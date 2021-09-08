@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:identityflutter/GlobalVariable.dart' as GV;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -12,15 +13,14 @@ class InventoryList extends StatefulWidget {
 }
 
 class InventoryListState extends State<InventoryList> {
-  List<dynamic> EquipmentLiST = [];
-  List<dynamic> PlaceList = [];
 
-  Future<List<dynamic>> _callApi(Uri uri) async {
+
+  Future<List<dynamic>> _callApi() async {
     var access_token = GV.tokenResponse.accessToken;
 
     try {
       var response = await http
-          .get(uri, headers: {"Authorization": "Bearer $access_token"});
+          .get(Uri(scheme: 'http', host: '192.168.10.152', port: 81, path: 'Item/GetItem'), headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
@@ -31,157 +31,186 @@ class InventoryListState extends State<InventoryList> {
     }
   }
 
+
   @override
   void initState() {
     super.initState();
 
-    this
-        ._callApi(Uri(
-            scheme: 'http',
-            host: '192.168.10.152',
-            port: 81,
-            path: 'Item/GetItem'))
-        .then((value) => setState(() {
-              EquipmentLiST = value;
-            }));
   }
 
   bool allChecked = false;
+List<dynamic> AreaList;
 
+ int Placeindex =0;
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      initialIndex: 0,
-      length: EquipmentLiST.length,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('設備清單'),
-          bottom: TabBar(
-              tabs:
-                  EquipmentLiST.map((e) => Tab(text: e['placeName'])).toList()),
+
+    return FutureBuilder<List<dynamic>>(
+        future:_callApi(), // a previously-obtained Future<String> or null
+
+        builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+
+          if (snapshot.hasData) {
+
+AreaList=snapshot.data[Placeindex]['priorityList'];
+
+            return DefaultTabController(
+              initialIndex: 0,
+              length:AreaList.length,
+              child:
+
+
+              Scaffold(
+                appBar: AppBar(
+                  title: Text('設備清單'),
+
+                ),
+                body: TabBarView(
+                    children:
+
+                 AreaList.map((e) =>ListView.builder(
+                   itemCount: e['fireitemList'].length,
+                   itemBuilder: (context, index) {
+                     List<dynamic> FireitemList = e['fireitemList'];
+                     return ListTile(
+                       title: Text(FireitemList[index]['itemId']+' '+FireitemList[index]['itemName']),
+
+                     );
+                   },
+                 ) ).toList()
+
+
+                ),
+                bottomNavigationBar:    new Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                     Material(
+                      color: Theme.of(context).primaryColor,
+                      child:  TabBar(
+                        isScrollable: true,
+                        tabs:AreaList.map((e) => Tab(text: e['subArea'])).toList()
+                      ),
+                    ),
+
+                     BottomNavigationBar(
+                      currentIndex: Placeindex,
+                      onTap: (int index) {
+                        setState(() {
+                          Placeindex = index;
+                        });
+                      },
+                      items:
+                        snapshot.data.map((e) =>
+
+                            BottomNavigationBarItem(
+                              icon: new Icon(Icons.location_on),
+                              title: new Text(   e['placeName']),
+                            )
+                     ).toList()
+
+                    ),
+                  ],
+                ),
+              ),
+            );
+          } else if (snapshot.hasError) {
+         return Text('錯誤');
+          } else {
+            return CircularProgressIndicator();
+          }
+
+        },
+      );
+
+
+
+  }
+}
+
+
+
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key key}) : super(key: key);
+
+  @override
+  _MyHomePageState createState() => new _MyHomePageState();
+}
+
+const List<String> tabNames = const<String>[
+  'foo', 'bar', 'baz', 'quox', 'quuz', 'corge', 'grault', 'garply', 'waldo'
+];
+
+class _MyHomePageState extends State<MyHomePage> {
+
+  int _screen = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return new DefaultTabController(
+      length: tabNames.length,
+      child: new Scaffold(
+        appBar: new AppBar(
+          title: new Text('Navigation example'),
         ),
-        body: TabBarView(
-            children: EquipmentLiST.map((e) => ListView.builder(
-                  itemCount: (e['priorityList'] as List).length,
-                  itemBuilder: (context, index) {
-                    var status = ['正常', '借出', '報修', '停用'];
-                    List<dynamic> AreaList = e['priorityList'];
+        body: new TabBarView(
+          children: new List<Widget>.generate(tabNames.length, (int index) {
+            switch (_screen) {
+              case 0: return new Center(
+                child: new Text('First screen, ${tabNames[index]}'),
+              );
+              case 1: return new Center(
+                child: new Text('Second screen'),
+              );
+            }
+          }),
+        ),
+        bottomNavigationBar:
 
-                    AreaList.sort(
-                        (a, b) => a['priorityNum'].compareTo(b['priorityNum']));
-                    var Area = AreaList[index];
-                    List fireitemList = Area['fireitemList'];
-                    return ExpansionTile(
-                        title: Text(
-                            ' ${Area['subArea']}(${fireitemList.where((x) => x['ischeck'] == true).length}/${fireitemList.length})'),
-                        leading:  Checkbox(
-                          checkColor: Colors.white,
-                          activeColor: Colors.red,
-                          value: fireitemList
-                              .where((x) => !x['ischeck'])
-                              .toList()
-                              .length ==
-                              0,
-                          onChanged: (bool value) {
-                            setState(() {
-                              allChecked = value;
-                              fireitemList.forEach((e) {
-                                e['ischeck'] = allChecked;
-                              });
-                            });
-                          },
-                        ),
-
-                        backgroundColor: index.isOdd
-                            ? Colors.limeAccent
-                            : Colors.lightGreenAccent,
-                        initiallyExpanded: false,
-
-                        // 是否默认展开
-                        children: fireitemList
-                            .map((e) => Container(
-                                margin: const EdgeInsets.all(1.0),
-                                decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
-                                    border:
-                                        Border.all(color: Colors.blueAccent)),
-                                child: ListTile(
-                                  leading: Checkbox(
-                                    checkColor: Colors.white,
-                                    value: e['ischeck'],
-                                    onChanged: (bool value) {
-                                      setState(() {
-                                        e['ischeck'] = value;
-                                      });
-                                    },
-                                  ) ,
-                                  title:
-                                      Text(e['itemId'] + ' ' + e['itemName']),
-                                  subtitle:
-                                      Text('狀態:' + status[e['presentStasus']]),
-                                  onTap: () => {
-                                    setState(() {
-                                      e['ischeck'] = !e['ischeck'];
-                                    })
-                                  },
-
-                                )))
-                            .toList());
-                  },
-                )).toList()
-
-            // <Widget>[
-            //
-            //
-            //   for (var place in EquipmentLiST)
-            //
-            //     ListView.builder(
-            //       itemCount: place['priorityList'].length,
-            //       itemBuilder: (context, index) {
-            //         var AreaLiST =place['priorityList'] ;
-            //         var Area =AreaLiST[index];
-            //         return
-            //
-            //
-            //
-            //           ListTile(
-            //           title: Text( Area['subArea']),
-            //         );
-            //       },
-            //     ),
-            // ],
+        new Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            new AnimatedCrossFade(
+              firstChild: new Material(
+                color: Theme
+                    .of(context)
+                    .primaryColor,
+                child: new TabBar(
+                  isScrollable: true,
+                  tabs: new List.generate(tabNames.length, (index) {
+                    return new Tab(text: tabNames[index].toUpperCase());
+                  }),
+                ),
+              ),
+              secondChild: new Container(),
+              crossFadeState: _screen == 0
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              duration: const Duration(milliseconds: 300),
             ),
+            new BottomNavigationBar(
+              currentIndex: _screen,
+              onTap: (int index) {
+                setState(() {
+                  _screen = index;
+                });
+              },
+              items: [
+                new BottomNavigationBarItem(
+                  icon: new Icon(Icons.airplanemode_active),
+                  title: new Text('Airplane'),
+                ),
+                new BottomNavigationBarItem(
+                  icon: new Icon(Icons.motorcycle),
+                  title: new Text('Motorcycle'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
-    // return WillPopScope (
-    //   onWillPop: () async {
-    //     return false;
-    //   },
-    //   child:
-    //   DefaultTabController(
-    //     initialIndex: 0,
-    //     length: EquipmentData == null ? 0 : EquipmentData.length,
-    //     child: Scaffold(
-    //       appBar: AppBar(
-    //         title: Text('TabBar Widget'),
-    //         bottom: TabBar(
-    //           tabs: <Widget>[
-    //             for (var title in EquipmentData) Tab(text: title['placeName'])
-    //           ],
-    //         ),
-    //       ),
-    //       body: TabBarView(
-    //         children: <Widget>[
-    //           for (var title in EquipmentData)
-    //             Center(
-    //               child: Text(title['placeName']),
-    //             ),
-    //         ],
-    //       ),
-    //     ),
-    //   )
-    // );
   }
 }
