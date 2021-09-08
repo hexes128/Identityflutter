@@ -35,31 +35,30 @@ class InventoryListState extends State<InventoryList> {
   @override
   void initState() {
     super.initState();
-
+PlaceList=_callApi();
   }
-
+Future<List<dynamic>>PlaceList;
   bool allChecked = false;
 List<dynamic> AreaList;
 
  int Placeindex =0;
-
+var status =['正常','借出','報修','停用'];
   @override
   Widget build(BuildContext context) {
 
     return FutureBuilder<List<dynamic>>(
-        future:_callApi(), // a previously-obtained Future<String> or null
+        future:PlaceList, // a previously-obtained Future<String> or null
 
         builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
 
           if (snapshot.hasData) {
-
-AreaList=snapshot.data[Placeindex]['priorityList'];
+AreaList= snapshot.data[Placeindex]['priorityList'];
+AreaList.sort((a,b)=>a['priorityNum'] .compareTo(a['priorityNum']) );
 
             return DefaultTabController(
               initialIndex: 0,
               length:AreaList.length,
               child:
-
 
               Scaffold(
                 appBar: AppBar(
@@ -72,9 +71,26 @@ AreaList=snapshot.data[Placeindex]['priorityList'];
                  AreaList.map((e) =>ListView.builder(
                    itemCount: e['fireitemList'].length,
                    itemBuilder: (context, index) {
-                     List<dynamic> FireitemList = e['fireitemList'];
+                     var Fireitem = e['fireitemList'][index];
                      return ListTile(
-                       title: Text(FireitemList[index]['itemId']+' '+FireitemList[index]['itemName']),
+                       leading: Checkbox(
+                         checkColor: Colors.white,
+                         value: Fireitem['ischeck'],
+                         onChanged: (bool value) {
+                           setState(() {
+                             Fireitem['ischeck'] = value;
+                           });
+                         },
+                       ) ,
+                       title:
+                       Text(Fireitem['itemId'] + ' ' + Fireitem['itemName']),
+                       subtitle:
+                       Text('當前狀態:' + status[Fireitem['presentStasus']]),
+                       onTap: () => {
+                         setState(() {
+                           Fireitem['ischeck'] =! Fireitem['ischeck'] ;
+                         })
+                       },
 
                      );
                    },
@@ -89,12 +105,17 @@ AreaList=snapshot.data[Placeindex]['priorityList'];
                      Material(
                       color: Theme.of(context).primaryColor,
                       child:  TabBar(
+                        indicatorColor: Colors.black,
+
+                       labelColor: Colors.black,
+                      unselectedLabelColor: Colors.white,
                         isScrollable: true,
                         tabs:AreaList.map((e) => Tab(text: e['subArea'])).toList()
                       ),
                     ),
 
                      BottomNavigationBar(
+
                       currentIndex: Placeindex,
                       onTap: (int index) {
                         setState(() {
@@ -118,7 +139,28 @@ AreaList=snapshot.data[Placeindex]['priorityList'];
           } else if (snapshot.hasError) {
          return Text('錯誤');
           } else {
-            return CircularProgressIndicator();
+            return Scaffold(
+              body: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child:
+
+                Center(child:    Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+
+                    Text(
+                      '資料讀取中',
+                      style: Theme.of(context).textTheme.headline6,
+                    ),
+                    CircularProgressIndicator(
+
+
+                    ),
+                  ],
+                ),)
+
+              ),
+            );
           }
 
         },
