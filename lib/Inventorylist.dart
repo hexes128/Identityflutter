@@ -63,6 +63,16 @@ AreaList.sort((a,b)=>a['priorityNum'] .compareTo(a['priorityNum']) );
               Scaffold(
                 appBar: AppBar(
                   title: Text('設備清單'),
+                  actions: [PopupMenuButton(
+                    icon: Icon(Icons.more_vert),
+                    itemBuilder: (BuildContext context) =>
+                    snapshot.data.map((e) => PopupMenuItem(child: Text(e['placeName']),value: snapshot.data.indexOf(e),)).toList()
+                    // <PopupMenuEntry>[
+                    //
+                    //   const PopupMenuItem(child: Text('Item A')),
+                    //
+                    // ],
+                  ),],
 
                 ),
                 body: TabBarView(
