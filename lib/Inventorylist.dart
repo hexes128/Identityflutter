@@ -13,180 +13,149 @@ class InventoryList extends StatefulWidget {
 }
 
 class InventoryListState extends State<InventoryList> {
-
-
   Future<List<dynamic>> _callApi() async {
     var access_token = GV.tokenResponse.accessToken;
 
     try {
-      var response = await http
-          .get(Uri(scheme: 'http', host: '192.168.10.152', port: 81, path: 'Item/GetItem'), headers: {"Authorization": "Bearer $access_token"});
+      var response = await http.get(
+          Uri(
+              scheme: 'http',
+              host: '192.168.10.152',
+              port: 81,
+              path: 'Item/GetItem'),
+          headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('123');
+
       }
     } on Error catch (e) {
-      print('Error: $e');
+      throw Exception('123');
     }
   }
-
 
   @override
   void initState() {
     super.initState();
-PlaceList=_callApi();
+    PlaceList = _callApi();
   }
-Future<List<dynamic>>PlaceList;
-  bool allChecked = false;
-List<dynamic> AreaList;
 
- int Placeindex =0;
-var status =['正常','借出','報修','停用'];
+  Future<List<dynamic>> PlaceList;
+  bool allChecked = false;
+  List<dynamic> AreaList;
+
+  int Placeindex = 0;
+  var status = ['正常', '借出', '報修', '停用'];
+
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<List<dynamic>>(
-        future:PlaceList, // a previously-obtained Future<String> or null
+      future: PlaceList,
 
-        builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+        if (snapshot.hasData) {
+          AreaList = snapshot.data[Placeindex]['priorityList'];
+          AreaList.sort((a, b) => a['priorityNum'].compareTo(a['priorityNum']));
 
-          if (snapshot.hasData) {
-AreaList= snapshot.data[Placeindex]['priorityList'];
-AreaList.sort((a,b)=>a['priorityNum'] .compareTo(a['priorityNum']) );
-
-            return DefaultTabController(
-              initialIndex: 0,
-              length:AreaList.length,
-              child:
-
-              Scaffold(
-                appBar: AppBar(
-                  title: Text('設備清單 '+snapshot.data[Placeindex]['placeName']),
-                  actions: [PopupMenuButton(
-                    onSelected: (int index){
-                      setState(() {
-                        Placeindex=index;
-                      });
-                    },
-                    icon: Icon(Icons.more_vert),
-                    itemBuilder: (BuildContext context) =>
-                    snapshot.data.map((e) => PopupMenuItem(child: Text(e['placeName']),value: snapshot.data.indexOf(e),)).toList()
-                    // <PopupMenuEntry>[
-                    //
-                    //   const PopupMenuItem(child: Text('Item A')),
-                    //
-                    // ],
-                  ),],
-
-                ),
-                body: TabBarView(
-                    children:
-
-                 AreaList.map((e) =>ListView.builder(
-                   itemCount: e['fireitemList'].length,
-                   itemBuilder: (context, index) {
-                     var Fireitem = e['fireitemList'][index];
-                     return ListTile(
-                       leading: Checkbox(
-                         checkColor: Colors.white,
-                         value: Fireitem['ischeck'],
-                         onChanged: (bool value) {
-                           setState(() {
-                             Fireitem['ischeck'] = value;
-                           });
-                         },
-                       ) ,
-                       title:
-                       Text(Fireitem['itemId'] + ' ' + Fireitem['itemName']),
-                       subtitle:
-                       Text('當前狀態:' + status[Fireitem['presentStasus']]),
-                       onTap: () => {
-                         setState(() {
-                           Fireitem['ischeck'] =! Fireitem['ischeck'] ;
-                         })
-                       },
-
-                     );
-                   },
-                 ) ).toList()
-
-
-                ),
-                bottomNavigationBar:    new Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                     Material(
-                      color: Theme.of(context).primaryColor,
-                      child:  TabBar(
-                        indicatorColor: Colors.black,
-
-                       labelColor: Colors.black,
-                      unselectedLabelColor: Colors.white,
-                        isScrollable: true,
-                        tabs:AreaList.map((e) => Tab(text: e['subArea'])).toList()
-                      ),
-                    ),
-
-                     BottomNavigationBar(
-
-                      currentIndex: Placeindex,
-                      onTap: (int index) {
+          return DefaultTabController(
+            initialIndex: 0,
+            length: AreaList.length,
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text('設備清單 ' + snapshot.data[Placeindex]['placeName']),
+                actions: [
+                  PopupMenuButton(
+                      onSelected: (int index) {
                         setState(() {
                           Placeindex = index;
                         });
                       },
-                      items:
-                        snapshot.data.map((e) =>
-
-                            BottomNavigationBarItem(
-                              icon: new Icon(Icons.location_on),
-                              title: new Text(   e['placeName']),
-                            )
-                     ).toList()
-
-                    ),
-                  ],
-                ),
+                      icon: Icon(Icons.more_vert),
+                      itemBuilder: (BuildContext context) => snapshot.data
+                          .map((e) => PopupMenuItem(
+                                child: Text(e['placeName']),
+                                value: snapshot.data.indexOf(e),
+                              ))
+                          .toList()
+                      // <PopupMenuEntry>[
+                      //
+                      //   const PopupMenuItem(child: Text('Item A')),
+                      //
+                      // ],
+                      ),
+                ],
               ),
-            );
-          } else if (snapshot.hasError) {
-         return Text('錯誤');
-          } else {
-            return Scaffold(
-              body: Padding(
+              body: TabBarView(
+                  children: AreaList.map((e) => ListView.builder(
+                        itemCount: e['fireitemList'].length,
+                        itemBuilder: (context, index) {
+                          var Fireitem = e['fireitemList'][index];
+                          return ListTile(
+                            leading: Checkbox(
+                              checkColor: Colors.white,
+                              value: Fireitem['ischeck'],
+                              onChanged: (bool value) {
+                                setState(() {
+                                  Fireitem['ischeck'] = value;
+                                });
+                              },
+                            ),
+                            title: Text(Fireitem['itemId'] +
+                                ' ' +
+                                Fireitem['itemName']),
+                            subtitle: Text(
+                                '當前狀態:' + status[Fireitem['presentStasus']]),
+                            onTap: () => {
+                              setState(() {
+                                Fireitem['ischeck'] = !Fireitem['ischeck'];
+                              })
+                            },
+                          );
+                        },
+                      )).toList()),
+              bottomNavigationBar: new Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Material(
+                    color: Theme.of(context).primaryColor,
+                    child: TabBar(
+                        indicatorColor: Colors.black,
+                        labelColor: Colors.black,
+                        unselectedLabelColor: Colors.white,
+                        isScrollable: true,
+                        tabs: AreaList.map((e) => Tab(text: e['subArea'] +' '+'(${e['fireitemList'].where((x)=>x['ischeck']==true).length}/${e['fireitemList'].length})'))
+                            .toList()),
+                  ),
+
+                ],
+              ),
+            ),
+          );
+        } else if (snapshot.hasError) {
+          return Text('錯誤');
+        } else {
+          return Scaffold(
+            body: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child:
-
-                Center(child:    Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-
-                    Text(
-                      '資料讀取中',
-                      style: Theme.of(context).textTheme.headline6,
-                    ),
-                    CircularProgressIndicator(
-
-
-                    ),
-                  ],
-                ),)
-
-              ),
-            );
-          }
-
-        },
-      );
-
-
-
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Text(
+                        '資料讀取中',
+                        style: Theme.of(context).textTheme.headline6,
+                      ),
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                )),
+          );
+        }
+      },
+    );
   }
 }
-
-
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key}) : super(key: key);
@@ -195,12 +164,19 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => new _MyHomePageState();
 }
 
-const List<String> tabNames = const<String>[
-  'foo', 'bar', 'baz', 'quox', 'quuz', 'corge', 'grault', 'garply', 'waldo'
+const List<String> tabNames = const <String>[
+  'foo',
+  'bar',
+  'baz',
+  'quox',
+  'quuz',
+  'corge',
+  'grault',
+  'garply',
+  'waldo'
 ];
 
 class _MyHomePageState extends State<MyHomePage> {
-
   int _screen = 0;
 
   @override
@@ -214,26 +190,24 @@ class _MyHomePageState extends State<MyHomePage> {
         body: new TabBarView(
           children: new List<Widget>.generate(tabNames.length, (int index) {
             switch (_screen) {
-              case 0: return new Center(
-                child: new Text('First screen, ${tabNames[index]}'),
-              );
-              case 1: return new Center(
-                child: new Text('Second screen'),
-              );
+              case 0:
+                return new Center(
+                  child: new Text('First screen, ${tabNames[index]}'),
+                );
+              case 1:
+                return new Center(
+                  child: new Text('Second screen'),
+                );
             }
           }),
         ),
-        bottomNavigationBar:
-
-        new Column(
+        bottomNavigationBar: new Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             new AnimatedCrossFade(
               firstChild: new Material(
-                color: Theme
-                    .of(context)
-                    .primaryColor,
+                color: Theme.of(context).primaryColor,
                 child: new TabBar(
                   isScrollable: true,
                   tabs: new List.generate(tabNames.length, (index) {
