@@ -93,7 +93,7 @@ class InventoryListState extends State<InventoryList>
                     if (Placeindex != index) {
                       setState(() {
                         Placeindex = index;
-                        tabController.animateTo(0);
+                        tabController.animateTo(0, curve: Curves.bounceIn);
                       });
                     }
                   },
@@ -111,34 +111,31 @@ class InventoryListState extends State<InventoryList>
                 ),
               ],
             ),
-            body: TabBarView(
-                controller: tabController,
-                children: AreaList.map((e) => ListView.builder(
-                      itemCount: e['fireitemList'].length,
-                      itemBuilder: (context, index) {
-                        var Fireitem = e['fireitemList'][index];
-                        return ListTile(
-                          leading: Checkbox(
-                            checkColor: Colors.white,
-                            value: Fireitem['ischeck'],
-                            onChanged: (bool value) {
-                              setState(() {
-                                Fireitem['ischeck'] = value;
-                              });
-                            },
-                          ),
-                          title: Text(
-                              Fireitem['itemId'] + ' ' + Fireitem['itemName']),
-                          subtitle:
-                              Text('當前狀態:' + status[Fireitem['presentStasus']]),
-                          onTap: () => {
-                            setState(() {
-                              Fireitem['ischeck'] = !Fireitem['ischeck'];
-                            })
-                          },
-                        );
+            body: ListView.builder(
+                itemCount: AreaList[Areaindex]['fireitemList'].length,
+                itemBuilder: (context, index) {
+                  var Fireitem = AreaList[Areaindex]['fireitemList'][index];
+                  return ListTile(
+                    leading: Checkbox(
+                      checkColor: Colors.white,
+                      value: Fireitem['ischeck'],
+                      onChanged: (bool value) {
+                        setState(() {
+                          Fireitem['ischeck'] = value;
+                        });
                       },
-                    )).toList()),
+                    ),
+                    title:
+                        Text(Fireitem['itemId'] + ' ' + Fireitem['itemName']),
+                    subtitle: Text('當前狀態:' + status[Fireitem['presentStasus']]),
+                    onTap: () => {
+                      setState(() {
+                        Fireitem['ischeck'] = !Fireitem['ischeck'];
+                      })
+                    },
+                  );
+                }),
+        
             bottomNavigationBar: Material(
               color: Theme.of(context).primaryColor,
               child: TabBar(
