@@ -23,7 +23,8 @@ dependencies:
   carousel_slider: ^4.0.0
   fluttertoast: ^8.0.8
   qr_code_scanner: ^0.5.2
-
+  scan: ^1.4.3
+  flutter_switch: ^0.3.2
 
 dev_dependencies:
   flutter_test:
