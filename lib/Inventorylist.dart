@@ -54,6 +54,7 @@ class InventoryListState extends State<InventoryList>
   var status = ['正常', '借出', '報修', '停用'];
   TabController tabController;
   bool showcamera = false;
+  bool Ddefaultshow = true;
 
   @override
   Widget build(BuildContext context) {
@@ -108,23 +109,54 @@ class InventoryListState extends State<InventoryList>
                 PopupMenuButton(
                   icon: Icon(Icons.more_vert),
                   itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+              
+
                     PopupMenuItem(
+                      onTap: () => setState(() {
+                        Ddefaultshow = !Ddefaultshow;
+                      }),
                       child: ListTile(
-                        leading: Icon(Icons.change_circle),
-                        title: Text('切換地點'),
+                        leading: Icon(Icons.settings_display),
+                        title: Text('變更顯示模式'),
+                      ),
+                    ),
+                    PopupMenuItem(
+
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.pop(context);
+                            showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                            title:  Text('${PlaceList[Placeindex]['placeName']} ${AreaList[Areaindex]['subArea']}'),
+                            content: const Text('將會清除本區勾選'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+
+
+
+                                  Navigator.pop(context);},
+                                child: const Text('取消'),
+                              ),
+                              TextButton(
+                                onPressed: () { setState(() {
+                                  ItemList.forEach((e) {e['ischeck']=false; });
+                                });
+                                  Navigator.pop(context);},
+                                child: const Text('確定'),
+                              ),
+                            ],
+                          ),
+                        );},
+                        leading: Icon(Icons.delete_forever),
+                        title: Text('本區重新盤點'),
                       ),
                     ),
                     PopupMenuItem(
                       child: ListTile(
                         leading: Icon(Icons.cloud_upload),
                         title: Text('送出盤點'),
-                      ),
-                    ),
-                    PopupMenuItem(
-                      child: ListTile(
-                        leading: Icon(Icons.delete_forever),
-                        title:
-                            Text('清除${PlaceList[Placeindex]['placeName']}所有勾選'),
                       ),
                     ),
                     const PopupMenuDivider(),
@@ -232,109 +264,127 @@ class InventoryListState extends State<InventoryList>
                       )
                     : Container(),
                 Expanded(
-                    flex:7,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child:
-
-                          Column(children: [
-
-                            Container(color: Colors.lightGreenAccent,  child: Center(child:Text('未盤點') )  ,width: double.infinity,)
-                            ,
-                            Expanded(
-                              child:
-                              ListView.builder(
-                                  itemCount: ItemList.where((e) =>! e['ischeck']).length,
-                                  itemBuilder: (context, index) {
-                                    var notchecklist =ItemList.where((e) =>! e['ischeck']).toList();
-                                    var Fireitem = notchecklist[index];
-                                    return
-                                      Container(
-                                       margin: EdgeInsets.only(bottom: 2),
-                                        child:        ListTile(
-                                          // leading: Checkbox(
-                                          //   checkColor: Colors.white,
-                                          //   value: Fireitem['ischeck'],
-                                          //   onChanged: (bool value) {
-                                          //     setState(() {
-                                          //       Fireitem['ischeck'] = value;
-                                          //     });
-                                          //   },
-                                          // ),
-                                          title: Text(Fireitem['itemId'] +
-                                              ' ' +
-                                              Fireitem['itemName']),
-                                          subtitle: Text('當前狀態:' +
-                                              status[Fireitem['presentStasus']]),
-                                          onTap: () => {
-                                            setState(() {
-                                              Fireitem['ischeck'] =
-                                              !Fireitem['ischeck'];
-                                            })
-                                          },
-                                        ),
-                                        decoration: BoxDecoration(border: Border.all()),
-                                      )
-
-                               ;
-                                  }),
-
-                            ),
-
-                           ])
-
-                        ),
-
-VerticalDivider(thickness: 1,),
-                        Expanded(
-                          flex: 1,
-                          child:
-                          Column(
+                    flex: 7,
+                    child: Ddefaultshow
+                        ? ListView.builder(
+                            itemCount: ItemList.length,
+                            itemBuilder: (context, index) {
+                              var Fireitem = ItemList[index];
+                              return ListTile(
+                                leading: Checkbox(
+                                  checkColor: Colors.white,
+                                  value: Fireitem['ischeck'],
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      Fireitem['ischeck'] = value;
+                                    });
+                                  },
+                                ),
+                                title: Text(Fireitem['itemId'] +
+                                    ' ' +
+                                    Fireitem['itemName']),
+                                subtitle: Text('當前狀態:' +
+                                    status[Fireitem['presentStasus']]),
+                                onTap: () => {
+                                  setState(() {
+                                    Fireitem['ischeck'] = !Fireitem['ischeck'];
+                                  })
+                                },
+                              );
+                            })
+                        : Row(
                             children: [
-                              Container(color: Colors.red,  child: Center(child:Text('已盤點') )  ,width: double.infinity,),
-                              Expanded(child:   ListView.builder(
-                                  itemCount:  ItemList.where((e) => e['ischeck']).length,
-                                  itemBuilder: (context, index) {
-                                    var checklist =ItemList.where((e) => e['ischeck']).toList();
-                                    var Fireitem = checklist[index];
-                                    return
-
+                              Expanded(
+                                  flex: 1,
+                                  child: Column(children: [
+                                    Container(
+                                      color: Colors.lightGreenAccent,
+                                      child: Center(child: Text('未盤點')),
+                                      width: double.infinity,
+                                    ),
+                                    Expanded(
+                                      child: ListView.builder(
+                                          itemCount: ItemList.where(
+                                              (e) => !e['ischeck']).length,
+                                          itemBuilder: (context, index) {
+                                            var notchecklist = ItemList.where(
+                                                (e) => !e['ischeck']).toList();
+                                            var Fireitem = notchecklist[index];
+                                            return ListTile(
+                                              // leading: Checkbox(
+                                              //   checkColor: Colors.white,
+                                              //   value: Fireitem['ischeck'],
+                                              //   onChanged: (bool value) {
+                                              //     setState(() {
+                                              //       Fireitem['ischeck'] = value;
+                                              //     });
+                                              //   },
+                                              // ),
+                                              title: Text(Fireitem['itemId'] +
+                                                  ' ' +
+                                                  Fireitem['itemName']),
+                                              subtitle: Text('當前狀態:' +
+                                                  status[Fireitem[
+                                                      'presentStasus']]),
+                                              onTap: () => {
+                                                setState(() {
+                                                  Fireitem['ischeck'] =
+                                                      !Fireitem['ischeck'];
+                                                })
+                                              },
+                                            );
+                                          }),
+                                    ),
+                                  ])),
+                              VerticalDivider(
+                                thickness: 1,
+                              ),
+                              Expanded(
+                                  flex: 1,
+                                  child: Column(
+                                    children: [
                                       Container(
-                                        margin: EdgeInsets.only(bottom: 2),
-                                        child:        ListTile(
-                                          // leading: Checkbox(
-                                          //   checkColor: Colors.white,
-                                          //   value: Fireitem['ischeck'],
-                                          //   onChanged: (bool value) {
-                                          //     setState(() {
-                                          //       Fireitem['ischeck'] = value;
-                                          //     });
-                                          //   },
-                                          // ),
-                                          title: Text(Fireitem['itemId'] +
-                                              ' ' +
-                                              Fireitem['itemName']),
-                                          subtitle: Text('當前狀態:' +
-                                              status[Fireitem['presentStasus']]),
-                                          onTap: () => {
-                                            setState(() {
-                                              Fireitem['ischeck'] =
-                                              !Fireitem['ischeck'];
-                                            })
-                                          },
-                                        ),
-                                        decoration: BoxDecoration(border: Border.all()),
-                                      );
-                                  }),)
+                                        color: Colors.red,
+                                        child: Center(child: Text('已盤點')),
+                                        width: double.infinity,
+                                      ),
+                                      Expanded(
+                                        child: ListView.builder(
+                                            itemCount: ItemList.where(
+                                                (e) => e['ischeck']).length,
+                                            itemBuilder: (context, index) {
+                                              var checklist = ItemList.where(
+                                                  (e) => e['ischeck']).toList();
+                                              var Fireitem = checklist[index];
+                                              return ListTile(
+                                                // leading: Checkbox(
+                                                //   checkColor: Colors.white,
+                                                //   value: Fireitem['ischeck'],
+                                                //   onChanged: (bool value) {
+                                                //     setState(() {
+                                                //       Fireitem['ischeck'] = value;
+                                                //     });
+                                                //   },
+                                                // ),
+                                                title: Text(Fireitem['itemId'] +
+                                                    ' ' +
+                                                    Fireitem['itemName']),
+                                                subtitle: Text('當前狀態:' +
+                                                    status[Fireitem[
+                                                        'presentStasus']]),
+                                                onTap: () => {
+                                                  setState(() {
+                                                    Fireitem['ischeck'] =
+                                                        !Fireitem['ischeck'];
+                                                  })
+                                                },
+                                              );
+                                            }),
+                                      )
+                                    ],
+                                  ))
                             ],
-                          )
-
-
-                        )
-                      ],
-                    ))
+                          ))
               ],
             ),
             bottomNavigationBar: Material(
