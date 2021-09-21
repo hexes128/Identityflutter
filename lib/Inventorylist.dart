@@ -51,7 +51,7 @@ class InventoryListState extends State<InventoryList>
   List<dynamic> ItemList;
   int Areaindex = 0;
   int Placeindex = 0;
-  var status = ['正常', '借出', '報修', '停用'];
+  var status = ['未知','正常', '借出', '報修', '停用'];
   TabController tabController;
   bool showcamera = false;
   bool Ddefaultshow = true;
@@ -172,7 +172,7 @@ class InventoryListState extends State<InventoryList>
                                   onPressed: () {
                                     setState(() {
                                       ItemList.forEach((e) {
-                                        e['ischeck'] = false;
+                                        e['inventoryStatus'] = 0;
                                       });
                                     });
                                     Navigator.pop(context);
@@ -188,9 +188,24 @@ class InventoryListState extends State<InventoryList>
                       ),
                     ),
                     PopupMenuItem(
+                      onTap: (){
+
+                        List<dynamic>InventoryItemList=[];
+                        ItemList.forEach((e) {
+                          InventoryItemList.add(
+                       {
+                         'ItemId':e['itemId'],
+                         'StasusBefore':e['presentStasus'],
+                         'StasusAfter':e['inventoryStatus']
+                       }
+                          );
+                        });
+                        print(jsonEncode(InventoryItemList));
+
+                      },
                       child: ListTile(
                         leading: Icon(Icons.cloud_upload),
-                        title: Text('送出盤點'),
+                        title: Text('送出${PlaceList[Placeindex]['placeName']}盤點'),
                       ),
                     ),
                     const PopupMenuDivider(),
@@ -224,7 +239,7 @@ class InventoryListState extends State<InventoryList>
                                 var Fireitrm = ItemList.singleWhere(
                                     (e) => e['itemId'] == data);
 
-                                if (!Fireitrm['ischeck']) {
+                                if (Fireitrm['inventoryStatus']==0) {
                                   showDialog<String>(
                                     context: context,
                                     builder: (BuildContext context) =>
@@ -245,7 +260,7 @@ class InventoryListState extends State<InventoryList>
                                         TextButton(
                                           onPressed: () {
                                             setState(() {
-                                              Fireitrm['ischeck'] = true;
+                                              Fireitrm['inventoryStatus'] = 1;
                                             });
                                             Navigator.pop(
                                               context,
@@ -315,21 +330,23 @@ class InventoryListState extends State<InventoryList>
                                   child: ListTile(
                                 leading: Checkbox(
                                   checkColor: Colors.white,
-                                  value: Fireitem['ischeck'],
-                                  onChanged: (bool value) {
-                                    setState(() {
-                                      Fireitem['ischeck'] = value;
-                                    });
-                                  },
+                                  value: Fireitem['inventoryStatus']!=0,
+
                                 ),
                                 title: Text(Fireitem['itemId'] +
                                     ' ' +
                                     Fireitem['itemName']),
-                                subtitle: Text('當前狀態:' +
-                                    status[Fireitem['presentStasus']]),
+                                subtitle: Text('盤點前:' + status[Fireitem['presentStasus']]+'\n'+
+                                    '盤點後:' + status[Fireitem['inventoryStatus']]),
                                 onTap: () => {
                                   setState(() {
-                                    Fireitem['ischeck'] = !Fireitem['ischeck'];
+                                    if(Fireitem['inventoryStatus']==1){
+                                      Fireitem['inventoryStatus']=0;
+                                    }
+                                    else if(Fireitem['inventoryStatus']==0){
+                                      Fireitem['inventoryStatus'] = 1;
+                                    }
+
                                   })
                                 },
                               ));
@@ -346,33 +363,22 @@ class InventoryListState extends State<InventoryList>
                                     ),
                                     Expanded(
                                       child: ListView.builder(
-                                          itemCount: ItemList.where(
-                                              (e) => !e['ischeck']).length,
+                                          itemCount: ItemList.where((e) => e['inventoryStatus']==0).length,
                                           itemBuilder: (context, index) {
                                             var notchecklist = ItemList.where(
-                                                (e) => !e['ischeck']).toList();
+                                                (e) => e['inventoryStatus']==0).toList();
                                             var Fireitem = notchecklist[index];
                                             return Card(
                                               child: ListTile(
-                                                // leading: Checkbox(
-                                                //   checkColor: Colors.white,
-                                                //   value: Fireitem['ischeck'],
-                                                //   onChanged: (bool value) {
-                                                //     setState(() {
-                                                //       Fireitem['ischeck'] = value;
-                                                //     });
-                                                //   },
-                                                // ),
+
                                                 title: Text(Fireitem['itemId'] +
                                                     ' ' +
                                                     Fireitem['itemName']),
-                                                subtitle: Text('當前狀態:' +
-                                                    status[Fireitem[
-                                                        'presentStasus']]),
+                                                subtitle: Text('盤點前:' + status[Fireitem['presentStasus']]+'\n'+'盤點後:' + status[Fireitem['inventoryStatus']]),
                                                 onTap: () => {
                                                   setState(() {
-                                                    Fireitem['ischeck'] =
-                                                        !Fireitem['ischeck'];
+                                                    Fireitem['inventoryStatus'] =1;
+
                                                   })
                                                 },
                                               ),
@@ -395,34 +401,24 @@ class InventoryListState extends State<InventoryList>
                                       Expanded(
                                         child: ListView.builder(
                                             itemCount: ItemList.where(
-                                                (e) => e['ischeck']).length,
+                                                (e) => e['inventoryStatus']!=0).length,
                                             itemBuilder: (context, index) {
                                               var checklist = ItemList.where(
-                                                  (e) => e['ischeck']).toList();
+                                                  (e) => e['inventoryStatus']!=0).toList();
                                               var Fireitem = checklist[index];
 
                                               return Card(
                                                 child: ListTile(
-                                                  // leading: Checkbox(
-                                                  //   checkColor: Colors.white,
-                                                  //   value: Fireitem['ischeck'],
-                                                  //   onChanged: (bool value) {
-                                                  //     setState(() {
-                                                  //       Fireitem['ischeck'] = value;
-                                                  //     });
-                                                  //   },
-                                                  // ),
+
                                                   title: Text(
                                                       Fireitem['itemId'] +
                                                           ' ' +
                                                           Fireitem['itemName']),
-                                                  subtitle: Text('當前狀態:' +
-                                                      status[Fireitem[
-                                                          'presentStasus']]),
+                                                  subtitle: Text('盤點前:' + status[Fireitem['presentStasus']]+'\n'+'盤點後:' + status[Fireitem['inventoryStatus']]),
                                                   onTap: () => {
                                                     setState(() {
-                                                      Fireitem['ischeck'] =
-                                                          !Fireitem['ischeck'];
+                                                      Fireitem['inventoryStatus'] =0;
+
                                                     })
                                                   },
                                                 ),
@@ -446,7 +442,7 @@ class InventoryListState extends State<InventoryList>
                   tabs: AreaList.map((e) => Tab(
                           text: e['subArea'] +
                               ' ' +
-                              '(${e['fireitemList'].where((x) => x['ischeck'] == true).length}/${e['fireitemList'].length})'))
+                              '(${e['fireitemList'].where((x) => x['inventoryStatus'] != 0).length}/${e['fireitemList'].length})'))
                       .toList()),
             ),
           );
