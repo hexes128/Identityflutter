@@ -45,7 +45,7 @@ class InventoryListState extends State<InventoryList>
   }
 
   Future<List<dynamic>> futureList;
-  bool allChecked = false;
+
   List<dynamic> PlaceList;
   List<dynamic> AreaList;
   List<dynamic> ItemList;
@@ -109,46 +109,80 @@ class InventoryListState extends State<InventoryList>
                 PopupMenuButton(
                   icon: Icon(Icons.more_vert),
                   itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-              
-
                     PopupMenuItem(
-                      onTap: () => setState(() {
-                        Ddefaultshow = !Ddefaultshow;
-                      }),
-                      child: ListTile(
-                        leading: Icon(Icons.settings_display),
-                        title: Text('變更顯示模式'),
-                      ),
-                    ),
-                    PopupMenuItem(
-
                       child: ListTile(
                         onTap: () {
                           Navigator.pop(context);
-                            showDialog<String>(
-                          context: context,
-                          builder: (BuildContext context) => AlertDialog(
-                            title:  Text('${PlaceList[Placeindex]['placeName']} ${AreaList[Areaindex]['subArea']}'),
-                            content: const Text('將會清除本區勾選'),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
+                          showDialog<String>(
+                            context: context,
+                            builder: (BuildContext context) => AlertDialog(
+                              title: const Text('請選擇地點'),
+                              content: Container(
+                                width: double.maxFinite,
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: PlaceList.length,
+                                  itemBuilder: (context, index) {
+                                    return Card(
+                                        child: ListTile(
+                                      onTap: () {
 
+                                          setState(() {
+                                            Placeindex = index;
+                                            Areaindex = 0;
+                                            tabController.animateTo(0);
+                                          });
 
-
-                                  Navigator.pop(context);},
-                                child: const Text('取消'),
+                                        Navigator.pop(context);
+                                      },
+                                      title:
+                                          Text(PlaceList[index]['placeName']),
+                                          subtitle: Placeindex==index?Text('當前選擇'):null,
+                                    ));
+                                  },
+                                ),
                               ),
-                              TextButton(
-                                onPressed: () { setState(() {
-                                  ItemList.forEach((e) {e['ischeck']=false; });
-                                });
-                                  Navigator.pop(context);},
-                                child: const Text('確定'),
-                              ),
-                            ],
-                          ),
-                        );},
+
+
+                            ),
+                          );
+                        },
+                        leading: Icon(Icons.switch_left),
+                        title: Text('切換地點'),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.pop(context);
+                          showDialog<String>(
+                            context: context,
+                            builder: (BuildContext context) => AlertDialog(
+                              title: Text(
+                                  '${PlaceList[Placeindex]['placeName']} ${AreaList[Areaindex]['subArea']}'),
+                              content: const Text('將會清除本區勾選'),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('取消'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      ItemList.forEach((e) {
+                                        e['ischeck'] = false;
+                                      });
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('確定'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                         leading: Icon(Icons.delete_forever),
                         title: Text('本區重新盤點'),
                       ),
@@ -160,8 +194,15 @@ class InventoryListState extends State<InventoryList>
                       ),
                     ),
                     const PopupMenuDivider(),
-                    const PopupMenuItem(child: Text('Item A')),
-                    const PopupMenuItem(child: Text('Item B')),
+                    PopupMenuItem(
+                      onTap: () => setState(() {
+                        Ddefaultshow = !Ddefaultshow;
+                      }),
+                      child: ListTile(
+                        leading: Icon(Icons.settings_display),
+                        title: Text('變更顯示模式'),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -270,7 +311,8 @@ class InventoryListState extends State<InventoryList>
                             itemCount: ItemList.length,
                             itemBuilder: (context, index) {
                               var Fireitem = ItemList[index];
-                              return ListTile(
+                              return Card(
+                                  child: ListTile(
                                 leading: Checkbox(
                                   checkColor: Colors.white,
                                   value: Fireitem['ischeck'],
@@ -290,7 +332,7 @@ class InventoryListState extends State<InventoryList>
                                     Fireitem['ischeck'] = !Fireitem['ischeck'];
                                   })
                                 },
-                              );
+                              ));
                             })
                         : Row(
                             children: [
@@ -310,28 +352,30 @@ class InventoryListState extends State<InventoryList>
                                             var notchecklist = ItemList.where(
                                                 (e) => !e['ischeck']).toList();
                                             var Fireitem = notchecklist[index];
-                                            return ListTile(
-                                              // leading: Checkbox(
-                                              //   checkColor: Colors.white,
-                                              //   value: Fireitem['ischeck'],
-                                              //   onChanged: (bool value) {
-                                              //     setState(() {
-                                              //       Fireitem['ischeck'] = value;
-                                              //     });
-                                              //   },
-                                              // ),
-                                              title: Text(Fireitem['itemId'] +
-                                                  ' ' +
-                                                  Fireitem['itemName']),
-                                              subtitle: Text('當前狀態:' +
-                                                  status[Fireitem[
-                                                      'presentStasus']]),
-                                              onTap: () => {
-                                                setState(() {
-                                                  Fireitem['ischeck'] =
-                                                      !Fireitem['ischeck'];
-                                                })
-                                              },
+                                            return Card(
+                                              child: ListTile(
+                                                // leading: Checkbox(
+                                                //   checkColor: Colors.white,
+                                                //   value: Fireitem['ischeck'],
+                                                //   onChanged: (bool value) {
+                                                //     setState(() {
+                                                //       Fireitem['ischeck'] = value;
+                                                //     });
+                                                //   },
+                                                // ),
+                                                title: Text(Fireitem['itemId'] +
+                                                    ' ' +
+                                                    Fireitem['itemName']),
+                                                subtitle: Text('當前狀態:' +
+                                                    status[Fireitem[
+                                                        'presentStasus']]),
+                                                onTap: () => {
+                                                  setState(() {
+                                                    Fireitem['ischeck'] =
+                                                        !Fireitem['ischeck'];
+                                                  })
+                                                },
+                                              ),
                                             );
                                           }),
                                     ),
@@ -356,28 +400,32 @@ class InventoryListState extends State<InventoryList>
                                               var checklist = ItemList.where(
                                                   (e) => e['ischeck']).toList();
                                               var Fireitem = checklist[index];
-                                              return ListTile(
-                                                // leading: Checkbox(
-                                                //   checkColor: Colors.white,
-                                                //   value: Fireitem['ischeck'],
-                                                //   onChanged: (bool value) {
-                                                //     setState(() {
-                                                //       Fireitem['ischeck'] = value;
-                                                //     });
-                                                //   },
-                                                // ),
-                                                title: Text(Fireitem['itemId'] +
-                                                    ' ' +
-                                                    Fireitem['itemName']),
-                                                subtitle: Text('當前狀態:' +
-                                                    status[Fireitem[
-                                                        'presentStasus']]),
-                                                onTap: () => {
-                                                  setState(() {
-                                                    Fireitem['ischeck'] =
-                                                        !Fireitem['ischeck'];
-                                                  })
-                                                },
+
+                                              return Card(
+                                                child: ListTile(
+                                                  // leading: Checkbox(
+                                                  //   checkColor: Colors.white,
+                                                  //   value: Fireitem['ischeck'],
+                                                  //   onChanged: (bool value) {
+                                                  //     setState(() {
+                                                  //       Fireitem['ischeck'] = value;
+                                                  //     });
+                                                  //   },
+                                                  // ),
+                                                  title: Text(
+                                                      Fireitem['itemId'] +
+                                                          ' ' +
+                                                          Fireitem['itemName']),
+                                                  subtitle: Text('當前狀態:' +
+                                                      status[Fireitem[
+                                                          'presentStasus']]),
+                                                  onTap: () => {
+                                                    setState(() {
+                                                      Fireitem['ischeck'] =
+                                                          !Fireitem['ischeck'];
+                                                    })
+                                                  },
+                                                ),
                                               );
                                             }),
                                       )
