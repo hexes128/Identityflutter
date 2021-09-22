@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:scan/scan.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class InventoryList extends StatefulWidget {
   InventoryList({Key key}) : super(key: key);
@@ -51,7 +52,8 @@ class InventoryListState extends State<InventoryList>
   List<dynamic> ItemList;
   int Areaindex = 0;
   int Placeindex = 0;
-  var status = ['未知','正常', '借出', '報修', '停用'];
+  var Presentstatus = ['正常', '報修', '借出', '停用'];
+  var AfterInventory = ['未知', '與盤點前無異'];
   TabController tabController;
   bool showcamera = false;
   bool Ddefaultshow = true;
@@ -116,7 +118,7 @@ class InventoryListState extends State<InventoryList>
                           showDialog<String>(
                             context: context,
                             builder: (BuildContext context) => AlertDialog(
-                              title: const Text('請選擇地點'),
+                              title: Text('請選擇地點'),
                               content: Container(
                                 width: double.maxFinite,
                                 child: ListView.builder(
@@ -126,24 +128,23 @@ class InventoryListState extends State<InventoryList>
                                     return Card(
                                         child: ListTile(
                                       onTap: () {
-
-                                          setState(() {
-                                            Placeindex = index;
-                                            Areaindex = 0;
-                                            tabController.animateTo(0);
-                                          });
+                                        setState(() {
+                                          Placeindex = index;
+                                          Areaindex = 0;
+                                          tabController.animateTo(0);
+                                        });
 
                                         Navigator.pop(context);
                                       },
                                       title:
                                           Text(PlaceList[index]['placeName']),
-                                          subtitle: Placeindex==index?Text('當前選擇'):null,
+                                      subtitle: Placeindex == index
+                                          ? Text('當前選擇')
+                                          : null,
                                     ));
                                   },
                                 ),
                               ),
-
-
                             ),
                           );
                         },
@@ -172,7 +173,9 @@ class InventoryListState extends State<InventoryList>
                                   onPressed: () {
                                     setState(() {
                                       ItemList.forEach((e) {
-                                        e['inventoryStatus'] = 0;
+                                        if (e['presentStasus'] == 0) {
+                                          e['inventoryStatus'] = 0;
+                                        }
                                       });
                                     });
                                     Navigator.pop(context);
@@ -188,27 +191,24 @@ class InventoryListState extends State<InventoryList>
                       ),
                     ),
                     PopupMenuItem(
-                      onTap: (){
-
-                        List<dynamic>InventoryItemList=[];
+                      onTap: () {
+                        List<dynamic> InventoryItemList = [];
                         ItemList.forEach((e) {
-                          InventoryItemList.add(
-                       {
-                         'ItemId':e['itemId'],
-                         'StasusBefore':e['presentStasus'],
-                         'StasusAfter':e['inventoryStatus']
-                       }
-                          );
+                          InventoryItemList.add({
+                            'ItemId': e['itemId'],
+                            'StasusBefore': e['presentStasus'],
+                            'StasusAfter': e['inventoryStatus']
+                          });
                         });
                         print(jsonEncode(InventoryItemList));
-
                       },
                       child: ListTile(
                         leading: Icon(Icons.cloud_upload),
-                        title: Text('送出${PlaceList[Placeindex]['placeName']}盤點'),
+                        title:
+                            Text('送出${PlaceList[Placeindex]['placeName']}盤點'),
                       ),
                     ),
-                    const PopupMenuDivider(),
+                    PopupMenuDivider(),
                     PopupMenuItem(
                       onTap: () => setState(() {
                         Ddefaultshow = !Ddefaultshow;
@@ -235,74 +235,56 @@ class InventoryListState extends State<InventoryList>
                             scanAreaScale: 0.9,
                             scanLineColor: Colors.green.shade400,
                             onCapture: (data) {
+                              var Fireitrm;
+                              bool showcancel = false;
+                              bool isnormal = false;
+                              String itemId = '';
+                              String hintmessage = '';
+
                               try {
-                                var Fireitrm = ItemList.singleWhere(
+                                Fireitrm = ItemList.singleWhere(
                                     (e) => e['itemId'] == data);
-
-                                if (Fireitrm['inventoryStatus']==0) {
-                                  showDialog<String>(
-                                    context: context,
-                                    builder: (BuildContext context) =>
-                                        AlertDialog(
-                                      title: Text(data),
-                                      content: Text(Fireitrm['itemName']),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(
-                                              context,
-                                            );
-
-                                            scanController.resume();
-                                          },
-                                          child: const Text('取消'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              Fireitrm['inventoryStatus'] = 1;
-                                            });
-                                            Navigator.pop(
-                                              context,
-                                            );
-                                            scanController.resume();
-                                          },
-                                          child: const Text('確定'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
+                                itemId = Fireitrm['itemId'];
+                                if (Fireitrm['presentStasus'] == 0) {
+                                  if (Fireitrm['inventoryStatus'] == 0) {
+                                    showcancel = true;
+                                    isnormal = true;
+                                    hintmessage = Fireitrm['itemName'];
+                                  } else {
+                                    hintmessage = '此設備已勾選';
+                                  }
                                 } else {
-                                  showDialog<String>(
-                                    context: context,
-                                    builder: (BuildContext context) =>
-                                        AlertDialog(
-                                      title: Text(data),
-                                      content: const Text('此物品已經勾選'),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(
-                                              context,
-                                            );
-                                            scanController.resume();
-                                          },
-                                          child: const Text('確定'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
+                                  hintmessage = '借出/報修中，無法盤點';
                                 }
                               } on Error catch (e) {
+                                hintmessage = '查無此設備，請確認地點區域是否正確';
+                              } finally {
                                 showDialog<String>(
                                   context: context,
                                   builder: (BuildContext context) =>
                                       AlertDialog(
-                                    title: Text(data),
-                                    content: Text('查無此id 請確認地點區域是否選擇正確'),
+                                    title: Text(itemId),
+                                    content: Text(hintmessage),
                                     actions: <Widget>[
+                                      Visibility(
+                                      visible:showcancel,
+                                          child: TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(
+                                            context,
+                                          );
+
+                                          scanController.resume();
+                                        },
+                                        child: Text('取消'),
+                                      )),
                                       TextButton(
                                         onPressed: () {
+                                          setState(() {
+                                            if (isnormal) {
+                                              Fireitrm['inventoryStatus'] = 1;
+                                            }
+                                          });
                                           Navigator.pop(
                                             context,
                                           );
@@ -329,25 +311,46 @@ class InventoryListState extends State<InventoryList>
                               return Card(
                                   child: ListTile(
                                 leading: Checkbox(
+                                  onChanged: (bool val) {},
                                   checkColor: Colors.white,
-                                  value: Fireitem['inventoryStatus']!=0,
-
+                                  activeColor: Fireitem['presentStasus'] != 0
+                                      ? Colors.grey
+                                      : Colors.blue,
+                                  value: Fireitem['inventoryStatus'] != 0,
                                 ),
                                 title: Text(Fireitem['itemId'] +
                                     ' ' +
                                     Fireitem['itemName']),
-                                subtitle: Text('盤點前:' + status[Fireitem['presentStasus']]+'\n'+
-                                    '盤點後:' + status[Fireitem['inventoryStatus']]),
+                                subtitle: Text('盤點前:' +
+                                    Presentstatus[Fireitem['presentStasus']] +
+                                    '\n' +
+                                    '盤點後:' +
+                                    AfterInventory[
+                                        Fireitem['inventoryStatus']]),
                                 onTap: () => {
-                                  setState(() {
-                                    if(Fireitem['inventoryStatus']==1){
-                                      Fireitem['inventoryStatus']=0;
+                                  if (Fireitem['presentStasus'] == 0)
+                                    {
+                                      setState(() {
+                                        if (Fireitem['inventoryStatus'] == 1) {
+                                          Fireitem['inventoryStatus'] = 0;
+                                        } else if (Fireitem[
+                                                'inventoryStatus'] ==
+                                            0) {
+                                          Fireitem['inventoryStatus'] = 1;
+                                        }
+                                      })
                                     }
-                                    else if(Fireitem['inventoryStatus']==0){
-                                      Fireitem['inventoryStatus'] = 1;
+                                  else
+                                    {
+                                      Fluttertoast.showToast(
+                                          msg: '借出/報修中，無法盤點',
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.CENTER,
+                                          timeInSecForIosWeb: 1,
+                                          backgroundColor: Colors.red,
+                                          textColor: Colors.white,
+                                          fontSize: 16.0)
                                     }
-
-                                  })
                                 },
                               ));
                             })
@@ -363,22 +366,30 @@ class InventoryListState extends State<InventoryList>
                                     ),
                                     Expanded(
                                       child: ListView.builder(
-                                          itemCount: ItemList.where((e) => e['inventoryStatus']==0).length,
+                                          itemCount: ItemList.where((e) =>
+                                              e['inventoryStatus'] == 0).length,
                                           itemBuilder: (context, index) {
                                             var notchecklist = ItemList.where(
-                                                (e) => e['inventoryStatus']==0).toList();
+                                                (e) =>
+                                                    e['inventoryStatus'] ==
+                                                    0).toList();
                                             var Fireitem = notchecklist[index];
                                             return Card(
                                               child: ListTile(
-
                                                 title: Text(Fireitem['itemId'] +
                                                     ' ' +
                                                     Fireitem['itemName']),
-                                                subtitle: Text('盤點前:' + status[Fireitem['presentStasus']]+'\n'+'盤點後:' + status[Fireitem['inventoryStatus']]),
+                                                subtitle: Text('盤點前:' +
+                                                    Presentstatus[Fireitem[
+                                                        'presentStasus']] +
+                                                    '\n' +
+                                                    '盤點後:' +
+                                                    AfterInventory[Fireitem[
+                                                        'inventoryStatus']]),
                                                 onTap: () => {
                                                   setState(() {
-                                                    Fireitem['inventoryStatus'] =1;
-
+                                                    Fireitem[
+                                                        'inventoryStatus'] = 1;
                                                   })
                                                 },
                                               ),
@@ -400,25 +411,33 @@ class InventoryListState extends State<InventoryList>
                                       ),
                                       Expanded(
                                         child: ListView.builder(
-                                            itemCount: ItemList.where(
-                                                (e) => e['inventoryStatus']!=0).length,
+                                            itemCount: ItemList.where((e) =>
+                                                    e['inventoryStatus'] != 0)
+                                                .length,
                                             itemBuilder: (context, index) {
                                               var checklist = ItemList.where(
-                                                  (e) => e['inventoryStatus']!=0).toList();
+                                                  (e) =>
+                                                      e['inventoryStatus'] !=
+                                                      0).toList();
                                               var Fireitem = checklist[index];
 
                                               return Card(
                                                 child: ListTile(
-
                                                   title: Text(
                                                       Fireitem['itemId'] +
                                                           ' ' +
                                                           Fireitem['itemName']),
-                                                  subtitle: Text('盤點前:' + status[Fireitem['presentStasus']]+'\n'+'盤點後:' + status[Fireitem['inventoryStatus']]),
+                                                  subtitle: Text('盤點前:' +
+                                                      Presentstatus[Fireitem[
+                                                          'presentStasus']] +
+                                                      '\n' +
+                                                      '盤點後:' +
+                                                      AfterInventory[Fireitem[
+                                                          'inventoryStatus']]),
                                                   onTap: () => {
                                                     setState(() {
-                                                      Fireitem['inventoryStatus'] =0;
-
+                                                      Fireitem[
+                                                          'inventoryStatus'] = 0;
                                                     })
                                                   },
                                                 ),
