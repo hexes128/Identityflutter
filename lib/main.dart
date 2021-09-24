@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'Dashboard.dart';
 import 'GlobalVariable.dart' as GV;
+import 'package:future_progress_dialog/future_progress_dialog.dart';
 
 void main() => runApp(MyApp());
 
@@ -38,9 +39,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var logouturl;
 
-  void _auth() async {
+  Future<int> _auth() async {
     var uri = new Uri(scheme: "http", host: "140.133.78.44", port: 82);
-
     try {
       var issuer = await Issuer.discover(uri);
       var client = new Client(issuer, "flutter");
@@ -63,33 +63,22 @@ class _MyHomePageState extends State<MyHomePage> {
             .generateLogoutUrl(
                 redirectUri: Uri(scheme: 'http', host: 'localhost', port: 4000))
             .toString(); //獲取登出網址
-
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Dashboard()),
-        );
+          return 0; //登入成功並獲取userinfo
       } catch (e) {
-        print('error');
+       return 1; //取消登入
       }
 
-      closeWebView();
+
     } catch (error) {
-      Fluttertoast.showToast(
-          msg: '連線超時，請檢查網路狀況，或是與開發者聯絡',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.blue,
-          textColor: Colors.white,
-          fontSize: 16.0);
+
+      return 2; //超時
+
     }
   }
 
   Future<void> _logout() async {
     if (await canLaunch(logouturl)) {
       await launch(logouturl, forceWebView: true, enableJavaScript: true);
-
     } else {
       throw 'Could not launch $logouturl';
     }
@@ -158,7 +147,57 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: FlatButton(
                 onPressed: () {
-                  _auth();
+                  showDialog(
+                    context: context,
+                    builder: (context) => FutureProgressDialog(
+                        _auth().then((value) {
+                          closeWebView();
+
+                          switch(value){
+                            case(0):{
+                              Fluttertoast.showToast(
+                                  msg: '已取消登入',
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor: Colors.blue,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0);
+                              Navigator.push(  //從登入push到第二個
+                                context,
+                                new MaterialPageRoute(builder: (context) => Dashboard()),
+                              );
+                              break;
+                            }
+                            case(1):{
+                              Fluttertoast.showToast(
+                                  msg: '已取消登入',
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor: Colors.blue,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0);
+                              break;
+                            }
+                            case(2):{
+                              Fluttertoast.showToast(
+                                  msg: '連線超時，請檢查網路狀況，或是與開發者聯絡',
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor: Colors.blue,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0);
+                              break;
+                            }
+
+                          }
+
+                        }
+                          ),
+                        message: Text('資料處理中，請稍後')),
+                  );
                 },
                 child: Text(
                   '登入',
@@ -191,6 +230,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
-
 }
