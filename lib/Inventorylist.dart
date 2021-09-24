@@ -577,11 +577,34 @@ class InventoryListState extends State<InventoryList>
                                                           AfterInventory[Fireitem[
                                                               'inventoryStatus']]),
                                                       onTap: () => {
-                                                        setState(() {
-                                                          Fireitem[
-                                                              'inventoryStatus'] = 0;
-                                                        })
+                                                        if (Fireitem['presentStasus'] == 0)
+                                                          {
+                                                            setState(() {
+                                                              if (Fireitem['inventoryStatus'] ==
+                                                                  1) {
+                                                                Fireitem['inventoryStatus'] = 0;
+                                                              } else if (Fireitem[
+                                                              'inventoryStatus'] ==
+                                                                  0) {
+                                                                Fireitem['inventoryStatus'] = 1;
+                                                              }
+                                                            })
+                                                          }
+                                                        else
+                                                          {
+                                                            Fluttertoast.showToast(
+                                                                msg: '借出/報修中，無法盤點',
+                                                                toastLength: Toast.LENGTH_SHORT,
+                                                                gravity: ToastGravity.CENTER,
+                                                                timeInSecForIosWeb: 1,
+                                                                backgroundColor: Colors.red,
+                                                                textColor: Colors.white,
+                                                                fontSize: 16.0)
+                                                          }
                                                       },
+
+
+
                                                     ),
                                                   );
                                                 }),
