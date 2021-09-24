@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var logouturl;
 
   void _auth() async {
-    var uri = new Uri(scheme: "http", host: "192.168.10.152", port: 80);
+    var uri = new Uri(scheme: "http", host: "140.133.78.44", port: 82);
 
     try {
       var issuer = await Issuer.discover(uri);

@@ -27,7 +27,7 @@ class InventoryListState extends State<InventoryList>
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '192.168.10.152',
+              host: '140.133.78.44',
               port: 81,
               path: 'Item/GetItem'),
           headers: {"Authorization": "Bearer $access_token"});
@@ -87,7 +87,7 @@ class InventoryListState extends State<InventoryList>
       var response = await http.post(
           Uri(
               scheme: 'http',
-              host: '192.168.10.152',
+              host: '140.133.78.44',
               port: 81,
               path: 'Item/Inventory'),
           headers: {
@@ -316,7 +316,7 @@ class InventoryListState extends State<InventoryList>
                                                       PlaceList[Placeindex]['todaysend'] =
                                                       true;
                                                     }),
-                                                    message: Text('Loading...')),
+                                                    message: Text('資料處理中，請稍後')),
                                               );
                                             },
                                             child: const Text('確定'),
