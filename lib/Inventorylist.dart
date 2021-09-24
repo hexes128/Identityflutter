@@ -498,7 +498,7 @@ class InventoryListState extends State<InventoryList>
                                       flex: 1,
                                       child: Column(children: [
                                         Container(
-                                          color: Colors.lightGreenAccent,
+                                          color: Colors.red,
                                           child: Center(child: Text('未盤點')),
                                           width: double.infinity,
                                         ),
@@ -546,7 +546,7 @@ class InventoryListState extends State<InventoryList>
                                       child: Column(
                                         children: [
                                           Container(
-                                            color: Colors.red,
+                                            color: Colors.lightGreenAccent,
                                             child: Center(child: Text('已盤點')),
                                             width: double.infinity,
                                           ),
