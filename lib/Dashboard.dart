@@ -18,11 +18,7 @@ class DashboardState extends State<Dashboard> {
   TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
 var arr =[['個人資料','隊員管理'],['設備盤點','設備借出','設備報修','新增設備','設備停用'],['盤點紀錄','報修/借出紀錄','新增/停用紀錄','全部紀錄匯出']];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +74,12 @@ var arr =[['個人資料','隊員管理'],['設備盤點','設備借出','設備
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.amber[800],
-          onTap: _onItemTapped,
+          onTap: (int index){
+            setState(() {
+              _selectedIndex = index;
+            });
+
+          },
         ),
       ),
     );

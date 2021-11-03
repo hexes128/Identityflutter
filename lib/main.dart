@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'Inventorylist.dart';
 import 'twst.dart';
 import 'dart:io';
 import 'dart:ui';
@@ -12,6 +13,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'Dashboard.dart';
 import 'GlobalVariable.dart' as GV;
 import 'package:future_progress_dialog/future_progress_dialog.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() => runApp(MyApp());
 
@@ -37,10 +39,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var logouturl;
+  final storage = new FlutterSecureStorage();
 
-  Future<int> _auth() async {
-    var uri = new Uri(scheme: "http", host: "140.133.78.44", port: 82);
+  int _selectedIndex = 0;
+
+  var arr = [
+    ['個人資料', '隊員管理'],
+    ['設備盤點', '設備借出', '設備報修', '新增設備', '設備停用'],
+    ['盤點紀錄', '報修/借出紀錄', '新增/停用紀錄', '全部紀錄匯出']
+  ];
+
+  _auth() async {
+    var uri = new Uri(scheme: "http", host: '192.168.10.152', port: 4000);
     try {
       var issuer = await Issuer.discover(uri);
       var client = new Client(issuer, "flutter");
@@ -52,33 +62,38 @@ class _MyHomePageState extends State<MyHomePage> {
 
       var c = await authenticator.authorize();
 
-      GV.tokenResponse = await c.getTokenResponse();
-
       try {
-        GV.userinfo = await c.getUserInfo();
-        Credential credential = client.createCredential(
-            accessToken: GV.tokenResponse.accessToken,
-            idToken: GV.tokenResponse.idToken.toCompactSerialization());
-        logouturl = credential
+        var userinfo = await c.getUserInfo();
+        var tokenresponse = await c.getTokenResponse();
+        await storage.write(
+            key: 'TokenResponse', value: jsonEncode(tokenresponse));
+        await storage.write(key: 'UserInfo', value: jsonEncode(userinfo));
+        var logouturl = c
             .generateLogoutUrl(
                 redirectUri: Uri(scheme: 'http', host: 'localhost', port: 4000))
             .toString(); //獲取登出網址
-          return 0; //登入成功並獲取userinfo
+        await storage.write(key: 'logouturl', value: logouturl);
+        setState(() {});
+        //登入成功並獲取userinfo
       } catch (e) {
-       return 1; //取消登入
+        //取消登入
       }
-
-
     } catch (error) {
-
-      return 2; //超時
+      //超時
 
     }
+    closeWebView();
   }
 
   Future<void> _logout() async {
+    var logouturl = await storage.read(key: 'logouturl');
     if (await canLaunch(logouturl)) {
       await launch(logouturl, forceWebView: true, enableJavaScript: true);
+      Future.delayed(Duration(milliseconds: 500));
+
+      await storage.deleteAll();
+
+      setState(() {});
     } else {
       throw 'Could not launch $logouturl';
     }
@@ -105,129 +120,141 @@ class _MyHomePageState extends State<MyHomePage> {
       'images/7.jpg',
       'images/8.jpg'
     ];
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text("消防設備管理應用-登入"),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 50.0),
-              child: Center(
-                child: Container(
-                    width: 1000,
-                    height: 300,
-                    child: CarouselSlider.builder(
-                      itemCount: images.length,
-                      options: CarouselOptions(
-                          initialPage: 0,
-                          enlargeCenterPage: true,
-                          autoPlay: true,
-                          autoPlayInterval: Duration(seconds: 3)),
-                      itemBuilder: (BuildContext context, int itemIndex,
-                              int pageViewIndex) =>
-                          Container(
-                        child: Image.asset(images[itemIndex]),
+    return FutureBuilder<String>(
+        future: storage.read(key: 'TokenResponse'),
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          if (snapshot.hasData) {
+            var selectfeature = arr[_selectedIndex];
+            GV.tokenResponse =
+                TokenResponse.fromJson(jsonDecode(snapshot.data));
+            return Scaffold(
+              appBar: AppBar(
+                  actions: [
+                    IconButton(
+                        onPressed: () {
+                          _logout();
+                        },
+                        icon: Icon(Icons.logout))
+                  ],
+                  title: FutureBuilder<String>(
+                      future: storage.read(key: 'UserInfo'),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.hasData) {
+                          GV.userinfo =
+                              UserInfo.fromJson(jsonDecode(snapshot.data));
+                          return Text('歡迎 ${GV.userinfo.name}');
+                        } else {
+                          return Text('讀取中');
+                        }
+                      })),
+              body: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, childAspectRatio: 2.5),
+                  itemCount: selectfeature.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return GestureDetector(
+                      child: Card(
+                        color: Colors.amber,
+                        child: Center(child: Text(selectfeature[index])),
                       ),
-                    )
-                    // child: Image.asset('images/1.jpg')
-                    ),
-              ),
-            ),
-            SizedBox(
-              height: 100,
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 20.0),
-              height: 50,
-              width: 250,
-              decoration: BoxDecoration(
-                  color: Colors.blue, borderRadius: BorderRadius.circular(20)),
-              child: FlatButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => FutureProgressDialog(
-                        _auth().then((value) {
-                          closeWebView();
-
-                          switch(value){
-                            case(0):{
-                              Fluttertoast.showToast(
-                                  msg: '已取消登入',
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.BOTTOM,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor: Colors.blue,
-                                  textColor: Colors.white,
-                                  fontSize: 16.0);
-                              Navigator.push(  //從登入push到第二個
+                      onTap: () {
+                        switch (selectfeature[index]) {
+                          case ('設備盤點'):
+                            {
+                              Navigator.push(
+                                //從登入push到第二個
                                 context,
-                                new MaterialPageRoute(builder: (context) => Dashboard()),
+                                new MaterialPageRoute(
+                                    builder: (context) => InventoryList()),
                               );
                               break;
                             }
-                            case(1):{
-                              Fluttertoast.showToast(
-                                  msg: '已取消登入',
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.BOTTOM,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor: Colors.blue,
-                                  textColor: Colors.white,
-                                  fontSize: 16.0);
-                              break;
-                            }
-                            case(2):{
-                              Fluttertoast.showToast(
-                                  msg: '連線超時，請檢查網路狀況，或是與開發者聯絡',
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.BOTTOM,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor: Colors.blue,
-                                  textColor: Colors.white,
-                                  fontSize: 16.0);
-                              break;
-                            }
-
-                          }
-
                         }
-                          ),
-                        message: Text('資料處理中，請稍後')),
-                  );
-                },
-                child: Text(
-                  '登入',
-                  style: TextStyle(color: Colors.white, fontSize: 25),
-                ),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 20.0),
-              height: 50,
-              width: 250,
-              decoration: BoxDecoration(
-                  color: Colors.blue, borderRadius: BorderRadius.circular(20)),
-              child: FlatButton(
-                onPressed: () {
-                  _logout();
-                  Timer(const Duration(seconds: 1), () {
-                    print('Closing WebView after 5 seconds...');
-                    closeWebView();
+                      },
+                    );
+                  }),
+              bottomNavigationBar: BottomNavigationBar(
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.account_box),
+                    label: '人員管理',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.inventory_outlined),
+                    label: '設備管理',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.history_outlined),
+                    label: '紀錄查詢',
+                  ),
+                ],
+                currentIndex: _selectedIndex,
+                selectedItemColor: Colors.amber[800],
+                onTap: (int index) {
+                  setState(() {
+                    _selectedIndex = index;
                   });
                 },
-                child: Text(
-                  '登出',
-                  style: TextStyle(color: Colors.white, fontSize: 25),
+              ),
+            );
+          } else {
+            return Scaffold(
+              backgroundColor: Colors.white,
+              appBar: AppBar(
+                title: Text("消防設備管理應用-登入"),
+              ),
+              body: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 50.0),
+                      child: Center(
+                        child: Container(
+                            width: 1000,
+                            height: 300,
+                            child: CarouselSlider.builder(
+                              itemCount: images.length,
+                              options: CarouselOptions(
+                                  initialPage: 0,
+                                  enlargeCenterPage: true,
+                                  autoPlay: true,
+                                  autoPlayInterval: Duration(seconds: 3)),
+                              itemBuilder: (BuildContext context, int itemIndex,
+                                      int pageViewIndex) =>
+                                  Container(
+                                child: Image.asset(images[itemIndex]),
+                              ),
+                            )
+                            // child: Image.asset('images/1.jpg')
+                            ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 100,
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 20.0),
+                      height: 50,
+                      width: 250,
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: FlatButton(
+                        onPressed: () {
+                          _auth();
+                        },
+                        child: Text(
+                          '登入',
+                          style: TextStyle(color: Colors.white, fontSize: 25),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
+            );
+          }
+        });
   }
 }
