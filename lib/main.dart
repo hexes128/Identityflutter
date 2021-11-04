@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:identityflutter/ChangeStatus.dart';
 import 'package:identityflutter/Inventorydate.dart';
 
 import 'Inventorylist.dart';
@@ -150,7 +151,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           return Text('讀取中');
                         }
                       })),
-              body: GridView.builder(
+              body:
+
+              GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2, childAspectRatio: 2.5),
                   itemCount: selectfeature.length,
@@ -179,6 +182,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                 context,
                                 new MaterialPageRoute(
                                     builder: (context) => InventoryRecord()),
+                              );
+                              break;
+                            }
+                          case ('設備狀態異動'):
+                            {
+                              Navigator.push(
+                                //從登入push到第二個
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => ChangeStatus()),
                               );
                               break;
                             }
