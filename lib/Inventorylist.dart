@@ -275,12 +275,12 @@ class InventoryListState extends State<InventoryList>
                               }
                               List<dynamic> groupItemList =
                                   AreaList.map((e) => e['fireitemList'])
-                                      .expand((e) => e)
+                                      .expand((e) => e).where((e) => e['inventoryStatus'] == 5)
                                       .toList();
 
                               List<dynamic> sendItemList = [];
-                              print('${groupItemList.where((e) => e['inventoryStatus'] == 5).length} ');
-                              if (groupItemList.where((e) => e['inventoryStatus'] == 5).length == 0) {
+
+                              if (groupItemList.length == 0) {
                                 groupItemList.forEach((e) {
                                   sendItemList.add({
                                     'ItemId': e['itemId'],
@@ -607,6 +607,7 @@ class InventoryListState extends State<InventoryList>
                                         Expanded(
                                           child: ListView.builder(
                                               itemCount: ItemList.where((e) =>
+                                                  e['inventoryStatus'] == 5 &&
                                                   e['inventoryStatus'] == 5 &&
                                                   e['presentStatus'] ==
                                                       0).length,

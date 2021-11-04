@@ -202,20 +202,20 @@ class ChangeStatusState extends State<ChangeStatus>
                               }
                               List<dynamic> groupItemList =
                                   AreaList.map((e) => e['fireitemList'])
-                                      .expand((e) => e)
+                                      .expand((e) => e).where((e) => e['inventoryStatus'] != 5)
                                       .toList();
 
                               List<dynamic> sendItemList = [];
 
-                              if (groupItemList.where((e) => e['inventoryStatus'] != 5).length !=
-                                  0) {
-                                groupItemList.forEach((e) {
+                              if (groupItemList.length!=0) {
+                                groupItemList  .forEach((e) {
                                   sendItemList.add({
                                     'ItemId': e['itemId'],
-                                    'StatusBefore': e['presentStatus'],
+                                    'StatusCode': e['inventoryStatus'],
                                     'PlaceId':PlaceList[Placeindex]['placeId'],
                                     'UserId': GV.userinfo.name
                                   });
+                                  print(jsonEncode(sendItemList));
                                 });
 
                                 showDialog<String>(
