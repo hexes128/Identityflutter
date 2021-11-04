@@ -261,18 +261,18 @@ class InventoryListState extends State<InventoryList>
                           child: ListTile(
                             onTap: () {
                               Navigator.pop(context);
-                              // if (PlaceList[Placeindex]['todaysend']) {
-                              //   Fluttertoast.showToast(
-                              //       msg: PlaceList[Placeindex]['placeName'] +
-                              //           '已完成盤點',
-                              //       toastLength: Toast.LENGTH_SHORT,
-                              //       gravity: ToastGravity.CENTER,
-                              //       timeInSecForIosWeb: 1,
-                              //       backgroundColor: Colors.red,
-                              //       textColor: Colors.white,
-                              //       fontSize: 16.0);
-                              //   return;
-                              // }
+                              if (PlaceList[Placeindex]['todaysend']) {
+                                Fluttertoast.showToast(
+                                    msg: PlaceList[Placeindex]['placeName'] +
+                                        '已完成盤點',
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor: Colors.red,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
+                                return;
+                              }
                               List<dynamic> groupItemList =
                                   AreaList.map((e) => e['fireitemList'])
                                       .expand((e) => e)

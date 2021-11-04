@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:identityflutter/Inventorydate.dart';
+
 import 'Inventorylist.dart';
 import 'twst.dart';
 import 'dart:io';
@@ -167,6 +169,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                 context,
                                 new MaterialPageRoute(
                                     builder: (context) => InventoryList()),
+                              );
+                              break;
+                            }
+                          case ('盤點紀錄'):
+                            {
+                              Navigator.push(
+                                //從登入push到第二個
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => InventoryRecord()),
                               );
                               break;
                             }
