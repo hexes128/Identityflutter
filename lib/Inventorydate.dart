@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:identityflutter/GlobalVariable.dart' as GV;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:identityflutter/InventoryItems.dart';
 import 'package:intl/intl.dart';
 import 'package:scan/scan.dart';
 import 'package:flutter_switch/flutter_switch.dart';
@@ -50,31 +51,7 @@ class InventoryRecordState extends State<InventoryRecord>
 
   int Placeindex = 0;
 
-  Future<String> sendInventory(List<dynamic> iteminfo) async {
-    var access_token = GV.tokenResponse.accessToken;
 
-    try {
-      var response = await http.get(
-        Uri(
-            scheme: 'http',
-            host: '192.168.10.152',
-            port: 3000,
-            path: 'Item/inventoryrecord'),
-        headers: {
-          "Authorization": "Bearer $access_token",
-        },
-      );
-
-      if (response.statusCode == 200) {
-        print(response.body);
-        return response.body;
-      } else {
-        print('錯誤');
-      }
-    } on Error catch (e) {
-      throw Exception('123');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -162,8 +139,18 @@ class InventoryRecordState extends State<InventoryRecord>
                                     title: Text(DateFormat('MM/dd kk:mm')
                                         .format(DateTime.parse(
                                             y['inventoryDate']))),
-                                subtitle: Text(y['userId']),));
+                                subtitle: Text(y['userId']),
+
+                                onTap: (){  Navigator.push(
+                                  //從登入push到第二個
+                                  context,
+                                  new MaterialPageRoute(
+                                      builder: (context) => InventoryRecorditem(inventoryid:y['eventId'],date: DateFormat('MM/dd kk:mm')
+                                          .format(DateTime.parse(
+                                          y['inventoryDate'])) )),
+                                );},));
                           }).toList(),
+
                         ))
                     .toList(),
               ));
