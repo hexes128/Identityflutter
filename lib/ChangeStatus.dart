@@ -61,8 +61,8 @@ class ChangeStatusState extends State<ChangeStatus>
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
-            title: new Text('退出盤點'),
-            content: new Text('盤點狀態將會清空，確定是否退出?'),
+            title: new Text('退出'),
+            content: new Text('狀態將會清空，確定是否退出?'),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -209,10 +209,10 @@ class ChangeStatusState extends State<ChangeStatus>
 
                               if (groupItemList.where((e) => e['inventoryStatus'] != 5).length !=
                                   0) {
-                                groupItemList.forEach((e) {
+                                groupItemList.where((e) => e['inventoryStatus'] != 5).forEach((e) {
                                   sendItemList.add({
                                     'ItemId': e['itemId'],
-                                    'StatusBefore': e['inventoryStatus'],
+                                    'StatusCode': e['inventoryStatus'],
                                     'PlaceId':PlaceList[Placeindex]['placeId'],
                                     'UserId': GV.userinfo.name
                                   });
@@ -273,7 +273,7 @@ class ChangeStatusState extends State<ChangeStatus>
                                 );
                               } else {
                                 Fluttertoast.showToast(
-                                    msg: '尚有物品未盤點，請確認後再送出',
+                                    msg: '未更動任何設備',
                                     toastLength: Toast.LENGTH_SHORT,
                                     gravity: ToastGravity.CENTER,
                                     timeInSecForIosWeb: 1,

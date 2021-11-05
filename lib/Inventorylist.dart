@@ -745,6 +745,10 @@ class InventoryListState extends State<InventoryList>
                                                               5).toList();
                                                   var Fireitem =
                                                       checklist[index];
+                                                  if(Fireitem['presentStatus'] != 0){
+
+                                                    Fireitem['inventoryStatus'] = Fireitem['presentStatus'];
+                                                  }
 
                                                   return Card(
                                                     child: ListTile(
@@ -796,8 +800,18 @@ class InventoryListState extends State<InventoryList>
                                                       ),
                                                       onTap: () {
                                                         setState(() {
-                                                          Fireitem[
-                                                              'inventoryStatus'] = 5;
+                                                          switch (Fireitem['inventoryStatus']) {
+                                                            case (0):
+                                                              {
+                                                                Fireitem['inventoryStatus'] = 5;
+                                                                break;
+                                                              }
+                                                            case (5):
+                                                              {
+                                                                Fireitem['inventoryStatus'] = 0;
+                                                                break;
+                                                              }
+                                                          }
                                                         });
                                                       },
                                                       onLongPress: () {
