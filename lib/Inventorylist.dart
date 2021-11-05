@@ -279,7 +279,7 @@ class InventoryListState extends State<InventoryList>
                                       .toList();
 
                               List<dynamic> sendItemList = [];
-                              print('${groupItemList.where((e) => e['inventoryStatus'] == 5).length} ');
+
                               if (groupItemList.where((e) => e['inventoryStatus'] == 5).length == 0) {
                                 groupItemList.forEach((e) {
                                   sendItemList.add({

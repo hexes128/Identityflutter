@@ -212,7 +212,7 @@ class ChangeStatusState extends State<ChangeStatus>
                                 groupItemList.forEach((e) {
                                   sendItemList.add({
                                     'ItemId': e['itemId'],
-                                    'StatusBefore': e['presentStatus'],
+                                    'StatusBefore': e['inventoryStatus'],
                                     'PlaceId':PlaceList[Placeindex]['placeId'],
                                     'UserId': GV.userinfo.name
                                   });
