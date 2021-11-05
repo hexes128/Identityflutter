@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:identityflutter/ChangeStatus.dart';
 import 'package:identityflutter/Inventorydate.dart';
+import 'package:identityflutter/StatusChangerecord.dart';
 
 import 'Inventorylist.dart';
 import 'twst.dart';
@@ -192,6 +193,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                 context,
                                 new MaterialPageRoute(
                                     builder: (context) => ChangeStatus()),
+                              );
+                              break;
+                            }
+                          case ('異動紀錄'):
+                            {
+                              Navigator.push(
+                                //從登入push到第二個
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => StatusRecord()),
                               );
                               break;
                             }

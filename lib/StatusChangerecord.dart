@@ -4,22 +4,23 @@ import 'package:flutter/cupertino.dart';
 import 'package:identityflutter/GlobalVariable.dart' as GV;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:identityflutter/InventoryItems.dart';
 import 'package:intl/intl.dart';
 import 'package:scan/scan.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 
-class InventoryRecord extends StatefulWidget {
-  InventoryRecord({Key key}) : super(key: key);
+class StatusRecord extends StatefulWidget {
+  StatusRecord({Key key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => InventoryRecordState();
+  State<StatefulWidget> createState() => StatusRecordState();
 }
 
-class InventoryRecordState extends State<InventoryRecord>
-    with TickerProviderStateMixin {
+class StatusRecordState extends State<StatusRecord>
+   {
+  ScanController scanController = ScanController();
+
   Future<List<dynamic>> _callApi() async {
     var access_token = GV.tokenResponse.accessToken;
 
@@ -29,7 +30,7 @@ class InventoryRecordState extends State<InventoryRecord>
               scheme: 'http',
               host: '192.168.10.152',
               port: 3000,
-              path: 'Item/inventoryrecord'),
+              path: 'Item/ChangeStatusRecord'),
           headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -43,32 +44,41 @@ class InventoryRecordState extends State<InventoryRecord>
   void initState() {
     super.initState();
     futureList = _callApi();
+
   }
 
   Future<List<dynamic>> futureList;
 
   List<dynamic> PlaceList;
 
+
+
   int Placeindex = 0;
+  var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
+
+
+
+
 
 
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<dynamic>>(
+    return  FutureBuilder<List<dynamic>>(
       future: futureList,
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+      builder:
+          (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
         if (snapshot.hasData) {
           PlaceList = snapshot.data;
-          var place = PlaceList[Placeindex];
-          List<dynamic> eventlist = place['inventoryEventList'];
-          eventlist.sort((a,b)=>DateTime.parse(a['inventoryDate']).isBefore(DateTime.parse(b['inventoryDate']))?1:-1);
-          print(place['placeName']);
-          var a = 0;
+          var Place = PlaceList[Placeindex];
+          List<dynamic> recordlist = Place['statusChangeList'];
+recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b['changeDate']))?1:-1);
+
           return Scaffold(
               appBar: AppBar(
-                title: Text(place['placeName']),
+                title: Text(Place['placeName'] ),
                 actions: [
+
                   PopupMenuButton(
                     icon: Icon(Icons.more_vert),
                     itemBuilder: (BuildContext context) => <PopupMenuEntry>[
@@ -88,22 +98,23 @@ class InventoryRecordState extends State<InventoryRecord>
                                     itemBuilder: (context, index) {
                                       return Card(
                                           child: ListTile(
-                                        onTap: () {
-                                          setState(() {
-                                            Placeindex = index;
-                                          });
+                                            onTap: () {
+                                              setState(() {
+                                                Placeindex = index;
 
-                                          Navigator.pop(context);
-                                        },
-                                        title: Text(PlaceList[index]
-                                                ['placeName'] +
-                                            (PlaceList[index]['todaysend']
-                                                ? '(已完成)'
-                                                : '')),
-                                        subtitle: Placeindex == index
-                                            ? Text('當前選擇')
-                                            : null,
-                                      ));
+                                              });
+
+                                              Navigator.pop(context);
+                                            },
+                                            title: Text(PlaceList[index]
+                                            ['placeName'] +
+                                                (PlaceList[index]['todaysend']
+                                                    ? '(已完成)'
+                                                    : '')),
+                                            subtitle: Placeindex == index
+                                                ? Text('當前選擇')
+                                                : null,
+                                          ));
                                     },
                                   ),
                                 ),
@@ -114,47 +125,55 @@ class InventoryRecordState extends State<InventoryRecord>
                           title: Text('切換地點'),
                         ),
                       ),
+
+
+
                     ],
                   ),
                 ],
               ),
-              body: ListView(
-                shrinkWrap: true,
-                children: eventlist
-                    .map((e) {
-                      DateTime etime = DateTime.parse(e['inventoryDate']);
-                      return DateTime(etime.year, etime.month);
-                    })
-                    .toSet()
-                    .map((e) => ExpansionTile(
-                          title: Text('${e.year}年 ${e.month}月'),
-                          children: eventlist
-                              .where((x) => (DateTime.parse(x['inventoryDate'])
-                                          .year ==
-                                      e.year &&
-                                  (DateTime.parse(x['inventoryDate']).month ==
-                                      e.month)))
-                              .map((y) {
-                            return Card(
-                                child: ListTile(
-                                    title: Text(DateFormat('MM/dd kk:mm')
-                                        .format(DateTime.parse(
-                                            y['inventoryDate']))),
-                                subtitle: Text(y['userId']),
+              body:
 
-                                onTap: (){  Navigator.push(
-                                  //從登入push到第二個
-                                  context,
-                                  new MaterialPageRoute(
-                                      builder: (context) => InventoryRecorditem(inventoryid:y['eventId'],date: DateFormat('MM/dd kk:mm')
-                                          .format(DateTime.parse(
-                                          y['inventoryDate'])) )),
-                                );},));
-                          }).toList(),
+              ListView.builder(
+                  itemCount: recordlist.length,
+                  itemBuilder: (context, index) {
+                    var record = recordlist[index];
+                    var Fireitem = record['fireitemRef'];
 
-                        ))
-                    .toList(),
-              ));
+
+                    return Card(
+                        child: ListTile(
+
+
+                          title: Text(Fireitem['itemId'] +
+                              ' ' +
+                              Fireitem['itemName']),
+                          subtitle: Column(
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '更改狀態:' +
+                                    ItemStatus[record['statusCode']],
+
+                              ),
+                              Text(
+                                  '日期:' +
+                                      DateFormat('yyyy/MM/dd kk:mm').format(DateTime.parse( record['changeDate']))
+
+                              ),
+                              Text(
+                                  '更改人:' +
+                                      record['userId'])
+
+
+                            ],
+                          ),
+
+
+                        ));
+                  })
+          );
         } else if (snapshot.hasError) {
           return Text('錯誤');
         } else {
