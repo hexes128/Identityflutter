@@ -153,6 +153,12 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
                             CrossAxisAlignment.start,
                             children: [
                               Text(
+                                '原始狀態:'
+                                    +
+                                    ItemStatus[record['beforechange']],
+
+                              ),
+                              Text(
                                 '更改狀態:' +
                                     ItemStatus[record['statusCode']],
 

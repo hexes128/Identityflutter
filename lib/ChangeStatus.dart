@@ -212,6 +212,7 @@ class ChangeStatusState extends State<ChangeStatus>
                                 groupItemList.where((e) => e['inventoryStatus'] != 5).forEach((e) {
                                   sendItemList.add({
                                     'ItemId': e['itemId'],
+                                    'Beforechange':e['presentStatus'],
                                     'StatusCode': e['inventoryStatus'],
                                     'PlaceId':PlaceList[Placeindex]['placeId'],
                                     'UserId': GV.userinfo.name
