@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:identityflutter/ChangeStatus.dart';
 import 'package:identityflutter/Inventorydate.dart';
 import 'package:identityflutter/StatusChangerecord.dart';
+import 'package:identityflutter/additem.dart';
 
 import 'Inventorylist.dart';
 import 'twst.dart';
@@ -50,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var arr = [
     ['個人資料', '隊員管理'],
     ['設備盤點', '設備狀態異動','新增設備','編輯設備資訊'],
-    ['盤點紀錄', '異動紀錄', '新增設備紀錄', '資訊編輯紀錄']
+    ['盤點紀錄', '異動紀錄',  '資訊編輯紀錄']
   ];
 
   _auth() async {
@@ -206,6 +207,17 @@ class _MyHomePageState extends State<MyHomePage> {
                               );
                               break;
                             }
+                          case('新增設備'):{
+
+
+                            Navigator.push(
+                              //從登入push到第二個
+                              context,
+                              new MaterialPageRoute(
+                                  builder: (context) => additemform()),
+                            );
+                            break;
+                          }
                         }
                       },
                     );
