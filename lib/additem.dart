@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:direct_select_flutter/direct_select_container.dart';
 import 'package:direct_select_flutter/direct_select_item.dart';
 import 'package:direct_select_flutter/direct_select_list.dart';
 import 'package:flutter/cupertino.dart';
@@ -95,7 +96,8 @@ class additemstate extends State<additemform> {
       appBar: AppBar(
         title: Text('新增設備'),
       ),
-      body: Column(
+      body:
+      DirectSelectContainer(child:     Column(
         children: [
           Flexible(
             child: Column(
@@ -118,61 +120,56 @@ class additemstate extends State<additemform> {
                           child: Text('存放地'),
                           flex: 1,
                         ),
-                      
+                        Expanded(
+                            child:  DirectSelectList<String>(
+
+                                values:  PlaceList.map((e) => e['placeName'].toString()).toList(),
+                                defaultItemIndex: Placeindex,
+                                itemBuilder: (String value) {return DirectSelectItem<String>(
+
+                                    value: value,
+                                    itemBuilder: (context, value) {
+                                      return Text(value);
+                                    });},
+                                focusedItemDecoration: BoxDecoration(
+                                  border: BorderDirectional(
+                                    bottom: BorderSide(width: 1, color: Colors.black12),
+                                    top: BorderSide(width: 1, color: Colors.black12),
+                                  ),
+                                ),
+                                onItemSelectedListener: (item, index, context) {
+                                  setState(() {
+                                    Placeindex=index;
+                                  });
+
+                                }),flex: 2,),
+
+
+
 
                         Expanded(
-                          child: DropdownButton<String>(
-                              value: PlaceList[Placeindex]['placeName'],
-                              iconSize: 24,
-                              elevation: 16,
-                              onChanged: (String value) {
-                                setState(() {
-                                  Placeindex =
-                                      PlaceList.map((e) => e['placeName'])
-                                          .toList()
-                                          .indexOf(value);
-                                });
-                              },
-                              items: PlaceList.map(
-                                      (e) => e['placeName'].toString())
-                                  .map<DropdownMenuItem<String>>(
-                                      (String value) {
-                                return DropdownMenuItem<String>(
+                          child:  DirectSelectList<String>(
+
+                              values:  Arealist.map((e) => e['subArea'].toString()).toList(),
+                              defaultItemIndex: Areaindex,
+                              itemBuilder: (String value) {return DirectSelectItem<String>(
+
                                   value: value,
-                                  child: Text(value),
-                                );
-                              }).toList()),
-                          flex: 2,
-                        ),
-                        Expanded(
-                          child: DropdownButton<String>(
-                              value: Arealist[Areaindex]['subArea'],
-                              icon: const Icon(Icons.arrow_downward),
-                              iconSize: 24,
-                              elevation: 16,
-                              style: const TextStyle(color: Colors.deepPurple),
-                              underline: Container(
-                                height: 2,
-                                color: Colors.deepPurpleAccent,
+                                  itemBuilder: (context, value) {
+                                    return Text(value);
+                                  });},
+                              focusedItemDecoration: BoxDecoration(
+                                border: BorderDirectional(
+                                  bottom: BorderSide(width: 1, color: Colors.black12),
+                                  top: BorderSide(width: 1, color: Colors.black12),
+                                ),
                               ),
-                              onChanged: (String value) {
+                              onItemSelectedListener: (item, index, context) {
                                 setState(() {
-                                  Areaindex = Arealist.map((e) => e['subArea'])
-                                      .toList()
-                                      .indexOf(value);
+                                  Areaindex=index;
                                 });
-                              },
-                              items:
-                                  Arealist.map((e) => e['subArea'].toString())
-                                      .map<DropdownMenuItem<String>>(
-                                          (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList()),
-                          flex: 2,
-                        ),
+
+                              }),flex: 2,),
                       ]);
                     } else if (snapshot.hasError) {
                       return Text('錯誤');
@@ -231,7 +228,8 @@ class additemstate extends State<additemform> {
             flex: 1,
           )
         ],
-      ),
+      ),)
+
     );
   }
 }
