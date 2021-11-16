@@ -50,8 +50,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   var arr = [
     ['個人資料', '隊員管理'],
-    ['設備盤點', '設備狀態異動','新增設備','編輯設備資訊'],
-    ['盤點紀錄', '異動紀錄',  '資訊編輯紀錄']
+    ['設備盤點', '設備狀態異動', '新增設備', '編輯設備資訊'],
+    ['盤點紀錄', '異動紀錄', '資訊編輯紀錄', '寄出盤點碼(長按)']
   ];
 
   _auth() async {
@@ -111,6 +111,45 @@ class _MyHomePageState extends State<MyHomePage> {
       throw 'Could not launch $url';
     }
   }
+  Future<String> sendemail() async {
+    var access_token = GV.tokenResponse.accessToken;
+print(GV.userinfo.email);
+    try {
+      var response = await http.get(
+          Uri(
+              scheme: 'http',
+              host: '192.168.10.152',
+              port: 3000,
+              path: 'Item/generatecodewithoutsave',queryParameters: <String,String>{'email':'hexes128@gmail.com'}),
+          headers: {"Authorization": "Bearer $access_token"});
+      if (response.statusCode == 200) {
+        return  '123';
+      } else {}
+    } on Error catch (e) {
+      throw Exception('123');
+    }
+    return ('123');
+  }
+
+  Future<String> _callApi() async {
+    var access_token = GV.tokenResponse.accessToken;
+
+    try {
+      var response = await http.get(
+          Uri(
+              scheme: 'http',
+              host: '192.168.10.152',
+              port: 3000,
+              path: 'Item/GetItem'),
+          headers: {"Authorization": "Bearer $access_token"});
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {}
+    } on Error catch (e) {
+      throw Exception('123');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -153,9 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           return Text('讀取中');
                         }
                       })),
-              body:
-
-              GridView.builder(
+              body: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2, childAspectRatio: 2.5),
                   itemCount: selectfeature.length,
@@ -207,17 +244,36 @@ class _MyHomePageState extends State<MyHomePage> {
                               );
                               break;
                             }
-                          case('新增設備'):{
+                          case ('新增設備'):
+                            {
+                              Navigator.push(
+                                //從登入push到第二個
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => additemform()),
+                              );
+                              break;
+                            }
+                        }
+                      },
+                      onLongPress: () {
+                        if (selectfeature[index] == '寄出盤點碼(長按)') {
+                          showDialog(
+                            context: context,
+                            builder: (context) => FutureProgressDialog(
+                                sendemail().then((value) {
+                                  Fluttertoast.showToast(
+                                      msg: '寄送成功，請至信箱查看',
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.CENTER,
+                                      timeInSecForIosWeb: 1,
+                                      backgroundColor: Colors.red,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0);
 
-
-                            Navigator.push(
-                              //從登入push到第二個
-                              context,
-                              new MaterialPageRoute(
-                                  builder: (context) => additemform()),
-                            );
-                            break;
-                          }
+                                }),
+                                message: Text('資料處理中，請稍後')),
+                          );
                         }
                       },
                     );

@@ -88,7 +88,8 @@ class additemstate extends State<additemform> {
 
   int Placeindex = 0;
   int Areaindex = 0;
-var areacontroller = FixedExtentScrollController();
+  var areacontroller = FixedExtentScrollController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,6 +106,9 @@ var areacontroller = FixedExtentScrollController();
                   decoration: const InputDecoration(
                       border: OutlineInputBorder(), hintText: '設備名稱'),
                 ),
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                ),
                 FutureBuilder<List<dynamic>>(
                   future: futureList,
                   builder: (BuildContext context,
@@ -120,46 +124,30 @@ var areacontroller = FixedExtentScrollController();
                         ),
                         Expanded(
                           child: Center(
-                            child: SizedBox(
-                              height: 350,
-                              child: CupertinoPicker(
-                                children: PlaceList.map((e) =>
-                                        Center(child: Text(e['placeName'] )))
-                                    .toList(),
-                                itemExtent: 64,
-                                onSelectedItemChanged: (int index) {
-                                  setState(() {
-                                    Placeindex = index;
-
-                                  });
-                                },
-
-                              ),
+                            child: CupertinoPicker(
+                              children: PlaceList.map((e) =>
+                                  Center(child: Text(e['placeName']))).toList(),
+                              itemExtent: 50,
+                              onSelectedItemChanged: (int index) {
+                                setState(() {
+                                  Placeindex = index;
+                                });
+                              },
                             ),
                           ),
                           flex: 2,
                         ),
                         Expanded(
                           child: Center(
-
-                            child:
-
-
-                            SizedBox(
-                              height: 350,
-                              child: CupertinoPicker(
-                                scrollController: areacontroller,
-                                children: Arealist.map((e) =>
-                                    Center(child: Text(e['subArea']+'('+ '${Arealist.indexOf(e)+1}'+')')))
-                                    .toList(),
-                                itemExtent: 64,
-                                onSelectedItemChanged: (int index) {
-
-                                },
-
-
-                              ),
-
+                            child: CupertinoPicker(
+                              scrollController: areacontroller,
+                              children: Arealist.map((e) => Center(
+                                  child: Text(e['subArea'] +
+                                      '(' +
+                                      '${Arealist.indexOf(e) + 1}' +
+                                      ')'))).toList(),
+                              itemExtent: 50,
+                              onSelectedItemChanged: (int index) {},
                             ),
                           ),
                           flex: 2,
@@ -168,7 +156,7 @@ var areacontroller = FixedExtentScrollController();
                     } else if (snapshot.hasError) {
                       return Text('錯誤');
                     } else {
-                      return Text('123');
+                      return Text('讀取資料中');
                     }
                   },
                 ),
@@ -185,7 +173,6 @@ var areacontroller = FixedExtentScrollController();
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: FlatButton(
                 onPressed: () {
-
                   if (namecontroller.text.trim().isEmpty) {
                     Fluttertoast.showToast(
                         msg: '名稱不可空白',
