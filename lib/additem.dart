@@ -63,7 +63,7 @@ class additemstate extends State<additemform> {
           },
           body: jsonEncode(<String, dynamic>{
             'ItemName': namecontroller.text,
-            'StoreId': Arealist[Areaindex]['storeId'],
+            'StoreId': Arealist[areacontroller.selectedItem]['storeId'],
             'UserId': GV.userinfo.subject
           }));
 
@@ -88,7 +88,7 @@ class additemstate extends State<additemform> {
 
   int Placeindex = 0;
   int Areaindex = 0;
-
+var areacontroller = FixedExtentScrollController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,59 +118,50 @@ class additemstate extends State<additemform> {
                           child: Text('存放地'),
                           flex: 1,
                         ),
-                      
-
                         Expanded(
-                          child: DropdownButton<String>(
-                              value: PlaceList[Placeindex]['placeName'],
-                              iconSize: 24,
-                              elevation: 16,
-                              onChanged: (String value) {
-                                setState(() {
-                                  Placeindex =
-                                      PlaceList.map((e) => e['placeName'])
-                                          .toList()
-                                          .indexOf(value);
-                                });
-                              },
-                              items: PlaceList.map(
-                                      (e) => e['placeName'].toString())
-                                  .map<DropdownMenuItem<String>>(
-                                      (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList()),
+                          child: Center(
+                            child: SizedBox(
+                              height: 350,
+                              child: CupertinoPicker(
+                                children: PlaceList.map((e) =>
+                                        Center(child: Text(e['placeName'] )))
+                                    .toList(),
+                                itemExtent: 64,
+                                onSelectedItemChanged: (int index) {
+                                  setState(() {
+                                    Placeindex = index;
+
+                                  });
+                                },
+
+                              ),
+                            ),
+                          ),
                           flex: 2,
                         ),
                         Expanded(
-                          child: DropdownButton<String>(
-                              value: Arealist[Areaindex]['subArea'],
-                              icon: const Icon(Icons.arrow_downward),
-                              iconSize: 24,
-                              elevation: 16,
-                              style: const TextStyle(color: Colors.deepPurple),
-                              underline: Container(
-                                height: 2,
-                                color: Colors.deepPurpleAccent,
+                          child: Center(
+
+                            child:
+
+
+                            SizedBox(
+                              height: 350,
+                              child: CupertinoPicker(
+                                scrollController: areacontroller,
+                                children: Arealist.map((e) =>
+                                    Center(child: Text(e['subArea']+'('+ '${Arealist.indexOf(e)+1}'+')')))
+                                    .toList(),
+                                itemExtent: 64,
+                                onSelectedItemChanged: (int index) {
+
+                                },
+
+
                               ),
-                              onChanged: (String value) {
-                                setState(() {
-                                  Areaindex = Arealist.map((e) => e['subArea'])
-                                      .toList()
-                                      .indexOf(value);
-                                });
-                              },
-                              items:
-                                  Arealist.map((e) => e['subArea'].toString())
-                                      .map<DropdownMenuItem<String>>(
-                                          (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList()),
+
+                            ),
+                          ),
                           flex: 2,
                         ),
                       ]);
@@ -194,6 +185,7 @@ class additemstate extends State<additemform> {
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: FlatButton(
                 onPressed: () {
+
                   if (namecontroller.text.trim().isEmpty) {
                     Fluttertoast.showToast(
                         msg: '名稱不可空白',
