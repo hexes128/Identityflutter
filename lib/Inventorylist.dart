@@ -83,7 +83,6 @@ class InventoryListState extends State<InventoryList>
   Future<String> sendInventory(List<dynamic> iteminfo) async {
     var access_token = GV.tokenResponse.accessToken;
 
-
     try {
       var response = await http.post(
           Uri(
@@ -95,18 +94,13 @@ class InventoryListState extends State<InventoryList>
             "Authorization": "Bearer $access_token",
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body:
-
-
-          jsonEncode(<String, dynamic>{
+          body: jsonEncode(<String, dynamic>{
             'UserId': GV.userinfo.name,
             'PlaceId': PlaceList[Placeindex]['placeId'],
-            'InventoryItemList':iteminfo
-          })
-    );
+            'InventoryItemList': iteminfo
+          }));
 
       if (response.statusCode == 200) {
-
         print(response.body);
         return response.body;
       } else {
@@ -144,10 +138,28 @@ class InventoryListState extends State<InventoryList>
               });
               return Scaffold(
                 appBar: AppBar(
-                  title: Text(PlaceList[Placeindex]['placeName'] +
-                      '(' +
-                      AreaList[Areaindex]['subArea'] +
-                      ')'),
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: CupertinoPicker(
+                          children: PlaceList.map(
+                                  (e) => Center(child: Text(e['placeName'])))
+                              .toList(),
+                          itemExtent: 50,
+                          onSelectedItemChanged: (int index) {
+                            setState(() {
+                              Placeindex = index;
+                              Areaindex = 0;
+                            });
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                            AreaList[Areaindex]['subArea'] ),
+                      )
+                    ],
+                  ),
                   actions: [
                     FlutterSwitch(
                       width: 60.0,
@@ -175,50 +187,50 @@ class InventoryListState extends State<InventoryList>
                     PopupMenuButton(
                       icon: Icon(Icons.more_vert),
                       itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-                        PopupMenuItem(
-                          child: ListTile(
-                            onTap: () {
-                              Navigator.pop(context);
-                              showDialog<String>(
-                                context: context,
-                                builder: (BuildContext context) => AlertDialog(
-                                  title: Text('請選擇地點'),
-                                  content: Container(
-                                    width: double.maxFinite,
-                                    child: ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: PlaceList.length,
-                                      itemBuilder: (context, index) {
-                                        return Card(
-                                            child: ListTile(
-                                          onTap: () {
-                                            setState(() {
-                                              Placeindex = index;
-                                              Areaindex = 0;
-                                              tabController.animateTo(0);
-                                            });
-
-                                            Navigator.pop(context);
-                                          },
-                                          title: Text(PlaceList[index]
-                                                  ['placeName'] +
-                                              (PlaceList[index]['todaysend']
-                                                  ? '(已完成)'
-                                                  : '')),
-                                          subtitle: Placeindex == index
-                                              ? Text('當前選擇')
-                                              : null,
-                                        ));
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                            leading: Icon(Icons.switch_left),
-                            title: Text('切換地點'),
-                          ),
-                        ),
+                        // PopupMenuItem(
+                        //   child: ListTile(
+                        //     onTap: () {
+                        //       Navigator.pop(context);
+                        //       showDialog<String>(
+                        //         context: context,
+                        //         builder: (BuildContext context) => AlertDialog(
+                        //           title: Text('請選擇地點'),
+                        //           content: Container(
+                        //             width: double.maxFinite,
+                        //             child: ListView.builder(
+                        //               shrinkWrap: true,
+                        //               itemCount: PlaceList.length,
+                        //               itemBuilder: (context, index) {
+                        //                 return Card(
+                        //                     child: ListTile(
+                        //                   onTap: () {
+                        //                     setState(() {
+                        //                       Placeindex = index;
+                        //                       Areaindex = 0;
+                        //                       tabController.animateTo(0);
+                        //                     });
+                        //
+                        //                     Navigator.pop(context);
+                        //                   },
+                        //                   title: Text(PlaceList[index]
+                        //                           ['placeName'] +
+                        //                       (PlaceList[index]['todaysend']
+                        //                           ? '(已完成)'
+                        //                           : '')),
+                        //                   subtitle: Placeindex == index
+                        //                       ? Text('當前選擇')
+                        //                       : null,
+                        //                 ));
+                        //               },
+                        //             ),
+                        //           ),
+                        //         ),
+                        //       );
+                        //     },
+                        //     leading: Icon(Icons.switch_left),
+                        //     title: Text('切換地點'),
+                        //   ),
+                        // ),
                         PopupMenuItem(
                           child: ListTile(
                             onTap: () {
@@ -280,14 +292,16 @@ class InventoryListState extends State<InventoryList>
 
                               List<dynamic> sendItemList = [];
 
-                              if (groupItemList.where((e) => e['inventoryStatus'] == 5).length == 0) {
+                              if (groupItemList
+                                      .where((e) => e['inventoryStatus'] == 5)
+                                      .length ==
+                                  0) {
                                 groupItemList.forEach((e) {
                                   sendItemList.add({
                                     'ItemId': e['itemId'],
                                     'StatusBefore': e['presentStatus'],
                                     'StatusAfter': e['inventoryStatus']
                                   });
-
                                 });
 
                                 showDialog<String>(
@@ -460,9 +474,9 @@ class InventoryListState extends State<InventoryList>
                                 itemCount: ItemList.length,
                                 itemBuilder: (context, index) {
                                   var Fireitem = ItemList[index];
-                                  if(Fireitem['presentStatus'] != 0){
-
-                                    Fireitem['inventoryStatus'] = Fireitem['presentStatus'];
+                                  if (Fireitem['presentStatus'] != 0) {
+                                    Fireitem['inventoryStatus'] =
+                                        Fireitem['presentStatus'];
                                   }
 
                                   return Card(
@@ -529,18 +543,16 @@ class InventoryListState extends State<InventoryList>
                                       });
                                     },
                                     onLongPress: () {
-                                      if(Fireitem['inventoryStatus'] == 0){
+                                      if (Fireitem['inventoryStatus'] == 0) {
                                         Fluttertoast.showToast(
-                                            msg:'請先取消勾選',
+                                            msg: '請先取消勾選',
                                             toastLength: Toast.LENGTH_SHORT,
                                             gravity: ToastGravity.CENTER,
                                             timeInSecForIosWeb: 1,
                                             backgroundColor: Colors.red,
                                             textColor: Colors.white,
                                             fontSize: 16.0);
-
-                                      }
-                                      else{
+                                      } else {
                                         showDialog<void>(
                                           context: context,
                                           barrierDismissible: false,
@@ -551,27 +563,30 @@ class InventoryListState extends State<InventoryList>
                                                     ' ' +
                                                     Fireitem['itemName']),
                                                 content: Column(
-                                                  mainAxisSize: MainAxisSize.min,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
                                                   children: [
                                                     Card(
                                                         child: ListTile(
-                                                          title: Text('復原'),
-                                                          onTap: () {
-                                                            setState(() {
-                                                              Fireitem[
+                                                      title: Text('復原'),
+                                                      onTap: () {
+                                                        setState(() {
+                                                          Fireitem[
                                                               'inventoryStatus'] = 5;
-                                                              Navigator.pop(context);
-                                                            });
-                                                          },
-                                                        )),
+                                                          Navigator.pop(
+                                                              context);
+                                                        });
+                                                      },
+                                                    )),
                                                     Card(
                                                         child: ListTile(
                                                             title: Text('報修'),
                                                             onTap: () {
                                                               setState(() {
                                                                 Fireitem[
-                                                                'inventoryStatus'] = 2;
-                                                                Navigator.pop(context);
+                                                                    'inventoryStatus'] = 2;
+                                                                Navigator.pop(
+                                                                    context);
                                                               });
                                                             })),
                                                     Card(
@@ -580,8 +595,9 @@ class InventoryListState extends State<InventoryList>
                                                             onTap: () {
                                                               setState(() {
                                                                 Fireitem[
-                                                                'inventoryStatus'] = 3;
-                                                                Navigator.pop(context);
+                                                                    'inventoryStatus'] = 3;
+                                                                Navigator.pop(
+                                                                    context);
                                                               });
                                                             }))
                                                   ],
@@ -589,8 +605,6 @@ class InventoryListState extends State<InventoryList>
                                           },
                                         );
                                       }
-
-
                                     },
                                   ));
                                 })
@@ -667,31 +681,31 @@ class InventoryListState extends State<InventoryList>
                                                             'inventoryStatus'] = 0;
                                                       });
                                                     },
-
                                                     onLongPress: () {
-
-
                                                       showDialog<void>(
                                                         context: context,
-                                                        barrierDismissible: false,
+                                                        barrierDismissible:
+                                                            false,
                                                         // user must tap button!
-                                                        builder: (BuildContext context) {
+                                                        builder: (BuildContext
+                                                            context) {
                                                           return AlertDialog(
-                                                              title: Text(Fireitem['itemId'] +
+                                                              title: Text(Fireitem[
+                                                                      'itemId'] +
                                                                   ' ' +
-                                                                  Fireitem['itemName']),
+                                                                  Fireitem[
+                                                                      'itemName']),
                                                               content: Column(
-                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
                                                                 children: [
-
-
                                                                   Card(
                                                                       child: ListTile(
                                                                           title: Text('報修'),
                                                                           onTap: () {
                                                                             setState(() {
-                                                                              Fireitem[
-                                                                              'inventoryStatus'] = 2;
+                                                                              Fireitem['inventoryStatus'] = 2;
                                                                               Navigator.pop(context);
                                                                             });
                                                                           })),
@@ -700,8 +714,7 @@ class InventoryListState extends State<InventoryList>
                                                                           title: Text('遺失'),
                                                                           onTap: () {
                                                                             setState(() {
-                                                                              Fireitem[
-                                                                              'inventoryStatus'] = 3;
+                                                                              Fireitem['inventoryStatus'] = 3;
                                                                               Navigator.pop(context);
                                                                             });
                                                                           }))
@@ -709,9 +722,6 @@ class InventoryListState extends State<InventoryList>
                                                               ));
                                                         },
                                                       );
-
-
-
                                                     },
                                                   ),
                                                 );
@@ -745,9 +755,13 @@ class InventoryListState extends State<InventoryList>
                                                               5).toList();
                                                   var Fireitem =
                                                       checklist[index];
-                                                  if(Fireitem['presentStatus'] != 0){
-
-                                                    Fireitem['inventoryStatus'] = Fireitem['presentStatus'];
+                                                  if (Fireitem[
+                                                          'presentStatus'] !=
+                                                      0) {
+                                                    Fireitem[
+                                                            'inventoryStatus'] =
+                                                        Fireitem[
+                                                            'presentStatus'];
                                                   }
 
                                                   return Card(
@@ -800,66 +814,83 @@ class InventoryListState extends State<InventoryList>
                                                       ),
                                                       onTap: () {
                                                         setState(() {
-                                                          switch (Fireitem['inventoryStatus']) {
+                                                          switch (Fireitem[
+                                                              'inventoryStatus']) {
                                                             case (0):
                                                               {
-                                                                Fireitem['inventoryStatus'] = 5;
+                                                                Fireitem[
+                                                                    'inventoryStatus'] = 5;
                                                                 break;
                                                               }
                                                             case (5):
                                                               {
-                                                                Fireitem['inventoryStatus'] = 0;
+                                                                Fireitem[
+                                                                    'inventoryStatus'] = 0;
                                                                 break;
                                                               }
                                                           }
                                                         });
                                                       },
                                                       onLongPress: () {
-                                                        if(Fireitem['inventoryStatus'] == 0){
+                                                        if (Fireitem[
+                                                                'inventoryStatus'] ==
+                                                            0) {
                                                           Fluttertoast.showToast(
-                                                              msg:'請先取消勾選',
-                                                              toastLength: Toast.LENGTH_SHORT,
-                                                              gravity: ToastGravity.CENTER,
-                                                              timeInSecForIosWeb: 1,
-                                                              backgroundColor: Colors.red,
-                                                              textColor: Colors.white,
+                                                              msg: '請先取消勾選',
+                                                              toastLength: Toast
+                                                                  .LENGTH_SHORT,
+                                                              gravity:
+                                                                  ToastGravity
+                                                                      .CENTER,
+                                                              timeInSecForIosWeb:
+                                                                  1,
+                                                              backgroundColor:
+                                                                  Colors.red,
+                                                              textColor:
+                                                                  Colors.white,
                                                               fontSize: 16.0);
-
-                                                        }
-                                                        else{
+                                                        } else {
                                                           showDialog<void>(
                                                             context: context,
-                                                            barrierDismissible: false,
+                                                            barrierDismissible:
+                                                                false,
                                                             // user must tap button!
-                                                            builder: (BuildContext context) {
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
                                                               return AlertDialog(
-                                                                  title: Text(Fireitem['itemId'] +
+                                                                  title: Text(Fireitem[
+                                                                          'itemId'] +
                                                                       ' ' +
-                                                                      Fireitem['itemName']),
-                                                                  content: Column(
-                                                                    mainAxisSize: MainAxisSize.min,
+                                                                      Fireitem[
+                                                                          'itemName']),
+                                                                  content:
+                                                                      Column(
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .min,
                                                                     children: [
                                                                       Card(
-                                                                          child: ListTile(
-                                                                            title: Text('復原'),
-                                                                            onTap: () {
-                                                                              setState(() {
-                                                                                Fireitem[
-                                                                                'inventoryStatus'] = 5;
-                                                                                Navigator.pop(context);
-                                                                              });
-                                                                            },
-                                                                          )),
-
+                                                                          child:
+                                                                              ListTile(
+                                                                        title: Text(
+                                                                            '復原'),
+                                                                        onTap:
+                                                                            () {
+                                                                          setState(
+                                                                              () {
+                                                                            Fireitem['inventoryStatus'] =
+                                                                                5;
+                                                                            Navigator.pop(context);
+                                                                          });
+                                                                        },
+                                                                      )),
                                                                     ],
                                                                   ));
                                                             },
                                                           );
                                                         }
-
-
                                                       },
-
                                                     ),
                                                   );
                                                 }),
@@ -879,8 +910,9 @@ class InventoryListState extends State<InventoryList>
                       unselectedLabelColor: Colors.white,
                       isScrollable: true,
                       tabs: AreaList.map((e) => Tab(
-                              text: e['subArea'] + ' ' +
-                                  '(${e['fireitemList'].where((x) => x['inventoryStatus'] != 5 ||x['presentStatus'] != 0).length}/${e['fireitemList'].length})'))
+                              text: e['subArea'] +
+                                  ' ' +
+                                  '(${e['fireitemList'].where((x) => x['inventoryStatus'] != 5 || x['presentStatus'] != 0).length}/${e['fireitemList'].length})'))
                           .toList()),
                 ),
               );

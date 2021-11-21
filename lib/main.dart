@@ -6,6 +6,7 @@ import 'package:identityflutter/StatusChangerecord.dart';
 import 'package:identityflutter/additem.dart';
 
 import 'Inventorylist.dart';
+import 'edititeminfolist.dart';
 import 'twst.dart';
 import 'dart:io';
 import 'dart:ui';
@@ -254,6 +255,16 @@ print(GV.userinfo.email);
                               );
                               break;
                             }
+
+                          case('編輯設備資訊'):{
+                            Navigator.push(
+                              //從登入push到第二個
+                              context,
+                              new MaterialPageRoute(
+                                  builder: (context) => editinfolist()),
+                            );
+                            break;
+                          }
                         }
                       },
                       onLongPress: () {

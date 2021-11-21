@@ -76,7 +76,18 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
 
           return Scaffold(
               appBar: AppBar(
-                title: Text(Place['placeName'] ),
+                title:
+                CupertinoPicker(
+                  children: PlaceList.map((e) =>
+                      Center(child: Text(e['placeName']))).toList(),
+                  itemExtent: 50,
+                  onSelectedItemChanged: (int index) {
+                    setState(() {
+                      Placeindex = index;
+                    });
+                  },
+                ),
+                // Text(Place['placeName'] ),
                 actions: [
 
                   PopupMenuButton(
@@ -133,52 +144,116 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
                 ],
               ),
               body:
+                  ListView(
+                    shrinkWrap: true,
+                    children:     recordlist
+                        .map((e) {
+                      DateTime etime = DateTime.parse(e['changeDate']);
+                      return DateTime(etime.year, etime.month);
+                    })
+                        .toSet()
+                        .map((e) => ExpansionTile(
+                      title: Text('${e.year}年 ${e.month}月'),
+                      children: recordlist
+                          .where((x) => (DateTime.parse(x['changeDate'])
+                          .year ==
+                          e.year &&
+                          (DateTime.parse(x['changeDate']).month ==
+                              e.month)))
+                          .map((y) {
 
-              ListView.builder(
-                  itemCount: recordlist.length,
-                  itemBuilder: (context, index) {
-                    var record = recordlist[index];
-                    var Fireitem = record['fireitemRef'];
+                        return Card(
+                            child: ListTile(
+                              // title: Text(DateFormat('MM/dd kk:mm')
+                              //     .format(DateTime.parse(
+                              //     y['changeDate']))),
+                                          title: Text(y['fireitemRef']['itemId'] +
+                                              ' ' +
+                                              y['fireitemRef']['itemName']),
+                              subtitle: Column(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              '原始狀態:'
+                                                  +
+                                                  ItemStatus[y['beforechange']],
+
+                                            ),
+                                            Text(
+                                              '更改狀態:' +
+                                                  ItemStatus[y['statusCode']],
+
+                                            ),
+                                            Text(
+                                                '日期:' +
+                                                    DateFormat('yyyy/MM/dd kk:mm').format(DateTime.parse( y['changeDate']))
+
+                                            ),
+                                            Text(
+                                                '更改人:' +
+                                                    y['userId'])
 
 
-                    return Card(
-                        child: ListTile(
+                                          ],
+                                        ),
 
 
-                          title: Text(Fireitem['itemId'] +
-                              ' ' +
-                              Fireitem['itemName']),
-                          subtitle: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '原始狀態:'
-                                    +
-                                    ItemStatus[record['beforechange']],
 
-                              ),
-                              Text(
-                                '更改狀態:' +
-                                    ItemStatus[record['statusCode']],
+                              onTap: (){ },));
+                      }).toList(),
 
-                              ),
-                              Text(
-                                  '日期:' +
-                                      DateFormat('yyyy/MM/dd kk:mm').format(DateTime.parse( record['changeDate']))
-
-                              ),
-                              Text(
-                                  '更改人:' +
-                                      record['userId'])
+                    ))
+                        .toList(),
+                  )
 
 
-                            ],
-                          ),
 
-
-                        ));
-                  })
+              // ListView.builder(
+              //     itemCount: recordlist.length,
+              //     itemBuilder: (context, index) {
+              //       var record = recordlist[index];
+              //       var Fireitem = record['fireitemRef'];
+              //
+              //
+              //       return Card(
+              //           child: ListTile(
+              //
+              //
+              //             title: Text(Fireitem['itemId'] +
+              //                 ' ' +
+              //                 Fireitem['itemName']),
+              //             subtitle: Column(
+              //               crossAxisAlignment:
+              //               CrossAxisAlignment.start,
+              //               children: [
+              //                 Text(
+              //                   '原始狀態:'
+              //                       +
+              //                       ItemStatus[record['beforechange']],
+              //
+              //                 ),
+              //                 Text(
+              //                   '更改狀態:' +
+              //                       ItemStatus[record['statusCode']],
+              //
+              //                 ),
+              //                 Text(
+              //                     '日期:' +
+              //                         DateFormat('yyyy/MM/dd kk:mm').format(DateTime.parse( record['changeDate']))
+              //
+              //                 ),
+              //                 Text(
+              //                     '更改人:' +
+              //                         record['userId'])
+              //
+              //
+              //               ],
+              //             ),
+              //
+              //
+              //           ));
+              //     })
           );
         } else if (snapshot.hasError) {
           return Text('錯誤');

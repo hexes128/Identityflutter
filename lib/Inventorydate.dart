@@ -67,60 +67,22 @@ class InventoryRecordState extends State<InventoryRecord>
           var a = 0;
           return Scaffold(
               appBar: AppBar(
-                title: Text(place['placeName']),
-                actions: [
-                  PopupMenuButton(
-                    icon: Icon(Icons.more_vert),
-                    itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-                      PopupMenuItem(
-                        child: ListTile(
-                          onTap: () {
-                            Navigator.pop(context);
-                            showDialog<String>(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                title: Text('請選擇地點'),
-                                content: Container(
-                                  width: double.maxFinite,
-                                  child: ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: PlaceList.length,
-                                    itemBuilder: (context, index) {
-                                      return Card(
-                                          child: ListTile(
-                                        onTap: () {
-                                          setState(() {
-                                            Placeindex = index;
-                                          });
+                title:  CupertinoPicker(
+                  children: PlaceList.map((e) =>
+                      Center(child: Text(e['placeName']))).toList(),
+                  itemExtent: 50,
+                  onSelectedItemChanged: (int index) {
+                    setState(() {
+                      Placeindex = index;
+                    });
+                  },
+                ),
 
-                                          Navigator.pop(context);
-                                        },
-                                        title: Text(PlaceList[index]
-                                                ['placeName'] +
-                                            (PlaceList[index]['todaysend']
-                                                ? '(已完成)'
-                                                : '')),
-                                        subtitle: Placeindex == index
-                                            ? Text('當前選擇')
-                                            : null,
-                                      ));
-                                    },
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                          leading: Icon(Icons.switch_left),
-                          title: Text('切換地點'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ),
               body: ListView(
                 shrinkWrap: true,
-                children: eventlist
+                children:
+                eventlist
                     .map((e) {
                       DateTime etime = DateTime.parse(e['inventoryDate']);
                       return DateTime(etime.year, etime.month);
