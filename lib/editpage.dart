@@ -63,6 +63,16 @@ class editstate extends State<editietm> {
   Future<String> sendnewitem() async {
     var access_token = GV.tokenResponse.accessToken;
 
+    print(
+      '${ PlaceList[widget.initialplace]['priorityList'][widget.initialarea]['storeId']}'
+    );
+    print(
+        '${ PlaceList[placecontroller.selectedItem]['priorityList'][areacontroller.selectedItem]['storeId']}'
+    );
+
+    // 'oldstore':,
+    // 'newstore': Arealist[areacontroller.selectedItem]['storeId'],
+
     try {
       var response = await http.post(
           Uri(
@@ -78,8 +88,8 @@ class editstate extends State<editietm> {
             'itemid': widget.Fireitem['itemId'],
             'oldname': widget.Fireitem['itemName'],
             'newname': namecontroller.text,
-            'oldstore': Arealist[widget.initialarea]['storeId'],
-            'newstore': Arealist[areacontroller.selectedItem]['storeId'],
+            'oldstore': PlaceList[widget.initialplace]['priorityList'][widget.initialarea]['storeId'],
+            'newstore':PlaceList[placecontroller.selectedItem]['priorityList'][areacontroller.selectedItem]['storeId'],
             'UserId': GV.userinfo.name
           }));
 
@@ -160,7 +170,10 @@ class editstate extends State<editietm> {
                               itemExtent: 50,
                               onSelectedItemChanged: (int index) {
                                 setState(() {
+                                  print('${areacontroller.selectedItem}');
                                   Placeindex = index;
+
+                                  print('${areacontroller.selectedItem}');
                                 });
                               },
                             ),
@@ -213,10 +226,11 @@ class editstate extends State<editietm> {
                             text: widget.Fireitem['itemName']);
                         Areaindex = widget.initialarea;
                         Placeindex = widget.initialplace;
-                        areacontroller.animateToItem(widget.initialarea,
+
+                        placecontroller.animateToItem(widget.initialplace,
                             duration: Duration(milliseconds: 500),
                             curve: Curves.ease);
-                        placecontroller.animateToItem(widget.initialplace,
+                        areacontroller.animateToItem(widget.initialarea,
                             duration: Duration(milliseconds: 500),
                             curve: Curves.ease);
                       });
