@@ -16,7 +16,9 @@ class StatusRecord extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => StatusRecordState();
 }
+List<dynamic> recordlist;
 
+var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
 class StatusRecordState extends State<StatusRecord>
    {
   ScanController scanController = ScanController();
@@ -54,7 +56,6 @@ class StatusRecordState extends State<StatusRecord>
 
 
   int Placeindex = 0;
-  var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
 
 
 
@@ -71,7 +72,7 @@ class StatusRecordState extends State<StatusRecord>
         if (snapshot.hasData) {
           PlaceList = snapshot.data;
           var Place = PlaceList[Placeindex];
-          List<dynamic> recordlist = Place['statusChangeList'];
+         recordlist = Place['statusChangeList'];
 recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b['changeDate']))?1:-1);
 
           return Scaffold(
@@ -89,58 +90,11 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
                 ),
                 // Text(Place['placeName'] ),
                 actions: [
-
-                  PopupMenuButton(
-                    icon: Icon(Icons.more_vert),
-                    itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-                      PopupMenuItem(
-                        child: ListTile(
-                          onTap: () {
-                            Navigator.pop(context);
-                            showDialog<String>(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                title: Text('請選擇地點'),
-                                content: Container(
-                                  width: double.maxFinite,
-                                  child: ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: PlaceList.length,
-                                    itemBuilder: (context, index) {
-                                      return Card(
-                                          child: ListTile(
-                                            onTap: () {
-                                              setState(() {
-                                                Placeindex = index;
-
-                                              });
-
-                                              Navigator.pop(context);
-                                            },
-                                            title: Text(PlaceList[index]
-                                            ['placeName'] +
-                                                (PlaceList[index]['todaysend']
-                                                    ? '(已完成)'
-                                                    : '')),
-                                            subtitle: Placeindex == index
-                                                ? Text('當前選擇')
-                                                : null,
-                                          ));
-                                    },
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                          leading: Icon(Icons.switch_left),
-                          title: Text('切換地點'),
-                        ),
-                      ),
-
-
-
-                    ],
-                  ),
+                  IconButton(
+                      onPressed: () {
+                        showSearch(context: context, delegate: Datasearch());
+                      },
+                      icon: Icon(Icons.search))
                 ],
               ),
               body:
@@ -162,11 +116,10 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
                               e.month)))
                           .map((y) {
 
-                        return Card(
+                        return
+                          Card(
                             child: ListTile(
-                              // title: Text(DateFormat('MM/dd kk:mm')
-                              //     .format(DateTime.parse(
-                              //     y['changeDate']))),
+
                                           title: Text(y['fireitemRef']['itemId'] +
                                               ' ' +
                                               y['fireitemRef']['itemName']),
@@ -209,51 +162,6 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
 
 
 
-              // ListView.builder(
-              //     itemCount: recordlist.length,
-              //     itemBuilder: (context, index) {
-              //       var record = recordlist[index];
-              //       var Fireitem = record['fireitemRef'];
-              //
-              //
-              //       return Card(
-              //           child: ListTile(
-              //
-              //
-              //             title: Text(Fireitem['itemId'] +
-              //                 ' ' +
-              //                 Fireitem['itemName']),
-              //             subtitle: Column(
-              //               crossAxisAlignment:
-              //               CrossAxisAlignment.start,
-              //               children: [
-              //                 Text(
-              //                   '原始狀態:'
-              //                       +
-              //                       ItemStatus[record['beforechange']],
-              //
-              //                 ),
-              //                 Text(
-              //                   '更改狀態:' +
-              //                       ItemStatus[record['statusCode']],
-              //
-              //                 ),
-              //                 Text(
-              //                     '日期:' +
-              //                         DateFormat('yyyy/MM/dd kk:mm').format(DateTime.parse( record['changeDate']))
-              //
-              //                 ),
-              //                 Text(
-              //                     '更改人:' +
-              //                         record['userId'])
-              //
-              //
-              //               ],
-              //             ),
-              //
-              //
-              //           ));
-              //     })
           );
         } else if (snapshot.hasError) {
           return Text('錯誤');
@@ -276,6 +184,91 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
           );
         }
       },
+    );
+  }
+}
+class Datasearch extends SearchDelegate<String> {
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [IconButton(onPressed: () {
+      close(context, null);
+
+    }, icon: Icon(Icons.clear))];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+        onPressed: () {
+          close(context, null);
+        },
+        icon: AnimatedIcon(
+          icon: AnimatedIcons.menu_arrow,
+          progress: transitionAnimation,
+        ));
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // TODO: implement buildResults
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    var suggestions = query.isEmpty? recordlist:recordlist.where((e) => e['fireitemRef']['itemId'].toString().contains(query) ||e['fireitemRef']['itemName'].toString().contains(query)).toList();
+    var a=0;
+
+
+
+
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        var record = suggestions[index];
+        var fireitem = record['fireitemRef'];
+        var a =0;
+        return
+
+          Card(
+              child: ListTile(
+
+                title: Text(fireitem['itemId'] +
+                    ' ' +
+                    fireitem['itemName']),
+                subtitle: Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '原始狀態:'
+                          +
+                          ItemStatus[record['beforechange']],
+
+                    ),
+                    Text(
+                      '更改狀態:' +
+                          ItemStatus[record['statusCode']],
+
+                    ),
+                    Text(
+                        '日期:' +
+                            DateFormat('yyyy/MM/dd kk:mm').format(DateTime.parse( record['changeDate']))
+
+                    ),
+                    Text(
+                        '更改人:' +
+                            record['userId'])
+
+
+                  ],
+                ),
+
+
+
+                onTap: (){ },));
+
+      },
+      itemCount: suggestions.length,
     );
   }
 }

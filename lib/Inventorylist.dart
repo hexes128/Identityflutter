@@ -608,7 +608,8 @@ class InventoryListState extends State<InventoryList>
                                     },
                                   ));
                                 })
-                            : Row(
+                            :
+                        Row(
                                 children: [
                                   Expanded(
                                       flex: 1,

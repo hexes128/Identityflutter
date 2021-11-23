@@ -6,6 +6,7 @@ import 'package:identityflutter/StatusChangerecord.dart';
 import 'package:identityflutter/additem.dart';
 
 import 'Inventorylist.dart';
+import 'editinforecord.dart';
 import 'edititeminfolist.dart';
 import 'twst.dart';
 import 'dart:io';
@@ -52,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var arr = [
     ['個人資料', '隊員管理'],
     ['設備盤點', '設備狀態異動', '新增設備', '編輯設備資訊'],
-    ['盤點紀錄', '異動紀錄', '資訊編輯紀錄', '寄出盤點碼(長按)']
+    ['盤點紀錄', '狀態異動紀錄', '資訊編輯紀錄', '寄出盤點碼(長按)']
   ];
 
   _auth() async {
@@ -235,7 +236,7 @@ print(GV.userinfo.email);
                               );
                               break;
                             }
-                          case ('異動紀錄'):
+                          case ('狀態異動紀錄'):
                             {
                               Navigator.push(
                                 //從登入push到第二個
@@ -264,6 +265,17 @@ print(GV.userinfo.email);
                                   builder: (context) => editinfolist()),
                             );
                             break;
+                          }
+                          case('資訊編輯紀錄'):{
+                            Navigator.push(
+                              //從登入push到第二個
+                              context,
+                              new MaterialPageRoute(
+                                  builder: (context) => EditinfoRecord()),
+                            );
+                            break;
+
+
                           }
                         }
                       },
