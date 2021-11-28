@@ -4,6 +4,7 @@ import 'package:identityflutter/ChangeStatus.dart';
 import 'package:identityflutter/Inventorydate.dart';
 import 'package:identityflutter/StatusChangerecord.dart';
 import 'package:identityflutter/additem.dart';
+import 'package:identityflutter/addplace.dart';
 
 import 'Inventorylist.dart';
 import 'editinforecord.dart';
@@ -52,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   var arr = [
     ['個人資料', '隊員管理'],
-    ['設備盤點', '設備狀態異動', '新增設備', '編輯設備資訊'],
+    ['設備盤點', '設備狀態異動', '新增設備', '編輯設備資訊','新增地點'],
     ['盤點紀錄', '狀態異動紀錄', '資訊編輯紀錄', '寄出盤點碼(長按)']
   ];
 
@@ -256,6 +257,16 @@ print(GV.userinfo.email);
                               );
                               break;
                             }
+                          case ('新增設備'):
+                            {
+                              Navigator.push(
+                                //從登入push到第二個
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => additemform()),
+                              );
+                              break;
+                            }
 
                           case('編輯設備資訊'):{
                             Navigator.push(
@@ -263,6 +274,19 @@ print(GV.userinfo.email);
                               context,
                               new MaterialPageRoute(
                                   builder: (context) => editinfolist()),
+                            );
+                            break;
+
+
+                          }
+
+
+                          case('新增地點'):{
+                            Navigator.push(
+                              //從登入push到第二個
+                              context,
+                              new MaterialPageRoute(
+                                  builder: (context) => addplace()),
                             );
                             break;
                           }
