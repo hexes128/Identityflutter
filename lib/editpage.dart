@@ -64,11 +64,9 @@ class editstate extends State<editietm> {
     var access_token = GV.tokenResponse.accessToken;
 
     print(
-      '${ PlaceList[widget.initialplace]['priorityList'][widget.initialarea]['storeId']}'
-    );
+        '${PlaceList[widget.initialplace]['priorityList'][widget.initialarea]['storeId']}');
     print(
-        '${ PlaceList[placecontroller.selectedItem]['priorityList'][areacontroller.selectedItem]['storeId']}'
-    );
+        '${PlaceList[placecontroller.selectedItem]['priorityList'][areacontroller.selectedItem]['storeId']}');
 
     // 'oldstore':,
     // 'newstore': Arealist[areacontroller.selectedItem]['storeId'],
@@ -88,8 +86,10 @@ class editstate extends State<editietm> {
             'itemid': widget.Fireitem['itemId'],
             'oldname': widget.Fireitem['itemName'],
             'newname': namecontroller.text,
-            'oldstore': PlaceList[widget.initialplace]['priorityList'][widget.initialarea]['storeId'],
-            'newstore':PlaceList[placecontroller.selectedItem]['priorityList'][areacontroller.selectedItem]['storeId'],
+            'oldstore': PlaceList[widget.initialplace]['priorityList']
+                [widget.initialarea]['storeId'],
+            'newstore': PlaceList[placecontroller.selectedItem]['priorityList']
+                [areacontroller.selectedItem]['storeId'],
             'UserId': GV.userinfo.name
           }));
 
@@ -277,7 +277,6 @@ class editstate extends State<editietm> {
                         return;
                       }
 
-
                       if (placecontroller.selectedItem != widget.initialplace) {
                         bool keepgo = false;
                         await showDialog<bool>(
@@ -312,31 +311,31 @@ class editstate extends State<editietm> {
                         context: context,
                         builder: (BuildContext context) => AlertDialog(
                           title: Text('確定送出以下變更?'),
-                          content: Column(
-
-                            mainAxisSize : MainAxisSize.min
-                          ,
-                            children: [
-                            namecontroller.text.trim() != widget.Fireitem['itemName']?
-                            Card(child:
-                            ListTile(title:   Text('設備名稱:'+widget.Fireitem['itemName']+'\n'+'更動後:'+      namecontroller.text.trim() ))
-                          )
-                       :Container(),
-                            Placeindex != widget.initialplace?
-                            Card(child:
-                            ListTile(title:   Text('存放地'+PlaceList[widget.initialplace]['placeName']+'\n'+'更動後:'+PlaceList[placecontroller.selectedItem]['placeName']),)
-                          )
-
-                            :Container(),
-                            Areaindex != widget.initialarea?
-                            Card(child:
-                            ListTile(title:   Text('存放地:'+Arealist[widget.initialarea]['subArea']+'\n'+'更動後:'+Arealist[areacontroller.selectedItem]['subArea']))
-
-                          )
-                            :Container(),
-
-
-                          ],),
+                          content:
+                              Column(mainAxisSize: MainAxisSize.min, children: [
+                            Card(
+                                child: ListTile(
+                              title: Text('更動前'),
+                              subtitle: Text('設備名稱:' +
+                                  widget.Fireitem['itemName'] +
+                                  '\n地點:' +
+                                  PlaceList[widget.initialplace]['placeName'] +
+                                  '\n區域:' +
+                                  PlaceList[widget.initialplace]['priorityList']
+                                      [widget.initialarea]['subArea']),
+                            )),
+                                Card(
+                                    child: ListTile(
+                                      title: Text('更動後'),
+                                      subtitle: Text('設備名稱:' +
+                                         namecontroller.text+
+                                          '\n地點:' +
+                                          PlaceList[placecontroller.selectedItem]['placeName'] +
+                                          '\n區域:' +
+                                          PlaceList[placecontroller.selectedItem]['priorityList']
+                                          [areacontroller.selectedItem]['subArea']),
+                                    ))
+                          ]),
                           actions: <Widget>[
                             FlatButton(
                                 child: Text('Cancel'),
@@ -353,10 +352,9 @@ class editstate extends State<editietm> {
                       ).then((value) {
                         keepgo = value;
                       });
-                      if(!keepgo){
+                      if (!keepgo) {
                         return;
                       }
-
 
                       showDialog(
                         context: context,
