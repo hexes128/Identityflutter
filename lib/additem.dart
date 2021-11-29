@@ -158,6 +158,10 @@ class additemstate extends State<additemform> {
                                             child: ListTile(
                                               title:
                                               Text(itemlist[index].namecontroller.text),
+                                              subtitle:
+
+                                              Text(  Arealist[itemlist[index].scrollController.selectedItem]['subArea'])
+                                            ,
                                             ),
                                           );
                                         })),
