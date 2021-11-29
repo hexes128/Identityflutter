@@ -132,163 +132,123 @@ class ChangeStatusState extends State<ChangeStatus>
               });
               return Scaffold(
                 appBar: AppBar(
-                  title: Text(PlaceList[Placeindex]['placeName'] +
-                      '(' +
-                      AreaList[Areaindex]['subArea'] +
-                      ')'),
+                  title: CupertinoPicker(
+                    children: PlaceList.map(
+                        (e) => Center(child: Text(e['placeName']))).toList(),
+                    itemExtent: 50,
+                    onSelectedItemChanged: (int index) {
+                      setState(() {
+                        Placeindex = index;
+                      });
+                    },
+                  ),
                   actions: [
-                    PopupMenuButton(
-                      icon: Icon(Icons.more_vert),
-                      itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-                        PopupMenuItem(
-                          child: ListTile(
-                            onTap: () {
-                              Navigator.pop(context);
-                              showDialog<String>(
-                                context: context,
-                                builder: (BuildContext context) => AlertDialog(
-                                  title: Text('請選擇地點'),
-                                  content: Container(
-                                    width: double.maxFinite,
-                                    child: ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: PlaceList.length,
-                                      itemBuilder: (context, index) {
-                                        return Card(
-                                            child: ListTile(
-                                          onTap: () {
-                                            setState(() {
-                                              Placeindex = index;
-                                              Areaindex = 0;
-                                              tabController.animateTo(0);
-                                            });
+                    IconButton(
+                      icon: Icon(Icons.cloud_upload),
+                      onPressed: () {
+                        if (PlaceList[Placeindex]['todaysend']) {
+                          Fluttertoast.showToast(
+                              msg: PlaceList[Placeindex]['placeName'] +
+                                  '請退出後重新進入',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0);
+                          return;
+                        }
+                        List<dynamic> groupItemList =
+                            AreaList.map((e) => e['fireitemList'])
+                                .expand((e) => e)
+                                .toList();
 
-                                            Navigator.pop(context);
-                                          },
-                                          title: Text(PlaceList[index]
-                                                  ['placeName'] +
-                                              (PlaceList[index]['todaysend']
-                                                  ? '(已完成)'
-                                                  : '')),
-                                          subtitle: Placeindex == index
-                                              ? Text('當前選擇')
-                                              : null,
-                                        ));
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                            leading: Icon(Icons.switch_left),
-                            title: Text('切換地點'),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          child: ListTile(
-                            onTap: () {
-                              Navigator.pop(context);
-                              if (PlaceList[Placeindex]['todaysend']) {
-                                Fluttertoast.showToast(
-                                    msg: PlaceList[Placeindex]['placeName'] +
-                                        '請退出後重新進入',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 1,
-                                    backgroundColor: Colors.red,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0);
-                                return;
-                              }
-                              List<dynamic> groupItemList =
-                                  AreaList.map((e) => e['fireitemList'])
-                                      .expand((e) => e)
-                                      .toList();
 
-                              List<dynamic> sendItemList = [];
+                        List<dynamic> infoList = groupItemList.where((e) => e['inventoryStatus'] != 5).toList();
+                        if (infoList.length != 0) {
 
-                              if (groupItemList.where((e) => e['inventoryStatus'] != 5).length !=
-                                  0) {
-                                groupItemList.where((e) => e['inventoryStatus'] != 5).forEach((e) {
-                                  sendItemList.add({
+
+
+                          List<dynamic> sendItemList = infoList.map((e) => {
                                     'ItemId': e['itemId'],
-                                    'Beforechange':e['presentStatus'],
+                                    'Beforechange': e['presentStatus'],
                                     'StatusCode': e['inventoryStatus'],
-                                    'PlaceId':PlaceList[Placeindex]['placeId'],
+                                    'PlaceId': PlaceList[Placeindex]['placeId'],
                                     'UserId': GV.userinfo.name
-                                  });
-                                });
+                                  }).toList();
 
-                                showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      AlertDialog(
-                                    title: Text(
-                                        PlaceList[Placeindex]['placeName']),
-                                    content: Text('確認送出更動紀錄?'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () {
-                                          print(jsonEncode(sendItemList));
-                                          Navigator.pop(
-                                            context,
-                                          );
-                                        },
-                                        child: Text('取消'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(
-                                            context,
-                                          );
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) =>
-                                                FutureProgressDialog(
-                                                    sendInventory(sendItemList)
-                                                        .then((value) {
-                                                      Fluttertoast.showToast(
-                                                          msg: '成功新增' +
-                                                              value +
-                                                              '筆紀錄',
-                                                          toastLength: Toast
-                                                              .LENGTH_SHORT,
-                                                          gravity: ToastGravity
-                                                              .CENTER,
-                                                          timeInSecForIosWeb: 1,
-                                                          backgroundColor:
-                                                              Colors.red,
-                                                          textColor:
-                                                              Colors.white,
-                                                          fontSize: 16.0);
-                                                      PlaceList[Placeindex]
-                                                          ['todaysend'] = true;
-                                                    }),
-                                                    message: Text('資料處理中，請稍後')),
-                                          );
-                                        },
-                                        child: const Text('確定'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              } else {
-                                Fluttertoast.showToast(
-                                    msg: '未更動任何設備',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 1,
-                                    backgroundColor: Colors.red,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0);
-                              }
-                            },
-                            leading: Icon(Icons.cloud_upload),
-                            title: Text(
-                                '送出${PlaceList[Placeindex]['placeName']}更動'),
-                          ),
-                        ),
-                      ],
+
+                          showDialog<String>(
+                            context: context,
+                            builder: (BuildContext context) => AlertDialog(
+                              title: Text(PlaceList[Placeindex]['placeName']),
+                              content: Container(
+                                  width: double.maxFinite,
+                                  child: ListView.builder(
+                                      itemCount: infoList.length,
+                                      shrinkWrap: true,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return Card(
+                                          child: ListTile(
+                                            title: Text(infoList[index]['itemId']+'\n'+infoList[index]['itemName']),
+                                            subtitle: Text('更動前:'+ItemStatus[infoList[index]['presentStatus']] +'\n更動後:'+ItemStatus[infoList[index]['inventoryStatus']] ),
+                                          ),
+                                        );
+                                      })),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    print(jsonEncode(sendItemList));
+                                    Navigator.pop(
+                                      context,
+                                    );
+                                  },
+                                  child: Text('取消'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(
+                                      context,
+                                    );
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) =>
+                                          FutureProgressDialog(
+                                              sendInventory(sendItemList)
+                                                  .then((value) {
+                                                Fluttertoast.showToast(
+                                                    msg: '成功新增' + value + '筆紀錄',
+                                                    toastLength:
+                                                        Toast.LENGTH_SHORT,
+                                                    gravity:
+                                                        ToastGravity.CENTER,
+                                                    timeInSecForIosWeb: 1,
+                                                    backgroundColor: Colors.red,
+                                                    textColor: Colors.white,
+                                                    fontSize: 16.0);
+                                                PlaceList[Placeindex]
+                                                    ['todaysend'] = true;
+                                              }),
+                                              message: Text('資料處理中，請稍後')),
+                                    );
+                                  },
+                                  child: const Text('確定'),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          Fluttertoast.showToast(
+                              msg: '未更動任何設備',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0);
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -304,12 +264,12 @@ class ChangeStatusState extends State<ChangeStatus>
                           ),
                           Expanded(
                             child: ListView.builder(
-                                itemCount: ItemList.where((e) =>
-                                    e['inventoryStatus'] == 5
-                               ).length,
+                                itemCount: ItemList.where(
+                                    (e) => e['inventoryStatus'] == 5).length,
                                 itemBuilder: (context, index) {
-                                  var notchecklist = ItemList.where((e) =>
-                                      e['inventoryStatus'] == 5  ).toList();
+                                  var notchecklist = ItemList.where(
+                                          (e) => e['inventoryStatus'] == 5)
+                                      .toList();
                                   var Fireitem = notchecklist[index];
                                   return Card(
                                     child: ListTile(
@@ -346,21 +306,38 @@ class ChangeStatusState extends State<ChangeStatus>
                                                 content: SizedBox(
                                                     width: double.maxFinite,
                                                     child: ListView.builder(
-                                                      shrinkWrap: true,
-                                                        itemCount: ItemStatus.length,
-                                                        itemBuilder: (context, index) {
-                                                          return index<5? Card(
-                                                            child: ListTile(
-                                                              enabled: index==0 &&Fireitem['presentStatus']!=0 ||index!=0 && Fireitem['presentStatus']==0,
-                                                              title: Text(ItemStatus[index]),
-                                                              onTap: (){
-                                                                setState(() {
-                                                                  Fireitem['inventoryStatus']=index;
-                                                                });
-                                                                Navigator.pop(context);
-                                                              },
-                                                            ),
-                                                          ):Container();
+                                                        shrinkWrap: true,
+                                                        itemCount:
+                                                            ItemStatus.length,
+                                                        itemBuilder:
+                                                            (context, index) {
+                                                          return index < 5
+                                                              ? Card(
+                                                                  child:
+                                                                      ListTile(
+                                                                    enabled: index ==
+                                                                                0 &&
+                                                                            Fireitem['presentStatus'] !=
+                                                                                0 ||
+                                                                        index !=
+                                                                                0 &&
+                                                                            Fireitem['presentStatus'] ==
+                                                                                0,
+                                                                    title: Text(
+                                                                        ItemStatus[
+                                                                            index]),
+                                                                    onTap: () {
+                                                                      setState(
+                                                                          () {
+                                                                        Fireitem['inventoryStatus'] =
+                                                                            index;
+                                                                      });
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                    },
+                                                                  ),
+                                                                )
+                                                              : Container();
                                                         })));
                                           },
                                         );
@@ -384,18 +361,16 @@ class ChangeStatusState extends State<ChangeStatus>
                             ),
                             Expanded(
                               child: ListView.builder(
-                                  itemCount: ItemList.where((e) =>
-
-                                      e['inventoryStatus'] != 5).length,
+                                  itemCount: ItemList.where(
+                                      (e) => e['inventoryStatus'] != 5).length,
                                   itemBuilder: (context, index) {
-                                    var checklist = ItemList.where((e) =>
-
-                                        e['inventoryStatus'] != 5).toList();
+                                    var checklist = ItemList.where(
+                                            (e) => e['inventoryStatus'] != 5)
+                                        .toList();
                                     var Fireitem = checklist[index];
 
                                     return Card(
                                       child: ListTile(
-
                                         title: Text(Fireitem['itemId'] +
                                             ' ' +
                                             Fireitem['itemName']),
@@ -416,9 +391,8 @@ class ChangeStatusState extends State<ChangeStatus>
                                             ),
                                             Text(
                                               '更動後:' +
-                                                  (
-                                                      ItemStatus[Fireitem[
-                                                          'inventoryStatus']]),
+                                                  (ItemStatus[Fireitem[
+                                                      'inventoryStatus']]),
                                               style: TextStyle(
                                                   color: Fireitem['inventoryStatus'] ==
                                                               0 ||
@@ -454,7 +428,7 @@ class ChangeStatusState extends State<ChangeStatus>
                       tabs: AreaList.map((e) => Tab(
                               text: e['subArea'] +
                                   ' ' +
-                                  '(${e['fireitemList'].where((x) => x['inventoryStatus'] != 5 ).length})'))
+                                  '(${e['fireitemList'].where((x) => x['inventoryStatus'] != 5).length})'))
                           .toList()),
                 ),
               );
