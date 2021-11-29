@@ -183,7 +183,7 @@ class addplacestate extends State<addplace> {
                   return;
                 }
               },
-              icon: Icon(Icons.upload_rounded)),
+              icon: Icon(Icons.cloud_upload)),
         ],
       ),
       body: ListView.builder(
