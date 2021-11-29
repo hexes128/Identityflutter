@@ -114,7 +114,7 @@ class addplacestate extends State<addplace> {
                   showDialog<String>(
                     context: context,
                     builder: (BuildContext context) => AlertDialog(
-                      title: Text('確認新增地點?'),
+                      title: Text('確認新增'+placecontroller.text+'?'),
 
                       content: Container(
                           width: double.maxFinite,
