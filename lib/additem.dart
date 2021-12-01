@@ -227,6 +227,7 @@ class additemstate extends State<additemform> {
                   return
 
                     Card(
+                      key: UniqueKey(),
                     child: Row(children: [
                       Expanded( child: TextField(
                           controller: controllers.namecontroller,
