@@ -236,16 +236,28 @@ class additemstate extends State<additemform> {
                             filled: true,
                             hintText: '輸入設備名稱',
                           )),flex: 7,),
-                      Expanded(child: CupertinoPicker(
-                        scrollController: controllers.scrollController,
-                        children: Arealist.map(
-                                (e) => Center(child: Text(e['subArea']))).toList(),
-                        itemExtent: 50,
-                        onSelectedItemChanged: (int index) {
+                      Expanded(child:  DropdownButton<String>(
+                        value: Arealist[controllers.areaindex]['subArea'],
+                        icon: const Icon(Icons.arrow_downward),
+                        iconSize: 24,
+                        elevation: 16,
+                        style: const TextStyle(color: Colors.deepPurple),
+                        underline: Container(
+                          height: 2,
+                          color: Colors.deepPurpleAccent,
+                        ),
+                        onChanged: (String newValue) {
                           setState(() {
-
+                            controllers.areaindex = Arealist.map((e) => e['subArea']).toList().indexOf(newValue);
                           });
                         },
+                        items: Arealist.map((e) => e['subArea'].toString())
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
                       ),flex: 2,),
                       Expanded(child:    IconButton(
                         icon: Icon(Icons.delete),
@@ -291,5 +303,6 @@ class iteminput{
 
  TextEditingController namecontroller = TextEditingController();
  FixedExtentScrollController scrollController =FixedExtentScrollController() ;
+ int areaindex =0;
 
 }
