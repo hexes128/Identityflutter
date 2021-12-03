@@ -65,7 +65,7 @@ class additemstate extends State<additemform> {
               itemlist.map((e) {
 
                 return { 'ItemName':e.namecontroller.text,
-                  'StoreId':Arealist[e.scrollController.selectedItem]['storeId']};
+                  'StoreId':Arealist[e.areaindex]['storeId']};
 
               }).toList()
 
@@ -161,7 +161,7 @@ class additemstate extends State<additemform> {
                                               Text(itemlist[index].namecontroller.text),
                                               subtitle:
 
-                                              Text(  Arealist[itemlist[index].scrollController.selectedItem]['subArea'])
+                                              Text(  Arealist[itemlist[index].areaindex]['subArea'])
                                             ,
                                             ),
                                           );
