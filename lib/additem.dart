@@ -116,6 +116,7 @@ class additemstate extends State<additemform> {
 
                       setState(() {
                         Placeindex = index;
+                        itemlist.forEach((e) { e.areaindex=0;});
                       });
                     },
                   ),
@@ -242,10 +243,7 @@ class additemstate extends State<additemform> {
                         iconSize: 24,
                         elevation: 16,
                         style: const TextStyle(color: Colors.deepPurple),
-                        underline: Container(
-                          height: 2,
-                          color: Colors.deepPurpleAccent,
-                        ),
+
                         onChanged: (String newValue) {
                           setState(() {
                             controllers.areaindex = Arealist.map((e) => e['subArea']).toList().indexOf(newValue);
