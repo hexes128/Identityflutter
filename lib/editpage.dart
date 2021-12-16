@@ -46,7 +46,7 @@ class editstate extends State<editietm> {
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.140',
+              host: '140.133.78.44',
               port: 81,
               path: 'Item/placeinfo'),
           headers: {"Authorization": "Bearer $access_token"});
@@ -74,7 +74,7 @@ class editstate extends State<editietm> {
       var response = await http.post(
           Uri(
               scheme: 'http',
-              host: '140.133.78.140',
+              host: '140.133.78.44',
               port: 81,
               path: 'Item/editinfo'),
           headers: {

@@ -26,7 +26,7 @@ class addplacestate extends State<addplace> {
       var response = await http.post(
           Uri(
               scheme: 'http',
-              host: '140.133.78.140',
+              host: '140.133.78.44',
               port: 81,
               path: 'Item/addplace'),
           headers: {

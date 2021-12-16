@@ -27,7 +27,7 @@ class InventoryListState extends State<InventoryList>
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.140',
+              host: '140.133.78.44',
               port: 81,
               path: 'Item/GetItem'),
           headers: {"Authorization": "Bearer $access_token"});
@@ -89,7 +89,7 @@ class InventoryListState extends State<InventoryList>
       var response = await http.post(
           Uri(
               scheme: 'http',
-              host: '140.133.78.140',
+              host: '140.133.78.44',
               port: 81,
               path: 'Item/Inventory'),
           headers: {

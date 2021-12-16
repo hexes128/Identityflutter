@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ];
 
   _auth() async {
-    var uri = new Uri(scheme: "http", host: '140.133.78.140', port: 82);
+    var uri = new Uri(scheme: "http", host: '140.133.78.44', port: 82);
     try {
       var issuer = await Issuer.discover(uri);
       var client = new Client(issuer, "flutter");
@@ -122,7 +122,7 @@ print(GV.userinfo.email);
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.140',
+              host: '140.133.78.44',
               port: 81,
               path: 'Item/generatecodewithoutsave',queryParameters: <String,String>{'email':GV.userinfo.email}),
           headers: {"Authorization": "Bearer $access_token"});
@@ -144,7 +144,7 @@ print(GV.userinfo.email);
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.140',
+              host: '140.133.78.44',
               port: 81,
               path: 'Item/GetItem'),
           headers: {"Authorization": "Bearer $access_token"});

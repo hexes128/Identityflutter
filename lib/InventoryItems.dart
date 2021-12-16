@@ -29,7 +29,7 @@ class InventoryRecorditemState extends State<InventoryRecorditem>
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.140',
+              host: '140.133.78.44',
               port: 81,
               path: 'Item/InventoryItemrecord',
               queryParameters: {'inventoryid': '${widget.inventoryid}'}),
