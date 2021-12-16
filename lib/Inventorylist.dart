@@ -27,13 +27,15 @@ class InventoryListState extends State<InventoryList>
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '192.168.10.152',
-              port: 3000,
+              host: '140.133.78.140',
+              port: 81,
               path: 'Item/GetItem'),
           headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
-      } else {}
+      } else {
+        print('${response.statusCode}');
+      }
     } on Error catch (e) {
       throw Exception('123');
     }
@@ -87,8 +89,8 @@ class InventoryListState extends State<InventoryList>
       var response = await http.post(
           Uri(
               scheme: 'http',
-              host: '192.168.10.152',
-              port: 3000,
+              host: '140.133.78.140',
+              port: 81,
               path: 'Item/Inventory'),
           headers: {
             "Authorization": "Bearer $access_token",

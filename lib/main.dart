@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ];
 
   _auth() async {
-    var uri = new Uri(scheme: "http", host: '192.168.10.152', port: 4000);
+    var uri = new Uri(scheme: "http", host: '140.133.78.140', port: 82);
     try {
       var issuer = await Issuer.discover(uri);
       var client = new Client(issuer, "flutter");
@@ -73,6 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
       try {
         var userinfo = await c.getUserInfo();
         var tokenresponse = await c.getTokenResponse();
+        print(tokenresponse.accessToken);
         await storage.write(
             key: 'TokenResponse', value: jsonEncode(tokenresponse));
         await storage.write(key: 'UserInfo', value: jsonEncode(userinfo));
@@ -121,13 +122,15 @@ print(GV.userinfo.email);
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '192.168.10.152',
-              port: 3000,
-              path: 'Item/generatecodewithoutsave',queryParameters: <String,String>{'email':'hexes128@gmail.com'}),
+              host: '140.133.78.140',
+              port: 81,
+              path: 'Item/generatecodewithoutsave',queryParameters: <String,String>{'email':GV.userinfo.email}),
           headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
         return  '123';
-      } else {}
+      } else {
+        print('${response.statusCode}');
+      }
     } on Error catch (e) {
       throw Exception('123');
     }
@@ -141,8 +144,8 @@ print(GV.userinfo.email);
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '192.168.10.152',
-              port: 3000,
+              host: '140.133.78.140',
+              port: 81,
               path: 'Item/GetItem'),
           headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
@@ -154,6 +157,14 @@ print(GV.userinfo.email);
   }
 
 
+Future<bool> readtoken() async{
+
+    var token = await storage.read(key: 'TokenResponse');
+    if(token ==null){
+      return false;
+    }
+
+}
   @override
   Widget build(BuildContext context) {
     var images = [
@@ -172,8 +183,8 @@ print(GV.userinfo.email);
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           if (snapshot.hasData) {
             var selectfeature = arr[_selectedIndex];
-            GV.tokenResponse =
-                TokenResponse.fromJson(jsonDecode(snapshot.data));
+            GV.tokenResponse = TokenResponse.fromJson(jsonDecode(snapshot.data));
+
             return Scaffold(
               appBar: AppBar(
                   actions: [
@@ -200,6 +211,7 @@ print(GV.userinfo.email);
                       crossAxisCount: 2, childAspectRatio: 2.5),
                   itemCount: selectfeature.length,
                   itemBuilder: (BuildContext context, int index) {
+
                     return GestureDetector(
                       child: Card(
                         color: Colors.amber,

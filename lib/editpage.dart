@@ -46,8 +46,8 @@ class editstate extends State<editietm> {
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '192.168.10.152',
-              port: 3000,
+              host: '140.133.78.140',
+              port: 81,
               path: 'Item/placeinfo'),
           headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
@@ -68,15 +68,14 @@ class editstate extends State<editietm> {
     print(
         '${PlaceList[placecontroller.selectedItem]['priorityList'][areacontroller.selectedItem]['storeId']}');
 
-    // 'oldstore':,
-    // 'newstore': Arealist[areacontroller.selectedItem]['storeId'],
+
 
     try {
       var response = await http.post(
           Uri(
               scheme: 'http',
-              host: '192.168.10.152',
-              port: 3000,
+              host: '140.133.78.140',
+              port: 81,
               path: 'Item/editinfo'),
           headers: {
             "Authorization": "Bearer $access_token",
@@ -154,6 +153,7 @@ class editstate extends State<editietm> {
                     if (snapshot.hasData) {
                       PlaceList = snapshot.data;
                       Arealist = PlaceList[Placeindex]['priorityList'];
+                      var a=0;
                       Arealist.sort((a, b) =>
                           a['priorityNum'].compareTo(b['priorityNum']));
                       return Row(children: [
@@ -173,7 +173,7 @@ class editstate extends State<editietm> {
                                   print('${areacontroller.selectedItem}');
                                   Placeindex = index;
 
-                                  print('${areacontroller.selectedItem}');
+areacontroller.jumpTo(0);
                                 });
                               },
                             ),
@@ -185,7 +185,11 @@ class editstate extends State<editietm> {
                             child: CupertinoPicker(
                               scrollController: areacontroller,
                               children: Arealist.map(
-                                      (e) => Center(child: Text(e['subArea'])))
+                                      (e) {
+                                        print(e['subArea']);
+                                        return  Center(child: Text(e['subArea']));
+
+                                      })
                                   .toList(),
                               itemExtent: 50,
                               onSelectedItemChanged: (int index) {

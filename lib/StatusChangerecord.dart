@@ -30,8 +30,8 @@ class StatusRecordState extends State<StatusRecord>
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '192.168.10.152',
-              port: 3000,
+              host: '140.133.78.140',
+              port: 81,
               path: 'Item/ChangeStatusRecord'),
           headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
