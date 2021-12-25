@@ -482,7 +482,6 @@ class InventoryListState extends State<InventoryList>
 
                                   return Card(
                                       child: ListTile(
-                                    enabled: Fireitem['presentStatus'] == 0,
                                     leading: Checkbox(
                                       onChanged: (bool val) {},
                                       checkColor: Colors.white,
@@ -528,6 +527,18 @@ class InventoryListState extends State<InventoryList>
                                       ],
                                     ),
                                     onTap: () {
+                                      if (Fireitem['presentStatus'] != 0) {
+                                        Fluttertoast.showToast(
+                                            msg: '設備異常 無法勾選',
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.CENTER,
+                                            timeInSecForIosWeb: 1,
+                                            backgroundColor: Colors.red,
+                                            textColor: Colors.white,
+                                            fontSize: 16.0);
+                                        return;
+                                      }
+
                                       setState(() {
                                         switch (Fireitem['inventoryStatus']) {
                                           case (0):
@@ -543,74 +554,75 @@ class InventoryListState extends State<InventoryList>
                                         }
                                       });
                                     },
-                                    onLongPress: () {
-                                      if (Fireitem['inventoryStatus'] == 0) {
-                                        Fluttertoast.showToast(
-                                            msg: '請先取消勾選',
-                                            toastLength: Toast.LENGTH_SHORT,
-                                            gravity: ToastGravity.CENTER,
-                                            timeInSecForIosWeb: 1,
-                                            backgroundColor: Colors.red,
-                                            textColor: Colors.white,
-                                            fontSize: 16.0);
-                                      } else {
-                                        showDialog<void>(
-                                          context: context,
-                                          barrierDismissible: false,
-                                          // user must tap button!
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                                title: Text(Fireitem['itemId'] +
-                                                    ' ' +
-                                                    Fireitem['itemName']),
-                                                content: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Card(
-                                                        child: ListTile(
-                                                      title: Text('復原'),
-                                                      onTap: () {
-                                                        setState(() {
-                                                          Fireitem[
-                                                              'inventoryStatus'] = 5;
-                                                          Navigator.pop(
-                                                              context);
-                                                        });
+                                    onLongPress: Fireitem['presentStatus'] == 0
+                                        ? () {
+                                            showDialog<void>(
+                                              context: context,
+                                              barrierDismissible: false,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: Text(
+                                                      Fireitem['itemId'] +
+                                                          ' ' +
+                                                          Fireitem['itemName']),
+                                                  content: Card(
+                                                    child: ListTile(
+                                                      title: Text('備註'),
+                                                      subtitle: Text(Fireitem['Itempostscript']==null?'無':Fireitem['Itempostscript']),
+                                                    ),
+                                                  ),
+                                                  actions: Fireitem['inventoryStatus'] == 5 ?
+                                                  [
+                                                    TextButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: Text('確定')),
+
+                                                          TextButton(
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  Fireitem['inventoryStatus'] = 2;
+                                                                  Navigator.pop(context);
+                                                                });
+                                                              },
+                                                              child: Text('報修')),
+                                                          TextButton(
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  Fireitem[
+                                                                      'inventoryStatus'] = 3;
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                });
+                                                              },
+                                                              child: Text('遺失'))
+                                                        ]
+                                                      : [TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
                                                       },
-                                                    )),
-                                                    Card(
-                                                        child: ListTile(
-                                                            title: Text('報修'),
-                                                            onTap: () {
-                                                              setState(() {
-                                                                Fireitem[
-                                                                    'inventoryStatus'] = 2;
-                                                                Navigator.pop(
-                                                                    context);
-                                                              });
-                                                            })),
-                                                    Card(
-                                                        child: ListTile(
-                                                            title: Text('遺失'),
-                                                            onTap: () {
-                                                              setState(() {
-                                                                Fireitem[
-                                                                    'inventoryStatus'] = 3;
-                                                                Navigator.pop(
-                                                                    context);
-                                                              });
-                                                            }))
-                                                  ],
-                                                ));
-                                          },
-                                        );
-                                      }
-                                    },
+                                                      child: Text('確定')),
+                                                          TextButton(
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  Fireitem[
+                                                                      'inventoryStatus'] = 5;
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                });
+                                                              },
+                                                              child: Text('復原'))
+                                                        ],
+
+                                                );
+                                              },
+                                            );
+                                          }
+                                        : null,
                                   ));
                                 })
-                            :
-                        Row(
+                            : Row(
                                 children: [
                                   Expanded(
                                       flex: 1,
@@ -688,40 +700,82 @@ class InventoryListState extends State<InventoryList>
                                                         context: context,
                                                         barrierDismissible:
                                                             false,
-                                                        // user must tap button!
                                                         builder: (BuildContext
                                                             context) {
                                                           return AlertDialog(
-                                                              title: Text(Fireitem[
-                                                                      'itemId'] +
-                                                                  ' ' +
-                                                                  Fireitem[
-                                                                      'itemName']),
-                                                              content: Column(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
-                                                                children: [
-                                                                  Card(
-                                                                      child: ListTile(
-                                                                          title: Text('報修'),
-                                                                          onTap: () {
-                                                                            setState(() {
-                                                                              Fireitem['inventoryStatus'] = 2;
-                                                                              Navigator.pop(context);
-                                                                            });
-                                                                          })),
-                                                                  Card(
-                                                                      child: ListTile(
-                                                                          title: Text('遺失'),
-                                                                          onTap: () {
-                                                                            setState(() {
-                                                                              Fireitem['inventoryStatus'] = 3;
-                                                                              Navigator.pop(context);
-                                                                            });
-                                                                          }))
-                                                                ],
-                                                              ));
+                                                            title: Text(Fireitem[
+                                                                    'itemId'] +
+                                                                ' ' +
+                                                                Fireitem[
+                                                                    'itemName']),
+                                                            content: Card(
+                                                              child: ListTile(
+                                                                title:
+                                                                    Text('備註'),
+
+                                                                subtitle: Text(Fireitem['Itempostscript']==null?'無':Fireitem['Itempostscript']),
+                                                              ),
+                                                            ),
+                                                            actions: Fireitem[
+                                                                        'inventoryStatus'] ==
+                                                                    5
+                                                                ? [
+                                                                    TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                        },
+                                                                        child: Text(
+                                                                            '確定')),
+                                                                    TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          setState(
+                                                                              () {
+                                                                            Fireitem['inventoryStatus'] =
+                                                                                2;
+                                                                            Navigator.pop(context);
+                                                                          });
+                                                                        },
+                                                                        child: Text(
+                                                                            '報修')),
+                                                                    TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          setState(
+                                                                              () {
+                                                                            Fireitem['inventoryStatus'] =
+                                                                                3;
+                                                                            Navigator.pop(context);
+                                                                          });
+                                                                        },
+                                                                        child: Text(
+                                                                            '遺失'))
+                                                                  ]
+                                                                : [
+                                                                    TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                        },
+                                                                        child: Text(
+                                                                            '確定')),
+                                                                    TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          setState(
+                                                                              () {
+                                                                            Fireitem['inventoryStatus'] =
+                                                                                5;
+                                                                            Navigator.pop(context);
+                                                                          });
+                                                                        },
+                                                                        child: Text(
+                                                                            '復原'))
+                                                                  ],
+                                                          );
                                                         },
                                                       );
                                                     },
@@ -856,39 +910,46 @@ class InventoryListState extends State<InventoryList>
                                                             context: context,
                                                             barrierDismissible:
                                                                 false,
-                                                            // user must tap button!
                                                             builder:
                                                                 (BuildContext
                                                                     context) {
                                                               return AlertDialog(
-                                                                  title: Text(Fireitem[
-                                                                          'itemId'] +
-                                                                      ' ' +
-                                                                      Fireitem[
-                                                                          'itemName']),
-                                                                  content:
-                                                                      Column(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .min,
-                                                                    children: [
-                                                                      Card(
-                                                                          child:
-                                                                              ListTile(
-                                                                        title: Text(
-                                                                            '復原'),
-                                                                        onTap:
-                                                                            () {
-                                                                          setState(
-                                                                              () {
-                                                                            Fireitem['inventoryStatus'] =
-                                                                                5;
+                                                                title: Text(Fireitem[
+                                                                        'itemId'] +
+                                                                    ' ' +
+                                                                    Fireitem[
+                                                                        'itemName']),
+                                                                content: Card(
+                                                                  child:
+                                                                      ListTile(
+                                                                    title: Text(
+                                                                        '備註'),
+                                                                        subtitle: Text(Fireitem['Itempostscript']==null?'無':Fireitem['Itempostscript']),
+                                                                  ),
+                                                                ),
+                                                                actions: [
+                                                                  TextButton(
+                                                                      onPressed:
+                                                                          () {
                                                                             Navigator.pop(context);
-                                                                          });
-                                                                        },
-                                                                      )),
-                                                                    ],
-                                                                  ));
+                                                                      },
+                                                                      child: Text(
+                                                                          '確定')),
+                                                                  TextButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        setState(
+                                                                            () {
+                                                                          Fireitem['inventoryStatus'] =
+                                                                              5;
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                        });
+                                                                      },
+                                                                      child: Text(
+                                                                          '復原'))
+                                                                ],
+                                                              );
                                                             },
                                                           );
                                                         }
