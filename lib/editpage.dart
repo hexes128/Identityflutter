@@ -40,13 +40,13 @@ class editstate extends State<editietm> {
   Future<List<dynamic>> futureList;
 
   Future<List<dynamic>> _callApi() async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token =GV.info['accessToken'];
 
     try {
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
               path: 'Item/placeinfo'),
           headers: {"Authorization": "Bearer $access_token"});
@@ -61,7 +61,7 @@ class editstate extends State<editietm> {
   TextEditingController namecontroller;
 
   Future<String> sendnewitem() async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token =GV.info['accessToken'];
 
     print(
         '${PlaceList[widget.initialplace]['priorityList'][widget.initialarea]['storeId']}');
@@ -74,7 +74,7 @@ class editstate extends State<editietm> {
       var response = await http.post(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
               path: 'Item/editinfo'),
           headers: {
@@ -89,7 +89,7 @@ class editstate extends State<editietm> {
                 [widget.initialarea]['storeId'],
             'newstore': PlaceList[placecontroller.selectedItem]['priorityList']
                 [areacontroller.selectedItem]['storeId'],
-            'UserId': GV.userinfo.name
+            'UserId': GV.info['name']
           }));
 
       if (response.statusCode == 200) {

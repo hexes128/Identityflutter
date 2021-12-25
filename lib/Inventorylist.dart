@@ -21,13 +21,13 @@ class InventoryListState extends State<InventoryList>
   ScanController scanController = ScanController();
 
   Future<List<dynamic>> _callApi() async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token = GV.info['accessToken'];
 
     try {
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
               path: 'Item/GetItem'),
           headers: {"Authorization": "Bearer $access_token"});
@@ -83,13 +83,13 @@ class InventoryListState extends State<InventoryList>
   }
 
   Future<String> sendInventory(List<dynamic> iteminfo) async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token = GV.info['accessToken'];
 
     try {
       var response = await http.post(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
               path: 'Item/Inventory'),
           headers: {
@@ -97,7 +97,7 @@ class InventoryListState extends State<InventoryList>
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(<String, dynamic>{
-            'UserId': GV.userinfo.name,
+            'UserId': GV.info['name'],
             'PlaceId': PlaceList[Placeindex]['placeId'],
             'InventoryItemList': iteminfo
           }));
@@ -157,8 +157,7 @@ class InventoryListState extends State<InventoryList>
                         ),
                       ),
                       Expanded(
-                        child: Text(
-                            AreaList[Areaindex]['subArea'] ),
+                        child: Text(AreaList[Areaindex]['subArea']),
                       )
                     ],
                   ),

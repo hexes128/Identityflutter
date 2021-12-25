@@ -5,23 +5,19 @@ import 'package:identityflutter/Inventorydate.dart';
 import 'package:identityflutter/StatusChangerecord.dart';
 import 'package:identityflutter/additem.dart';
 import 'package:identityflutter/addplace.dart';
-
 import 'Inventorylist.dart';
 import 'editinforecord.dart';
 import 'edititeminfolist.dart';
-import 'twst.dart';
-import 'dart:io';
-import 'dart:ui';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:openid_client/openid_client_io.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'Dashboard.dart';
 import 'GlobalVariable.dart' as GV;
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_appauth/flutter_appauth.dart';
 
 void main() => runApp(MyApp());
 
@@ -48,64 +44,98 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final storage = new FlutterSecureStorage();
+  final FlutterAppAuth _appAuth = FlutterAppAuth();
 
   int _selectedIndex = 0;
 
   var arr = [
     ['個人資料', '隊員管理'],
-    ['設備盤點', '設備狀態異動', '新增設備', '編輯設備資訊','新增地點'],
+    ['設備盤點', '設備狀態異動', '新增設備', '編輯設備資訊', '新增地點'],
     ['盤點紀錄', '狀態異動紀錄', '資訊編輯紀錄', '寄出盤點碼(長按)']
   ];
 
-  _auth() async {
-    var uri = new Uri(scheme: "http", host: '140.133.78.44', port: 82);
+
+
+  Future<void> _signInWithAutoCodeExchange() async {
     try {
-      var issuer = await Issuer.discover(uri);
-      var client = new Client(issuer, "flutter");
+      final AuthorizationTokenResponse result =
+          await _appAuth.authorizeAndExchangeCode(
+        AuthorizationTokenRequest(
+          'flutter2',
+          'com.firedepartment.apps.flutter2:/oauth2redirect',
+          serviceConfiguration: AuthorizationServiceConfiguration(
+            authorizationEndpoint:
+                'http://140.133.78.140:82/connect/authorize',
+            tokenEndpoint: 'http://140.133.78.140:82/connect/token',
+            endSessionEndpoint: 'http://140.133.78.140:82/connect/endsession',
+          ),
+          scopes: [
+            'profile',
+            'openid',
+            'IdentityServerApi',
+            'API',
+            'email',
+            'offline_access'
+          ],
+          allowInsecureConnections: true,
+          preferEphemeralSession: false,
+          promptValues: ['login'],
+        ),
+      );
 
-      var authenticator = new Authenticator(client,
-          scopes: ['profile', 'openid', 'IdentityServerApi', 'API', 'email'],
-          port: 4000,
-          urlLancher: urlLauncher);
+      if (result != null) {
+        final http.Response httpResponse = await http.get(
+            Uri.parse('http://140.133.78.140:82/connect/userinfo'),
+            headers: <String, String>{'Authorization': 'Bearer ${result.accessToken}'});
+if(httpResponse.statusCode==200){
+  print(httpResponse.body);
+  var userinfo = jsonDecode(httpResponse.body);
+  await storage.deleteAll();
+  await storage.write(key: 'name', value: userinfo['name']);
+  await storage.write(key: 'email', value: userinfo['email']);
+  await storage.write(key: 'website', value: userinfo['website']);
+  await storage.write(key: 'accessToken', value: result.accessToken);
+  await storage.write(key: 'refreshToken', value: result.refreshToken);
+  await storage.write(key: 'accessTokenExpirationDateTime', value: result.accessTokenExpirationDateTime.toString());
+  await storage.write(key: 'idToken', value: result.idToken);
+setState(() {
 
-      var c = await authenticator.authorize();
+});
+}
 
-      try {
-        var userinfo = await c.getUserInfo();
-        var tokenresponse = await c.getTokenResponse();
-        print(tokenresponse.accessToken);
-        await storage.write(
-            key: 'TokenResponse', value: jsonEncode(tokenresponse));
-        await storage.write(key: 'UserInfo', value: jsonEncode(userinfo));
-        var logouturl = c
-            .generateLogoutUrl(
-                redirectUri: Uri(scheme: 'http', host: 'localhost', port: 4000))
-            .toString(); //獲取登出網址
-        await storage.write(key: 'logouturl', value: logouturl);
-        setState(() {});
-        //登入成功並獲取userinfo
-      } catch (e) {
-        //取消登入
+
       }
-    } catch (error) {
-      //超時
-
+    } catch (_) {
+      print(_.toString());
     }
-    closeWebView();
   }
 
-  Future<void> _logout() async {
-    var logouturl = await storage.read(key: 'logouturl');
-    if (await canLaunch(logouturl)) {
-      await launch(logouturl, forceWebView: true, enableJavaScript: true);
-      Future.delayed(Duration(milliseconds: 500));
 
+
+
+  Future<void> _logout() async {
+
+    try {
       await storage.deleteAll();
 
-      setState(() {});
-    } else {
-      throw 'Could not launch $logouturl';
+      await _appAuth.endSession(EndSessionRequest(
+          idTokenHint:GV. info['idToken'],
+          postLogoutRedirectUrl: 'com.firedepartment.apps.flutter2:/oauth2redirect',
+          serviceConfiguration: AuthorizationServiceConfiguration(
+            authorizationEndpoint: 'http://140.133.78.140:82/connect/authorize',
+            tokenEndpoint: 'http://140.133.78.140:82/connect/token',
+            endSessionEndpoint: 'http://140.133.78.140:82/connect/endsession',
+          )));
+      await storage.deleteAll();
+      setState(() {
+
+
+
+      });
+    } catch (e) {
+print(e.toString());
     }
+
   }
 
   urlLauncher(String url) async {
@@ -115,19 +145,21 @@ class _MyHomePageState extends State<MyHomePage> {
       throw 'Could not launch $url';
     }
   }
+
   Future<String> sendemail() async {
-    var access_token = GV.tokenResponse.accessToken;
-print(GV.userinfo.email);
+    var access_token = GV.info['accessToken'];
+
     try {
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
-              path: 'Item/generatecodewithoutsave',queryParameters: <String,String>{'email':GV.userinfo.email}),
+              path: 'Item/generatecodewithoutsave',
+              queryParameters: <String, String>{'email':GV.info['email']}),
           headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
-        return  '123';
+        return '123';
       } else {
         print('${response.statusCode}');
       }
@@ -137,34 +169,8 @@ print(GV.userinfo.email);
     return ('123');
   }
 
-  Future<String> _callApi() async {
-    var access_token = GV.tokenResponse.accessToken;
-
-    try {
-      var response = await http.get(
-          Uri(
-              scheme: 'http',
-              host: '140.133.78.44',
-              port: 81,
-              path: 'Item/GetItem'),
-          headers: {"Authorization": "Bearer $access_token"});
-      if (response.statusCode == 200) {
-        return response.body;
-      } else {}
-    } on Error catch (e) {
-      throw Exception('123');
-    }
-  }
 
 
-Future<bool> readtoken() async{
-
-    var token = await storage.read(key: 'TokenResponse');
-    if(token ==null){
-      return false;
-    }
-
-}
   @override
   Widget build(BuildContext context) {
     var images = [
@@ -178,13 +184,13 @@ Future<bool> readtoken() async{
       'images/7.jpg',
       'images/8.jpg'
     ];
-    return FutureBuilder<String>(
-        future: storage.read(key: 'TokenResponse'),
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-          if (snapshot.hasData) {
+    return FutureBuilder<Map<String,String>>(
+        future: storage.readAll(),
+        builder: (BuildContext context, AsyncSnapshot<Map<String,String>> snapshot) {
+          if (snapshot.hasData && snapshot.data.isNotEmpty) {
             var selectfeature = arr[_selectedIndex];
-            GV.tokenResponse = TokenResponse.fromJson(jsonDecode(snapshot.data));
-
+GV.info=snapshot.data;
+print(snapshot.data['idToken']);
             return Scaffold(
               appBar: AppBar(
                   actions: [
@@ -194,24 +200,15 @@ Future<bool> readtoken() async{
                         },
                         icon: Icon(Icons.logout))
                   ],
-                  title: FutureBuilder<String>(
-                      future: storage.read(key: 'UserInfo'),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<String> snapshot) {
-                        if (snapshot.hasData) {
-                          GV.userinfo =
-                              UserInfo.fromJson(jsonDecode(snapshot.data));
-                          return Text('歡迎 ${GV.userinfo.name}');
-                        } else {
-                          return Text('讀取中');
-                        }
-                      })),
+                  title:
+                  Text('歡迎 ${GV.info['name']}')
+
+          ),
               body: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2, childAspectRatio: 2.5),
                   itemCount: selectfeature.length,
                   itemBuilder: (BuildContext context, int index) {
-
                     return GestureDetector(
                       child: Card(
                         color: Colors.amber,
@@ -280,39 +277,37 @@ Future<bool> readtoken() async{
                               break;
                             }
 
-                          case('編輯設備資訊'):{
-                            Navigator.push(
-                              //從登入push到第二個
-                              context,
-                              new MaterialPageRoute(
-                                  builder: (context) => editinfolist()),
-                            );
-                            break;
+                          case ('編輯設備資訊'):
+                            {
+                              Navigator.push(
+                                //從登入push到第二個
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => editinfolist()),
+                              );
+                              break;
+                            }
 
-
-                          }
-
-
-                          case('新增地點'):{
-                            Navigator.push(
-                              //從登入push到第二個
-                              context,
-                              new MaterialPageRoute(
-                                  builder: (context) => addplace()),
-                            );
-                            break;
-                          }
-                          case('資訊編輯紀錄'):{
-                            Navigator.push(
-                              //從登入push到第二個
-                              context,
-                              new MaterialPageRoute(
-                                  builder: (context) => EditinfoRecord()),
-                            );
-                            break;
-
-
-                          }
+                          case ('新增地點'):
+                            {
+                              Navigator.push(
+                                //從登入push到第二個
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => addplace()),
+                              );
+                              break;
+                            }
+                          case ('資訊編輯紀錄'):
+                            {
+                              Navigator.push(
+                                //從登入push到第二個
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => EditinfoRecord()),
+                              );
+                              break;
+                            }
                         }
                       },
                       onLongPress: () {
@@ -329,7 +324,6 @@ Future<bool> readtoken() async{
                                       backgroundColor: Colors.red,
                                       textColor: Colors.white,
                                       fontSize: 16.0);
-
                                 }),
                                 message: Text('資料處理中，請稍後')),
                           );
@@ -405,7 +399,7 @@ Future<bool> readtoken() async{
                           borderRadius: BorderRadius.circular(20)),
                       child: FlatButton(
                         onPressed: () {
-                          _auth();
+                          _signInWithAutoCodeExchange();
                         },
                         child: Text(
                           '登入',

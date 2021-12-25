@@ -23,13 +23,13 @@ class editinfostate extends State<editinfolist>
   ScanController scanController = ScanController();
 
   Future<List<dynamic>> _callApi() async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token =GV.info['accessToken'];
 
     try {
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
               path: 'Item/GetItem'),
           headers: {"Authorization": "Bearer $access_token"});

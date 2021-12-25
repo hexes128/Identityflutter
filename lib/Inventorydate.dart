@@ -21,13 +21,13 @@ class InventoryRecord extends StatefulWidget {
 class InventoryRecordState extends State<InventoryRecord>
     with TickerProviderStateMixin {
   Future<List<dynamic>> _callApi() async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token =GV.info['accessToken'];
 
     try {
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
               path: 'Item/inventoryrecord'),
           headers: {"Authorization": "Bearer $access_token"});

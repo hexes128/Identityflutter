@@ -21,13 +21,13 @@ class ChangeStatusState extends State<ChangeStatus>
   ScanController scanController = ScanController();
 
   Future<List<dynamic>> _callApi() async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token =GV.info['accessToken'];
 
     try {
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
               path: 'Item/GetItem'),
           headers: {"Authorization": "Bearer $access_token"});
@@ -79,13 +79,13 @@ class ChangeStatusState extends State<ChangeStatus>
   }
 
   Future<String> sendInventory(List<dynamic> iteminfo) async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token =GV.info['accessToken'];
 
     try {
       var response = await http.post(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
               path: 'Item/ChangeStatus'),
           headers: {
@@ -174,7 +174,7 @@ class ChangeStatusState extends State<ChangeStatus>
                                     'Beforechange': e['presentStatus'],
                                     'StatusCode': e['inventoryStatus'],
                                     'PlaceId': PlaceList[Placeindex]['placeId'],
-                                    'UserId': GV.userinfo.name
+                                    'UserId': GV.info['name']
                                   }).toList();
 
 

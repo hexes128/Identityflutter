@@ -20,13 +20,13 @@ class addplacestate extends State<addplace> {
   List<TextEditingController> controllerlist = [];
 
   Future<String> sendInventory() async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token =GV.info['accessToken'];
 
     try {
       var response = await http.post(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
               path: 'Item/addplace'),
           headers: {

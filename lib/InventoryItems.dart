@@ -23,13 +23,13 @@ var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤�
 class InventoryRecorditemState extends State<InventoryRecorditem>
     with TickerProviderStateMixin {
   Future<List<dynamic>> _callApi() async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token =GV.info['accessToken'];
 
     try {
       var response = await http.get(
           Uri(
               scheme: 'http',
-              host: '140.133.78.44',
+              host: '140.133.78.140',
               port: 81,
               path: 'Item/InventoryItemrecord',
               queryParameters: {'inventoryid': '${widget.inventoryid}'}),
