@@ -27,7 +27,7 @@ class additemstate extends State<additemform> {
   Future<List<dynamic>> futureList;
 
   Future<List<dynamic>> _callApi() async {
-    var access_token = GV.tokenResponse.accessToken;
+    var access_token = GV.info['accessToken'];
 
     try {
       var response = await http.get(
@@ -61,15 +61,14 @@ class additemstate extends State<additemform> {
             "Authorization": "Bearer $access_token",
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: jsonEncode(
-              itemlist.map((e) {
-
-                return { 'ItemName':e.namecontroller.text,
-                  'StoreId':Arealist[e.areaindex]['storeId']};
-
-              }).toList()
-
-          ));
+          body: jsonEncode(itemlist.map((e) {
+            return {
+              'ItemName': e.namecontroller.text,
+              'postscript':
+                  e.addpostscript ? e.postscriptcontroller.text : null,
+              'StoreId': Arealist[e.areaindex]['storeId']
+            };
+          }).toList()));
 
       if (response.statusCode == 200) {
         return response.body;
@@ -103,20 +102,19 @@ class additemstate extends State<additemform> {
           PlaceList = snapshot.data;
           Arealist = PlaceList[Placeindex]['priorityList'];
 
-          Arealist.sort((a, b) =>
-              a['priorityNum'].compareTo(b['priorityNum']));
+          Arealist.sort((a, b) => a['priorityNum'].compareTo(b['priorityNum']));
           return Scaffold(
               appBar: AppBar(
                   title: CupertinoPicker(
-
                     children: PlaceList.map(
                         (e) => Center(child: Text(e['placeName']))).toList(),
                     itemExtent: 50,
                     onSelectedItemChanged: (int index) {
-
                       setState(() {
                         Placeindex = index;
-                        itemlist.forEach((e) { e.areaindex=0;});
+                        itemlist.forEach((e) {
+                          e.areaindex = 0;
+                        });
                       });
                     },
                   ),
@@ -128,12 +126,14 @@ class additemstate extends State<additemform> {
                           });
                         },
                         icon: Icon(Icons.add)),
-
                     IconButton(
                         onPressed: () {
-
                           if (itemlist.length > 0) {
-                            if (itemlist.map((e) => e.namecontroller.text).where((e) => e.isEmpty).length > 0) {
+                            if (itemlist
+                                    .map((e) => e.namecontroller.text)
+                                    .where((e) => e.isEmpty)
+                                    .length >
+                                0) {
                               Fluttertoast.showToast(
                                   msg: '尚有設備名稱未填寫',
                                   toastLength: Toast.LENGTH_SHORT,
@@ -148,21 +148,21 @@ class additemstate extends State<additemform> {
                               context: context,
                               builder: (BuildContext context) => AlertDialog(
                                 title: Text('確認以下設備?'),
-
                                 content: Container(
                                     width: double.maxFinite,
                                     child: ListView.builder(
                                         itemCount: itemlist.length,
                                         shrinkWrap: true,
-                                        itemBuilder: (BuildContext context, int index) {
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
                                           return Card(
                                             child: ListTile(
-                                              title:
-                                              Text(itemlist[index].namecontroller.text),
-                                              subtitle:
-
-                                              Text(  Arealist[itemlist[index].areaindex]['subArea'])
-                                            ,
+                                              title: Text(itemlist[index]
+                                                  .namecontroller
+                                                  .text),
+                                              subtitle: Text(Arealist[
+                                                      itemlist[index].areaindex]
+                                                  ['subArea']),
                                             ),
                                           );
                                         })),
@@ -184,25 +184,21 @@ class additemstate extends State<additemform> {
                                         context: context,
                                         builder: (context) =>
                                             FutureProgressDialog(
-                                                sendnewitem()
-                                                    .then((value) {
+                                                sendnewitem().then((value) {
                                                   Fluttertoast.showToast(
                                                       msg: value,
-                                                      toastLength: Toast
-                                                          .LENGTH_SHORT,
-                                                      gravity: ToastGravity
-                                                          .CENTER,
+                                                      toastLength:
+                                                          Toast.LENGTH_SHORT,
+                                                      gravity:
+                                                          ToastGravity.CENTER,
                                                       timeInSecForIosWeb: 1,
                                                       backgroundColor:
-                                                      Colors.red,
-                                                      textColor:
-                                                      Colors.white,
+                                                          Colors.red,
+                                                      textColor: Colors.white,
                                                       fontSize: 16.0);
-
                                                 }),
                                                 message: Text('資料處理中，請稍後')),
                                       );
-
                                     },
                                     child: const Text('確定'),
                                   ),
@@ -225,52 +221,101 @@ class additemstate extends State<additemform> {
                   ]),
               body: ListView(
                 children: itemlist.map((controllers) {
-                  return
-
-                    Card(
+                  return Dismissible(
+                      onDismissed: (direction) {
+                        setState(() {
+                          itemlist.remove(controllers);
+                        });
+                      },
                       key: UniqueKey(),
-                    child: Row(children: [
-                      Expanded( child: TextField(
-                          controller: controllers.namecontroller,
-                          decoration: InputDecoration(
-                            fillColor: Colors.white,
-                            filled: true,
-                            hintText: '輸入設備名稱',
-                          )),flex: 7,),
-                      Expanded(child:  DropdownButton<String>(
-                        value: Arealist[controllers.areaindex]['subArea'],
-                        icon: const Icon(Icons.arrow_downward),
-                        iconSize: 24,
-                        elevation: 16,
-                        style: const TextStyle(color: Colors.deepPurple),
+                      child: Card(
+                        key: UniqueKey(),
+                        child: Row(children: [
+                          Expanded(
+                            child: Column(
+                                children: controllers.addpostscript
+                                    ? [
+                                        TextField(
+                                            controller:
+                                                controllers.namecontroller,
+                                            decoration: InputDecoration(
+                                              fillColor: Colors.white,
+                                              filled: true,
+                                              hintText: '輸入設備名稱',
+                                            )),
+                                        TextField(
+                                            keyboardType:
+                                                TextInputType.multiline,
+                                            maxLines: null,
+                                            controller: controllers
+                                                .postscriptcontroller,
+                                            decoration: InputDecoration(
+                                              fillColor: Colors.white,
+                                              filled: true,
+                                              hintText: '輸入備註',
+                                            )),
+                                      ]
+                                    : [
+                                        TextField(
+                                            controller:
+                                                controllers.namecontroller,
+                                            decoration: InputDecoration(
+                                              fillColor: Colors.white,
+                                              filled: true,
+                                              hintText: '輸入設備名稱',
+                                            ))
+                                      ]),
+                            flex: 5,
+                          ),
+                          Expanded(
+                            child: Column(children: [
+                              Text('存放區'),
+                              DropdownButton<String>(
+                                value: Arealist[controllers.areaindex]
+                                    ['subArea'],
+                                iconSize: 24,
+                                elevation: 16,
+                                style:
+                                    const TextStyle(color: Colors.deepPurple),
+                                onChanged: (String newValue) {
+                                  setState(() {
+                                    controllers.areaindex =
+                                        Arealist.map((e) => e['subArea'])
+                                            .toList()
+                                            .indexOf(newValue);
+                                  });
+                                },
+                                items:
+                                    Arealist.map((e) => e['subArea'].toString())
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              )
+                            ]),
+                            flex: 3,
+                          ),
+                          Expanded(
+                            child: Column(children: [
+                              Text('新增備註'),
+                              Checkbox(
+                                checkColor: Colors.white,
+                                value: controllers.addpostscript,
+                                onChanged: (bool value) {
+                                  setState(() {
+                                    controllers.addpostscript = value;
+                                  });
+                                },
+                              )
+                            ]),
+                            flex: 2,
+                          ),
 
-                        onChanged: (String newValue) {
-                          setState(() {
-                            controllers.areaindex = Arealist.map((e) => e['subArea']).toList().indexOf(newValue);
-                          });
-                        },
-                        items: Arealist.map((e) => e['subArea'].toString())
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                      ),flex: 2,),
-                      Expanded(child:    IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          setState(() {
-                            itemlist.remove(controllers);
-
-                          });
-                        },
-                      ),flex:1 ),
-
-
-
-                    ]),
-                  );
+                        ]),
+                      ));
                 }).toList(),
               ));
         } else if (snapshot.hasError) {
@@ -297,10 +342,12 @@ class additemstate extends State<additemform> {
     );
   }
 }
-class iteminput{
 
- TextEditingController namecontroller = TextEditingController();
- FixedExtentScrollController scrollController =FixedExtentScrollController() ;
- int areaindex =0;
+class iteminput {
+  TextEditingController namecontroller = TextEditingController();
+  TextEditingController postscriptcontroller = TextEditingController();
+  FixedExtentScrollController scrollController = FixedExtentScrollController();
 
+  int areaindex = 0;
+  bool addpostscript = false;
 }
