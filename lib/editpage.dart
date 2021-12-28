@@ -29,6 +29,7 @@ class editstate extends State<editietm> {
     super.initState();
     futureList = _callApi();
     namecontroller = TextEditingController(text: widget.Fireitem['itemName']);
+    postscriptcontroller = TextEditingController(text: widget.Fireitem['postscript']);
     Areaindex = widget.initialarea;
     Placeindex = widget.initialplace;
     areacontroller =
@@ -40,7 +41,7 @@ class editstate extends State<editietm> {
   Future<List<dynamic>> futureList;
 
   Future<List<dynamic>> _callApi() async {
-    var access_token =GV.info['accessToken'];
+    var access_token = GV.info['accessToken'];
 
     try {
       var response = await http.get(
@@ -59,16 +60,14 @@ class editstate extends State<editietm> {
   }
 
   TextEditingController namecontroller;
-
+  TextEditingController postscriptcontroller;
   Future<String> sendnewitem() async {
-    var access_token =GV.info['accessToken'];
+    var access_token = GV.info['accessToken'];
 
     print(
         '${PlaceList[widget.initialplace]['priorityList'][widget.initialarea]['storeId']}');
     print(
         '${PlaceList[placecontroller.selectedItem]['priorityList'][areacontroller.selectedItem]['storeId']}');
-
-
 
     try {
       var response = await http.post(
@@ -89,7 +88,8 @@ class editstate extends State<editietm> {
                 [widget.initialarea]['storeId'],
             'newstore': PlaceList[placecontroller.selectedItem]['priorityList']
                 [areacontroller.selectedItem]['storeId'],
-            'UserId': GV.info['name']
+            'UserId': GV.info['name'],
+            'postscript':postscriptcontroller.text.trim()
           }));
 
       if (response.statusCode == 200) {
@@ -132,163 +132,228 @@ class editstate extends State<editietm> {
       appBar: AppBar(
         title: Text('新增設備'),
       ),
-      body: Column(
+      body:
+
+      Column(
         children: [
-          Flexible(
-            child: Column(
-              children: [
-                Text(widget.Fireitem['itemId']),
-                TextField(
-                  controller: namecontroller,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(), hintText: '設備名稱'),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(16.0),
-                ),
-                FutureBuilder<List<dynamic>>(
-                  future: futureList,
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<dynamic>> snapshot) {
-                    if (snapshot.hasData) {
-                      PlaceList = snapshot.data;
-                      Arealist = PlaceList[Placeindex]['priorityList'];
-                      var a=0;
-                      Arealist.sort((a, b) =>
-                          a['priorityNum'].compareTo(b['priorityNum']));
-                      return Row(children: [
-                        Expanded(
-                          child: Text('存放地'),
-                          flex: 1,
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: CupertinoPicker(
-                              scrollController: placecontroller,
-                              children: PlaceList.map((e) =>
-                                  Center(child: Text(e['placeName']))).toList(),
-                              itemExtent: 50,
-                              onSelectedItemChanged: (int index) {
-                                setState(() {
-                                  print('${areacontroller.selectedItem}');
-                                  Placeindex = index;
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Column(
+                children: [
+                  Text(widget.Fireitem['itemId']),
+                  TextField(
+                    controller: namecontroller,
+                    decoration: const InputDecoration(
+                        border: OutlineInputBorder(), hintText: '設備名稱'),
+                  ),
+                  TextField(
+                    keyboardType:
+                    TextInputType.multiline,
+                    maxLines: null,
+                    controller: postscriptcontroller,
+                    decoration: const InputDecoration(
 
-areacontroller.jumpTo(0);
-                                });
-                              },
-                            ),
+                        border: OutlineInputBorder(), hintText: '備註'),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(16.0),
+                  ),
+                  FutureBuilder<List<dynamic>>(
+                    future: futureList,
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<dynamic>> snapshot) {
+                      if (snapshot.hasData) {
+                        PlaceList = snapshot.data;
+                        Arealist = PlaceList[Placeindex]['priorityList'];
+                        var a = 0;
+                        Arealist.sort((a, b) =>
+                            a['priorityNum'].compareTo(b['priorityNum']));
+                        return Row(children: [
+                          Expanded(
+                            child: Text('存放地'),
+                            flex: 1,
                           ),
-                          flex: 2,
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: CupertinoPicker(
-                              scrollController: areacontroller,
-                              children: Arealist.map(
-                                      (e) {
-                                        print(e['subArea']);
-                                        return  Center(child: Text(e['subArea']));
+                          Expanded(
+                            child: Center(
+                              child: CupertinoPicker(
+                                scrollController: placecontroller,
+                                children: PlaceList.map((e) =>
+                                    Center(child: Text(e['placeName']))).toList(),
+                                itemExtent: 50,
+                                onSelectedItemChanged: (int index) {
+                                  setState(() {
+                                    print('${areacontroller.selectedItem}');
+                                    Placeindex = index;
 
-                                      })
-                                  .toList(),
-                              itemExtent: 50,
-                              onSelectedItemChanged: (int index) {
-                                setState(() {
-                                  Areaindex = index;
-                                });
-                              },
+                                    areacontroller.jumpTo(0);
+                                  });
+                                },
+                              ),
                             ),
+                            flex: 2,
                           ),
-                          flex: 2,
-                        ),
-                      ]);
-                    } else if (snapshot.hasError) {
-                      return Text('錯誤');
-                    } else {
-                      return Text('讀取資料中');
-                    }
-                  },
-                ),
-              ],
-            ),
-            flex: 1,
-          ),
-          Flexible(
-            child: Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 20.0),
-                  height: 50,
-                  width: 250,
-                  decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(20)),
-                  child: FlatButton(
-                    onPressed: () {
-                      setState(() {
-                        namecontroller = TextEditingController(
-                            text: widget.Fireitem['itemName']);
-                        Areaindex = widget.initialarea;
-                        Placeindex = widget.initialplace;
-
-                        placecontroller.animateToItem(widget.initialplace,
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.ease);
-                        areacontroller.animateToItem(widget.initialarea,
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.ease);
-                      });
+                          Expanded(
+                            child: Center(
+                              child: CupertinoPicker(
+                                scrollController: areacontroller,
+                                children: Arealist.map((e) {
+                                  print(e['subArea']);
+                                  return Center(child: Text(e['subArea']));
+                                }).toList(),
+                                itemExtent: 50,
+                                onSelectedItemChanged: (int index) {
+                                  setState(() {
+                                    Areaindex = index;
+                                  });
+                                },
+                              ),
+                            ),
+                            flex: 2,
+                          ),
+                        ]);
+                      } else if (snapshot.hasError) {
+                        return Text('錯誤');
+                      } else {
+                        return Text('讀取資料中');
+                      }
                     },
-                    child: Text(
-                      '復原',
-                      style: TextStyle(color: Colors.white, fontSize: 25),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 20.0),
+                    height: 50,
+                    width: 250,
+                    decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(20)),
+                    child: FlatButton(
+                      onPressed: () {
+                        setState(() {
+                          namecontroller = TextEditingController(
+                              text: widget.Fireitem['itemName']);
+                          postscriptcontroller = TextEditingController(
+                              text: widget.Fireitem['postscript']);
+                          Areaindex = widget.initialarea;
+                          Placeindex = widget.initialplace;
+
+                          placecontroller.animateToItem(widget.initialplace,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.ease);
+                          areacontroller.animateToItem(widget.initialarea,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.ease);
+                        });
+                      },
+                      child: Text(
+                        '復原',
+                        style: TextStyle(color: Colors.white, fontSize: 25),
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 20.0),
-                  height: 50,
-                  width: 250,
-                  decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(20)),
-                  child: FlatButton(
-                    onPressed: () async {
-                      if (namecontroller.text.trim().isEmpty) {
-                        Fluttertoast.showToast(
-                            msg: '名稱不可空白',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.CENTER,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: Colors.red,
-                            textColor: Colors.white,
-                            fontSize: 16.0);
-                        return;
-                      }
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 20.0),
+                    height: 50,
+                    width: 250,
+                    decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(20)),
+                    child: FlatButton(
+                      onPressed: () async {
+                        if (namecontroller.text.trim().isEmpty) {
+                          Fluttertoast.showToast(
+                              msg: '名稱不可空白',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0);
+                          return;
+                        }
+print(postscriptcontroller.text.trim());
+            print( widget.Fireitem['postscript']);
+                        if (Areaindex == widget.initialarea &&
+                            Placeindex == widget.initialplace &&
+                            namecontroller.text.trim() == widget.Fireitem['itemName']&&widget.Fireitem['postscript'].toString().trim()==postscriptcontroller.text.trim()) {
+                          Fluttertoast.showToast(
+                              msg: '無任何更動',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0);
+                          return;
+                        }
 
-                      if (Areaindex == widget.initialarea &&
-                          Placeindex == widget.initialplace &&
-                          namecontroller.text.trim() ==
-                              widget.Fireitem['itemName']) {
-                        Fluttertoast.showToast(
-                            msg: '無任何更動',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.CENTER,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: Colors.red,
-                            textColor: Colors.white,
-                            fontSize: 16.0);
-                        return;
-                      }
-
-                      if (placecontroller.selectedItem != widget.initialplace) {
+                        if (placecontroller.selectedItem != widget.initialplace) {
+                          bool keepgo = false;
+                          await showDialog<bool>(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (BuildContext context) => AlertDialog(
+                              title: Text('警告'),
+                              content: Text('更改設備地點將會刪除本設備先前相關紀錄\n確定更改?'),
+                              actions: <Widget>[
+                                FlatButton(
+                                    child: Text('Cancel'),
+                                    onPressed: () {
+                                      Navigator.pop(context, false);
+                                    }),
+                                FlatButton(
+                                    child: Text('Ok'),
+                                    onPressed: () {
+                                      Navigator.pop(context, true);
+                                    })
+                              ],
+                            ),
+                          ).then((value) {
+                            keepgo = value;
+                          });
+                          if (!keepgo) {
+                            return;
+                          }
+                        }
                         bool keepgo = false;
                         await showDialog<bool>(
                           barrierDismissible: false,
                           context: context,
                           builder: (BuildContext context) => AlertDialog(
-                            title: Text('警告'),
-                            content: Text('更改設備地點將會刪除本設備先前相關紀錄\n確定更改?'),
+                            title: Text('確定送出以下變更?'),
+                            content:
+                            Column(mainAxisSize: MainAxisSize.min, children: [
+                              Card(
+                                  child: ListTile(
+                                    title: Text('更動前'),
+                                    subtitle: Text('設備名稱:' +
+                                        widget.Fireitem['itemName'] +
+                                        '\n地點:' +
+                                        PlaceList[widget.initialplace]['placeName'] +
+                                        '\n區域:' +
+                                        PlaceList[widget.initialplace]['priorityList']
+
+                                        [widget.initialarea]['subArea']+'\n備註'+
+                                        widget.Fireitem['postscript']),
+                                  )),
+                              Card(
+                                  child: ListTile(
+                                    title: Text('更動後'),
+                                    subtitle: Text('設備名稱:' +
+                                        namecontroller.text +
+                                        '\n地點:' +
+                                        PlaceList[placecontroller.selectedItem]
+                                        ['placeName'] +
+                                        '\n區域:' +
+                                        PlaceList[placecontroller.selectedItem]
+                                        ['priorityList']
+                                        [areacontroller.selectedItem]['subArea']+'\n備註'+
+                                    postscriptcontroller.text.trim()),
+                                  ))
+                            ]),
                             actions: <Widget>[
                               FlatButton(
                                   child: Text('Cancel'),
@@ -308,87 +373,39 @@ areacontroller.jumpTo(0);
                         if (!keepgo) {
                           return;
                         }
-                      }
-                      bool keepgo = false;
-                      await showDialog<bool>(
-                        barrierDismissible: false,
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                          title: Text('確定送出以下變更?'),
-                          content:
-                              Column(mainAxisSize: MainAxisSize.min, children: [
-                            Card(
-                                child: ListTile(
-                              title: Text('更動前'),
-                              subtitle: Text('設備名稱:' +
-                                  widget.Fireitem['itemName'] +
-                                  '\n地點:' +
-                                  PlaceList[widget.initialplace]['placeName'] +
-                                  '\n區域:' +
-                                  PlaceList[widget.initialplace]['priorityList']
-                                      [widget.initialarea]['subArea']),
-                            )),
-                                Card(
-                                    child: ListTile(
-                                      title: Text('更動後'),
-                                      subtitle: Text('設備名稱:' +
-                                         namecontroller.text+
-                                          '\n地點:' +
-                                          PlaceList[placecontroller.selectedItem]['placeName'] +
-                                          '\n區域:' +
-                                          PlaceList[placecontroller.selectedItem]['priorityList']
-                                          [areacontroller.selectedItem]['subArea']),
-                                    ))
-                          ]),
-                          actions: <Widget>[
-                            FlatButton(
-                                child: Text('Cancel'),
-                                onPressed: () {
-                                  Navigator.pop(context, false);
-                                }),
-                            FlatButton(
-                                child: Text('Ok'),
-                                onPressed: () {
-                                  Navigator.pop(context, true);
-                                })
-                          ],
-                        ),
-                      ).then((value) {
-                        keepgo = value;
-                      });
-                      if (!keepgo) {
-                        return;
-                      }
 
-                      showDialog(
-                        context: context,
-                        builder: (context) => FutureProgressDialog(
-                            sendnewitem().then((value) {
-                              Fluttertoast.showToast(
-                                  msg: value,
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.CENTER,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor: Colors.red,
-                                  textColor: Colors.white,
-                                  fontSize: 16.0);
-                              PlaceList[Placeindex]['todaysend'] = true;
-                            }),
-                            message: Text('資料處理中，請稍後')),
-                      );
-                    },
-                    child: Text(
-                      '送出',
-                      style: TextStyle(color: Colors.white, fontSize: 25),
+                        showDialog(
+                          context: context,
+                          builder: (context) => FutureProgressDialog(
+                              sendnewitem().then((value) {
+                                Fluttertoast.showToast(
+                                    msg: value,
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor: Colors.red,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
+                                PlaceList[Placeindex]['todaysend'] = true;
+                              }),
+                              message: Text('資料處理中，請稍後')),
+                        );
+                      },
+                      child: Text(
+                        '送出',
+                        style: TextStyle(color: Colors.white, fontSize: 25),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            flex: 1,
+                ],
+              ),
+            ],
           )
         ],
-      ),
+      )
+
+
+
     );
   }
 }

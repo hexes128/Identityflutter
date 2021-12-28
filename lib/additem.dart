@@ -65,7 +65,7 @@ class additemstate extends State<additemform> {
             return {
               'ItemName': e.namecontroller.text,
               'postscript':
-                  e.addpostscript ? e.postscriptcontroller.text : null,
+                  e.addpostscript ? e.postscriptcontroller.text : '',
               'StoreId': Arealist[e.areaindex]['storeId']
             };
           }).toList()));
