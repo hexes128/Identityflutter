@@ -14,10 +14,33 @@ class addplace extends StatefulWidget {
   }
 }
 
-class addplacestate extends State<addplace> {
+class addplacestate extends State<addplace> with WidgetsBindingObserver  {
   var placecontroller = TextEditingController();
   List<TextField> arealist = [];
   List<TextEditingController> controllerlist = [];
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+
+  }
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state.index==0){
+      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+        GV.timeout=true;
+        Navigator.of(context).popUntil((route) =>route.isFirst
+        );
+      }
+
+    }
+  }
 
   Future<String> sendInventory() async {
     var access_token =GV.info['accessToken'];

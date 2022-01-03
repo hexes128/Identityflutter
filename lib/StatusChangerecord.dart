@@ -20,7 +20,7 @@ List<dynamic> recordlist;
 
 var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
 class StatusRecordState extends State<StatusRecord>
-   {
+  with WidgetsBindingObserver {
   ScanController scanController = ScanController();
 
   Future<List<dynamic>> _callApi() async {
@@ -46,7 +46,26 @@ class StatusRecordState extends State<StatusRecord>
   void initState() {
     super.initState();
     futureList = _callApi();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
+
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state.index==0){
+      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+        GV.timeout=true;
+        Navigator.of(context).popUntil((route) =>route.isFirst
+        );
+      }
+
+    }
   }
 
   Future<List<dynamic>> futureList;

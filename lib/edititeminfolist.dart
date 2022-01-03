@@ -19,7 +19,7 @@ class editinfolist extends StatefulWidget {
 }
 
 class editinfostate extends State<editinfolist>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin , WidgetsBindingObserver  {
   ScanController scanController = ScanController();
 
   Future<List<dynamic>> _callApi() async {
@@ -44,9 +44,29 @@ class editinfostate extends State<editinfolist>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     futureList = _callApi();
     tabController = TabController(length: 0, vsync: this);
   }
+
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state.index==0){
+      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+        GV.timeout=true;
+        Navigator.of(context).popUntil((route) =>route.isFirst
+        );
+      }
+
+    }
+  }
+
 
   Future<List<dynamic>> futureList;
 
@@ -59,28 +79,6 @@ class editinfostate extends State<editinfolist>
 
   TabController tabController;
 
-  // bool Ddefaultshow = true;
-
-  Future<bool> _onWillPop() async {
-    return (await showDialog(
-      context: context,
-      builder: (context) => new AlertDialog(
-        title: new Text('退出盤點'),
-        content: new Text('盤點狀態將會清空，確定是否退出?'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: new Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: new Text('確定'),
-          ),
-        ],
-      ),
-    )) ??
-        false;
-  }
 
 
 

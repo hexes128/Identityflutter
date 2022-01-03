@@ -19,7 +19,7 @@ class InventoryRecord extends StatefulWidget {
 }
 
 class InventoryRecordState extends State<InventoryRecord>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin , WidgetsBindingObserver{
   Future<List<dynamic>> _callApi() async {
     var access_token =GV.info['accessToken'];
 
@@ -43,6 +43,24 @@ class InventoryRecordState extends State<InventoryRecord>
   void initState() {
     super.initState();
     futureList = _callApi();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state.index==0){
+      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+        GV.timeout=true;
+        Navigator.of(context).popUntil((route) =>route.isFirst
+        );
+      }
+
+    }
   }
 
   Future<List<dynamic>> futureList;

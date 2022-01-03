@@ -17,11 +17,28 @@ class additemform extends StatefulWidget {
   }
 }
 
-class additemstate extends State<additemform> {
+class additemstate extends State<additemform> with WidgetsBindingObserver {
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
     futureList = _callApi();
+  }
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+   if(state.index==0){
+     if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+      GV.timeout=true;
+       Navigator.of(context).popUntil((route) =>route.isFirst
+     );
+     }
+
+   }
   }
 
   Future<List<dynamic>> futureList;
@@ -73,11 +90,7 @@ class additemstate extends State<additemform> {
       if (response.statusCode == 200) {
         return response.body;
       } else {
-        print(jsonEncode(<String, dynamic>{
-          'ItemName': namecontroller.text,
-          'StoreId': Arealist[Areaindex]['storeId'],
-          'UserId': GV.userinfo.subject
-        }));
+
       }
     } on Error catch (e) {
       throw Exception('123');
@@ -159,10 +172,10 @@ class additemstate extends State<additemform> {
                                             child: ListTile(
                                               title: Text(itemlist[index]
                                                   .namecontroller
-                                                  .text),
-                                              subtitle: Text(Arealist[
-                                                      itemlist[index].areaindex]
-                                                  ['subArea']),
+                                                  .text+' '+Arealist[
+                                              itemlist[index].areaindex]
+                                              ['subArea']),
+                                              subtitle: Text(itemlist[index].addpostscript?'備註:'+itemlist[index].postscriptcontroller.text:''),
                                             ),
                                           );
                                         })),

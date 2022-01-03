@@ -17,7 +17,7 @@ class InventoryList extends StatefulWidget {
 }
 
 class InventoryListState extends State<InventoryList>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin , WidgetsBindingObserver  {
   ScanController scanController = ScanController();
 
   Future<List<dynamic>> _callApi() async {
@@ -46,6 +46,26 @@ class InventoryListState extends State<InventoryList>
     super.initState();
     futureList = _callApi();
     tabController = TabController(length: 0, vsync: this);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state.index==0){
+      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+        GV.timeout=true;
+        Navigator.of(context).popUntil((route) =>route.isFirst
+        );
+      }
+
+    }
   }
 
   Future<List<dynamic>> futureList;
@@ -188,50 +208,7 @@ class InventoryListState extends State<InventoryList>
                     PopupMenuButton(
                       icon: Icon(Icons.more_vert),
                       itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-                        // PopupMenuItem(
-                        //   child: ListTile(
-                        //     onTap: () {
-                        //       Navigator.pop(context);
-                        //       showDialog<String>(
-                        //         context: context,
-                        //         builder: (BuildContext context) => AlertDialog(
-                        //           title: Text('請選擇地點'),
-                        //           content: Container(
-                        //             width: double.maxFinite,
-                        //             child: ListView.builder(
-                        //               shrinkWrap: true,
-                        //               itemCount: PlaceList.length,
-                        //               itemBuilder: (context, index) {
-                        //                 return Card(
-                        //                     child: ListTile(
-                        //                   onTap: () {
-                        //                     setState(() {
-                        //                       Placeindex = index;
-                        //                       Areaindex = 0;
-                        //                       tabController.animateTo(0);
-                        //                     });
-                        //
-                        //                     Navigator.pop(context);
-                        //                   },
-                        //                   title: Text(PlaceList[index]
-                        //                           ['placeName'] +
-                        //                       (PlaceList[index]['todaysend']
-                        //                           ? '(已完成)'
-                        //                           : '')),
-                        //                   subtitle: Placeindex == index
-                        //                       ? Text('當前選擇')
-                        //                       : null,
-                        //                 ));
-                        //               },
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       );
-                        //     },
-                        //     leading: Icon(Icons.switch_left),
-                        //     title: Text('切換地點'),
-                        //   ),
-                        // ),
+
                         PopupMenuItem(
                           child: ListTile(
                             onTap: () {
@@ -527,6 +504,7 @@ class InventoryListState extends State<InventoryList>
                                       ],
                                     ),
                                     onTap: () {
+
                                       if (Fireitem['presentStatus'] != 0) {
                                         Fluttertoast.showToast(
                                             msg: '設備異常 無法勾選',

@@ -17,7 +17,7 @@ class ChangeStatus extends StatefulWidget {
 }
 
 class ChangeStatusState extends State<ChangeStatus>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin , WidgetsBindingObserver  {
   ScanController scanController = ScanController();
 
   Future<List<dynamic>> _callApi() async {
@@ -44,7 +44,26 @@ class ChangeStatusState extends State<ChangeStatus>
     super.initState();
     futureList = _callApi();
     tabController = TabController(length: 0, vsync: this);
+    WidgetsBinding.instance.addObserver(this);
   }
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state.index==0){
+      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+        GV.timeout=true;
+        Navigator.of(context).popUntil((route) =>route.isFirst
+        );
+      }
+
+    }
+  }
+
+
 
   Future<List<dynamic>> futureList;
 

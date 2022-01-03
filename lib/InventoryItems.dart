@@ -21,7 +21,9 @@ class InventoryRecorditem extends StatefulWidget {
 List<dynamic> Itemlist;
 var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
 class InventoryRecorditemState extends State<InventoryRecorditem>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin , WidgetsBindingObserver {
+
+
   Future<List<dynamic>> _callApi() async {
     var access_token =GV.info['accessToken'];
 
@@ -46,6 +48,25 @@ class InventoryRecorditemState extends State<InventoryRecorditem>
   void initState() {
     super.initState();
     futureList = _callApi();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state.index==0){
+      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+        GV.timeout=true;
+        Navigator.of(context).popUntil((route) =>route.isFirst
+        );
+      }
+
+    }
   }
 
   Future<List<dynamic>> futureList;

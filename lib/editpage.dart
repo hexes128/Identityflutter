@@ -23,7 +23,7 @@ class editietm extends StatefulWidget {
   }
 }
 
-class editstate extends State<editietm> {
+class editstate extends State<editietm>   with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -36,6 +36,24 @@ class editstate extends State<editietm> {
         FixedExtentScrollController(initialItem: widget.initialarea);
     placecontroller =
         FixedExtentScrollController(initialItem: widget.initialplace);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state.index==0){
+      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+        GV.timeout=true;
+        Navigator.of(context).popUntil((route) =>route.isFirst
+        );
+      }
+
+    }
   }
 
   Future<List<dynamic>> futureList;
@@ -95,24 +113,13 @@ class editstate extends State<editietm> {
       if (response.statusCode == 200) {
         return response.body;
       } else {
-        print(jsonEncode(<String, dynamic>{
-          'ItemName': namecontroller.text,
-          'StoreId': Arealist[Areaindex]['storeId'],
-          'UserId': GV.userinfo.subject
-        }));
+
       }
     } on Error catch (e) {
       throw Exception('123');
     }
 
-    print(jsonEncode(<String, dynamic>{
-      'itemid': widget.Fireitem['itemId'],
-      'oldname': widget.Fireitem['itemName'],
-      'newname': namecontroller.text,
-      'oldstore': widget.initialarea,
-      'newstore': Arealist[areacontroller.selectedItem]['storeId'],
-      'UserId': GV.userinfo.name
-    }));
+
   }
 
   List<dynamic> PlaceList;
@@ -131,7 +138,7 @@ class editstate extends State<editietm> {
     return Scaffold(
         resizeToAvoidBottomInset : false,
       appBar: AppBar(
-        title: Text('新增設備'),
+        title: Text('編輯設備資訊'),
       ),
       body:
           SingleChildScrollView(child:  Column(
