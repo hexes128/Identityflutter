@@ -65,6 +65,9 @@ bool backfrombroswer =false;
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
 
+    setState(() {
+
+    });
     if(state.index==0){
 
       if(backfrombroswer){
@@ -249,7 +252,10 @@ if(result!=null){
                       _logout(snapshot.data['idToken']);
                     },
                     icon: Icon(Icons.logout))
-              ], title: Text('歡迎 ${GV.info['name']}')),
+              ], title:
+              ListTile(title: Text('歡迎 ${GV.info['name']}'),subtitle:
+                Text('登入剩餘時間:'+(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inMinutes-20).toString()+'分鐘'))
+             ),
               body: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2, childAspectRatio: 2.5),
@@ -336,6 +342,9 @@ if(result!=null){
                         }
 
                         Navigator.of(context).push(route).then((value) {
+                          setState(() {
+
+                          });
                           if(  DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
                             showDialog<String>(
                               barrierDismissible: false,
