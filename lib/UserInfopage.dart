@@ -19,7 +19,9 @@ class userinfostate extends State<userinfo> {
         appBar: AppBar(
           title: Text('個人資訊'),
         ),
-        body: SingleChildScrollView(
+        body:
+
+        SingleChildScrollView(
             child: Column(
           children: [
             Card(

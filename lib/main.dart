@@ -46,10 +46,36 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 bool backfrombroswer =false;
 
+initialtimeoutcheck()async{
+var expired = await storage.read(key: 'accessTokenExpirationDateTime');
+
+  if( expired!=null && DateTime.parse(expired).difference(DateTime.now()).inSeconds<GV.settimeout){
+    var idtoken = await storage.read(key: 'idToken');
+    showDialog<String>(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text('登入時間逾時 請重新登入'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              _logout(idtoken);
+              Navigator.pop(
+                context,
+              );
+            },
+            child: Text('確定'),
+          ),
+        ],
+      ),
+
+    );
+  }
+}
 
   @override
   initState() {
-
+initialtimeoutcheck();
     WidgetsBinding.instance.addObserver(this);
     super.initState();
 
@@ -149,7 +175,7 @@ print(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTi
             });
         if (httpResponse.statusCode == 200) {
           var userinfo = jsonDecode(httpResponse.body);
-
+print(result.accessToken);
           await storage.deleteAll();
           await storage.write(key: 'name', value: userinfo['name']);
           await storage.write(key: 'email', value: userinfo['email']);
@@ -238,7 +264,8 @@ if(result!=null){
       'images/7.jpg',
       'images/8.jpg'
     ];
-    return FutureBuilder<Map<String, String>>(
+    return
+      FutureBuilder<Map<String, String>>(
         future: storage.readAll(),
         initialData:null,
         builder: (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
@@ -254,9 +281,10 @@ if(result!=null){
                     icon: Icon(Icons.logout))
               ], title:
               ListTile(title: Text('歡迎 ${GV.info['name']}'),subtitle:
-                Text('登入剩餘時間:'+(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inMinutes-20).toString()+'分鐘'))
+                Text('登入剩餘時間:'+(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inMinutes-10).toString()+'分鐘'))
              ),
-              body: GridView.builder(
+              body:
+              GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2, childAspectRatio: 2.5),
                   itemCount: selectfeature.length,
