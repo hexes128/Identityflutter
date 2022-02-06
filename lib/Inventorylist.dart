@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_blue/flutter_blue.dart';
+
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:identityflutter/GlobalVariable.dart' as GV;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:identityflutter/scanpage.dart';
 import 'package:scan/scan.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 
 class InventoryList extends StatefulWidget {
@@ -17,7 +21,7 @@ class InventoryList extends StatefulWidget {
 }
 
 class InventoryListState extends State<InventoryList>
-    with TickerProviderStateMixin , WidgetsBindingObserver  {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   ScanController scanController = ScanController();
 
   Future<List<dynamic>> _callApi() async {
@@ -32,6 +36,7 @@ class InventoryListState extends State<InventoryList>
               path: 'Item/GetItem'),
           headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
+        var a = response.body;
         return jsonDecode(response.body);
       } else {
         print('${response.statusCode}');
@@ -49,22 +54,25 @@ class InventoryListState extends State<InventoryList>
     WidgetsBinding.instance.addObserver(this);
   }
 
-
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    SubscriptionList.forEach((element) {
+      element.cancel();
+    });
     super.dispose();
   }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if(state.index==0){
-      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
-        GV.timeout=true;
-        Navigator.of(context).popUntil((route) =>route.isFirst
-        );
+    if (state.index == 0) {
+      if (DateTime.parse(GV.info['accessTokenExpirationDateTime'])
+              .difference(DateTime.now())
+              .inSeconds <
+          GV.settimeout) {
+        GV.timeout = true;
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
-
     }
   }
 
@@ -80,6 +88,8 @@ class InventoryListState extends State<InventoryList>
   TabController tabController;
   bool showcamera = false;
   bool Ddefaultshow = true;
+  List<BluetoothCharacteristic> CharacteristicList = [];
+  List<StreamSubscription> SubscriptionList = [];
 
   Future<bool> _onWillPop() async {
     return (await showDialog(
@@ -133,6 +143,72 @@ class InventoryListState extends State<InventoryList>
     }
   }
 
+  Future<void> discoverservice(BluetoothDevice device) async {
+    try {
+      await device.discoverServices();
+    } catch (e) {}
+  }
+
+  Future<void> setnotify(BluetoothCharacteristic characteristic) async {
+    if (!characteristic.isNotifying) {
+      try {
+        await characteristic.setNotifyValue(true);
+        String devicename;
+
+        if (!CharacteristicList.map((e) => e.deviceId)
+            .contains(characteristic.deviceId)) {
+          StreamSubscription subscription =
+              characteristic.value.listen((event) {
+            String id='';
+            print(event);
+            AreaList.forEach((element) {
+              try {
+                id = latin1.decode(event).toString().trim();
+
+                List<dynamic> itemlist = element['fireitemList'];
+                var Fireitem = itemlist.singleWhere((e) => e['itemId'] == id,
+                    orElse: () => null);
+                if (Fireitem != null) {
+                  print(Fireitem['itemName']);
+                  if (Fireitem['presentStatus'] == 0) {
+                    if (Fireitem['inventoryStatus'] == 5) {
+                      FlutterBlue.instance.connectedDevices.then((value) {
+                        BluetoothDevice device = value.singleWhere(
+                            (x) => x.id == characteristic.deviceId,
+                            orElse: () => null);
+                        if(device!=null){
+                          devicename=device.name;
+                        }
+                        Fluttertoast.showToast(
+                            msg: devicename+'\n'+Fireitem['itemId']+'('+Fireitem['itemName']+')'+'\n'+element['subArea'],
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.CENTER,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 16.0);
+                        setState(() {
+                          Fireitem['inventoryStatus'] = 0;
+                        });
+                      });
+
+                    }
+                  }
+                }
+              } catch (e) {
+                print(e);
+              }
+            });
+          });
+          CharacteristicList.add(characteristic);
+          SubscriptionList.add(subscription);
+        }
+      } catch (e) {}
+    }
+  }
+
+  processBLEdata(String id) {}
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -182,33 +258,44 @@ class InventoryListState extends State<InventoryList>
                     ],
                   ),
                   actions: [
-                    FlutterSwitch(
-                      width: 60.0,
-                      height: 30.0,
-                      toggleSize: 20.0,
-                      value: showcamera,
-                      borderRadius: 30.0,
-                      padding: 2.0,
-                      toggleColor: Colors.black,
-                      activeColor: Colors.red,
-                      showOnOff: true,
-                      activeIcon: Icon(
-                        Icons.camera_alt,
-                      ),
-                      inactiveIcon: Icon(
-                        Icons.camera_alt,
-                        color: Color(0xFFFFDF5D),
-                      ),
-                      onToggle: (val) {
-                        setState(() {
-                          showcamera = val;
-                        });
-                      },
-                    ),
+                    IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            //從登入push到第二個
+                            context,
+                            new MaterialPageRoute(
+                                builder: (context) => scanpage()),
+                          ).then((value) {
+                            setState(() {});
+                          });
+                        },
+                        icon: Icon(Icons.bluetooth)),
+                    // FlutterSwitch(
+                    //   width: 60.0,
+                    //   height: 30.0,
+                    //   toggleSize: 20.0,
+                    //   value: showcamera,
+                    //   borderRadius: 30.0,
+                    //   padding: 2.0,
+                    //   toggleColor: Colors.black,
+                    //   activeColor: Colors.red,
+                    //   showOnOff: true,
+                    //   activeIcon: Icon(
+                    //     Icons.camera_alt,
+                    //   ),
+                    //   inactiveIcon: Icon(
+                    //     Icons.camera_alt,
+                    //     color: Color(0xFFFFDF5D),
+                    //   ),
+                    //   onToggle: (val) {
+                    //     setState(() {
+                    //       showcamera = val;
+                    //     });
+                    //   },
+                    // ),
                     PopupMenuButton(
                       icon: Icon(Icons.more_vert),
                       itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-
                         PopupMenuItem(
                           child: ListTile(
                             onTap: () {
@@ -444,7 +531,86 @@ class InventoryListState extends State<InventoryList>
                               ),
                             ),
                           )
-                        : Container(),
+                        : FutureBuilder<List<BluetoothDevice>>(
+                            future: FlutterBlue.instance.connectedDevices,
+                            initialData: [],
+                            builder: (c, snapshot) {
+                              return Column(
+                                children: snapshot.data.map((d) {
+                                  return ListTile(
+                                    title: Text(d.name),
+                                    subtitle: Text(d.id.toString()),
+                                    trailing:
+                                        StreamBuilder<BluetoothDeviceState>(
+                                      stream: d.state,
+                                      initialData:
+                                          BluetoothDeviceState.disconnected,
+                                      builder: (c, snapshot) {
+                                        if (snapshot.data ==
+                                            BluetoothDeviceState.connected) {
+                                          return StreamBuilder<
+                                              List<BluetoothService>>(
+                                            stream: d.services,
+                                            initialData: [],
+                                            builder: (c, snapshot) {
+                                              if (snapshot.hasData &&
+                                                  snapshot.data.isNotEmpty) {
+                                                BluetoothService service = snapshot
+                                                    .data
+                                                    .singleWhere((e) =>
+                                                        e.uuid.toString() ==
+                                                        '0000ffe0-0000-1000-8000-00805f9b34fb');
+
+                                                BluetoothCharacteristic chara =
+                                                    service.characteristics
+                                                        .singleWhere((e) =>
+                                                            e.uuid.toString() ==
+                                                            '0000ffe1-0000-1000-8000-00805f9b34fb');
+                                                setnotify(chara);
+
+                                                return RaisedButton(
+                                                  child: const Text('中斷連線'),
+                                                  onPressed: () async {
+                                                    await d.disconnect();
+                                                  },
+                                                );
+                                              }
+                                              discoverservice(d);
+                                              return const IconButton(
+                                                icon: SizedBox(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation(
+                                                            Colors.grey),
+                                                  ),
+                                                  width: 18.0,
+                                                  height: 18.0,
+                                                ),
+                                                onPressed: null,
+                                              );
+                                            },
+                                          );
+                                        } else {
+                                          return RaisedButton(
+                                            child: const Text('重新連線'),
+                                            onPressed: () async {
+                                              await d
+                                                  .connect(
+                                                      timeout: const Duration(
+                                                          seconds: 5),
+                                                      autoConnect: false)
+                                                  .then((value) =>
+                                                      setState(() {}));
+                                            },
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  );
+                                }).toList(),
+                              );
+                            }),
                     Expanded(
                         flex: 7,
                         child: Ddefaultshow
@@ -504,7 +670,6 @@ class InventoryListState extends State<InventoryList>
                                       ],
                                     ),
                                     onTap: () {
-
                                       if (Fireitem['presentStatus'] != 0) {
                                         Fluttertoast.showToast(
                                             msg: '設備異常 無法勾選',
@@ -544,29 +709,40 @@ class InventoryListState extends State<InventoryList>
                                                           ' ' +
                                                           Fireitem['itemName']),
                                                   content:
-                                                  SingleChildScrollView(
+                                                      SingleChildScrollView(
                                                     child: ListBody(
-                                                      children:  <Widget>[
-                                                        Text(Fireitem['postscript']==null?'無':Fireitem['postscript']),
+                                                      children: <Widget>[
+                                                        Text(Fireitem[
+                                                                    'postscript'] ==
+                                                                null
+                                                            ? '無'
+                                                            : Fireitem[
+                                                                'postscript']),
                                                       ],
                                                     ),
                                                   ),
-                                                  actions: Fireitem['inventoryStatus'] == 5 ?
-                                                  [
-                                                    TextButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(context);
-                                                        },
-                                                        child: Text('確定')),
-
+                                                  actions: Fireitem[
+                                                              'inventoryStatus'] ==
+                                                          5
+                                                      ? [
+                                                          TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                              },
+                                                              child:
+                                                                  Text('確定')),
                                                           TextButton(
                                                               onPressed: () {
                                                                 setState(() {
-                                                                  Fireitem['inventoryStatus'] = 2;
-                                                                  Navigator.pop(context);
+                                                                  Fireitem[
+                                                                      'inventoryStatus'] = 2;
+                                                                  Navigator.pop(
+                                                                      context);
                                                                 });
                                                               },
-                                                              child: Text('報修')),
+                                                              child:
+                                                                  Text('報修')),
                                                           TextButton(
                                                               onPressed: () {
                                                                 setState(() {
@@ -578,11 +754,14 @@ class InventoryListState extends State<InventoryList>
                                                               },
                                                               child: Text('遺失'))
                                                         ]
-                                                      : [TextButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child: Text('確定')),
+                                                      : [
+                                                          TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                              },
+                                                              child:
+                                                                  Text('確定')),
                                                           TextButton(
                                                               onPressed: () {
                                                                 setState(() {
@@ -594,7 +773,6 @@ class InventoryListState extends State<InventoryList>
                                                               },
                                                               child: Text('復原'))
                                                         ],
-
                                                 );
                                               },
                                             );
@@ -689,15 +867,19 @@ class InventoryListState extends State<InventoryList>
                                                                 Fireitem[
                                                                     'itemName']),
                                                             content:
-                                                            SingleChildScrollView(
+                                                                SingleChildScrollView(
                                                               child: ListBody(
-                                                                children:  <Widget>[
-                                                             Text(Fireitem['postscript']==null?'無':Fireitem['postscript']),
+                                                                children: <
+                                                                    Widget>[
+                                                                  Text(Fireitem[
+                                                                              'postscript'] ==
+                                                                          null
+                                                                      ? '無'
+                                                                      : Fireitem[
+                                                                          'postscript']),
                                                                 ],
                                                               ),
                                                             ),
-
-
                                                             actions: Fireitem[
                                                                         'inventoryStatus'] ==
                                                                     5
@@ -873,31 +1055,34 @@ class InventoryListState extends State<InventoryList>
                                                         showDialog<void>(
                                                           context: context,
                                                           barrierDismissible:
-                                                          false,
-                                                          builder:
-                                                              (BuildContext
-                                                          context) {
+                                                              false,
+                                                          builder: (BuildContext
+                                                              context) {
                                                             return AlertDialog(
                                                               title: Text(Fireitem[
-                                                              'itemId'] +
+                                                                      'itemId'] +
                                                                   ' ' +
                                                                   Fireitem[
-                                                                  'itemName']),
+                                                                      'itemName']),
                                                               content:
-                                                              SingleChildScrollView(
+                                                                  SingleChildScrollView(
                                                                 child: ListBody(
-                                                                  children:  <Widget>[
-                                                                    Text(Fireitem['postscript']==null?'無':Fireitem['postscript']),
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Text(Fireitem['postscript'] ==
+                                                                            null
+                                                                        ? '無'
+                                                                        : Fireitem[
+                                                                            'postscript']),
                                                                   ],
                                                                 ),
                                                               ),
-
-
                                                               actions: [
                                                                 TextButton(
                                                                     onPressed:
                                                                         () {
-                                                                      Navigator.pop(context);
+                                                                      Navigator.pop(
+                                                                          context);
                                                                     },
                                                                     child: Text(
                                                                         '確定')),
@@ -905,12 +1090,12 @@ class InventoryListState extends State<InventoryList>
                                                                     onPressed:
                                                                         () {
                                                                       setState(
-                                                                              () {
-                                                                            Fireitem['inventoryStatus'] =
-                                                                            5;
-                                                                            Navigator.pop(
-                                                                                context);
-                                                                          });
+                                                                          () {
+                                                                        Fireitem[
+                                                                            'inventoryStatus'] = 5;
+                                                                        Navigator.pop(
+                                                                            context);
+                                                                      });
                                                                     },
                                                                     child: Text(
                                                                         '復原'))

@@ -1,10 +1,5 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:get/get.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import 'controllers.dart' as GV;
 
 class scanpage extends StatefulWidget {
   @override
@@ -14,13 +9,17 @@ class scanpage extends StatefulWidget {
 }
 
 class scanstate extends State<scanpage> {
-  setnotify(BluetoothCharacteristic chara) async {
-    if (!chara.isNotifying) {
-      await chara.setNotifyValue(true);
+  Future<void> discoverservice(BluetoothDevice device) async {
+    try {
+      await device.discoverServices();
+    } catch (e) {}
+  }
 
-      chara.value.listen((event) {
-        print(event);
-      });
+  Future<void> setnotify(BluetoothCharacteristic characteristic) async {
+    if (!characteristic.isNotifying) {
+      try {
+        await characteristic.setNotifyValue(true);
+      } catch (e) {}
     }
   }
 
@@ -39,71 +38,86 @@ class scanstate extends State<scanpage> {
               body: SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
+                    Text('已連線裝置',textAlign: TextAlign.left,),
+                    Divider(),
                     FutureBuilder<List<BluetoothDevice>>(
                         future: FlutterBlue.instance.connectedDevices,
                         initialData: [],
                         builder: (c, snapshot) {
                           return Column(
-                            children: snapshot.data!.map((d) {
+                            children:
+                             snapshot.data.map((d) {
                               return ListTile(
                                 title: Text(d.name),
                                 subtitle: Text(d.id.toString()),
                                 trailing: StreamBuilder<BluetoothDeviceState>(
                                   stream: d.state,
                                   initialData:
-                                      BluetoothDeviceState.disconnected,
+                                  BluetoothDeviceState.disconnected,
                                   builder: (c, snapshot) {
                                     if (snapshot.data ==
                                         BluetoothDeviceState.connected) {
-                                      return FutureBuilder<
+                                      discoverservice(d);
+                                      return StreamBuilder<
                                           List<BluetoothService>>(
-                                        future: d.discoverServices(),
+                                        stream: d.services,
                                         initialData: [],
                                         builder: (c, snapshot) {
-                                          if (snapshot.data!.isNotEmpty) {
-                                            BluetoothService service = snapshot
-                                                .data!
-                                                .singleWhere((e) =>
-                                                    e.uuid.toString() ==
-                                                    '0000ffe0-0000-1000-8000-00805f9b34fb');
+                                          if (snapshot.hasData &&
+                                              snapshot.data.isNotEmpty) {
+                                            BluetoothService service =
+                                            snapshot.data.singleWhere((e) =>
+                                            e.uuid.toString() ==
+                                                '0000ffe0-0000-1000-8000-00805f9b34fb');
 
                                             BluetoothCharacteristic chara = service
                                                 .characteristics
                                                 .singleWhere((e) =>
-                                                    e.uuid.toString() ==
-                                                    '0000ffe1-0000-1000-8000-00805f9b34fb');
-
-                                            return FutureBuilder<bool>(
-                                                initialData: false,
-                                                future:
-                                                    chara.setNotifyValue(true),
+                                            e.uuid.toString() ==
+                                                '0000ffe1-0000-1000-8000-00805f9b34fb');
+                                            setnotify(chara);
+                                            return StreamBuilder<List<int>>(
+                                                stream: chara.value,
                                                 builder: (c, snapshot) {
-                                                  if (snapshot.data!) {
-                                                    return StreamBuilder<
-                                                            List<int>>(
-                                                        stream: chara.value,
-                                                        builder: (c, snapshot) {
-                                                          print(snapshot.data);
-                                                          return RaisedButton(
-                                                            child: const Text(
-                                                                '中斷連線'),
-                                                            onPressed:
-                                                                () async {
-                                                              await d
-                                                                  .disconnect();
-                                                            },
-                                                          );
-                                                        });
-                                                  }
-                                                  return const Text('啟用特徵通知');
+                                                  print(snapshot.data);
+                                                  return RaisedButton(
+                                                    child: const Text('中斷連線'),
+                                                    onPressed: () async {
+                                                      await d.disconnect();
+                                                    },
+                                                  );
                                                 });
+                                            // return FutureBuilder<bool>(
+                                            //     initialData: false,
+                                            //     future:
+                                            //         chara.setNotifyValue(true),
+                                            //     builder: (c, snapshot) {
+                                            //       if (snapshot.hasData&& snapshot.data) {
+                                            //         return StreamBuilder<
+                                            //                 List<int>>(
+                                            //             stream: chara.value,
+                                            //             builder: (c, snapshot) {
+                                            //               print(snapshot.data);
+                                            //               return RaisedButton(
+                                            //                 child: const Text(
+                                            //                     '中斷連線'),
+                                            //                 onPressed:
+                                            //                     () async {
+                                            //                   await d
+                                            //                       .disconnect();
+                                            //                 },
+                                            //               );
+                                            //             });
+                                            //       }
+                                            //       return const Text('啟用特徵通知');
+                                            //     });
                                           }
                                           return const IconButton(
                                             icon: SizedBox(
                                               child: CircularProgressIndicator(
                                                 valueColor:
-                                                    AlwaysStoppedAnimation(
-                                                        Colors.grey),
+                                                AlwaysStoppedAnimation(
+                                                    Colors.grey),
                                               ),
                                               width: 18.0,
                                               height: 18.0,
@@ -113,14 +127,15 @@ class scanstate extends State<scanpage> {
                                         },
                                       );
                                     } else {
+
                                       return RaisedButton(
                                         child: const Text('重新連線'),
                                         onPressed: () async {
                                           await d
                                               .connect(
-                                                  timeout: const Duration(
-                                                      seconds: 5),
-                                                  autoConnect: false)
+                                              timeout: const Duration(
+                                                  seconds: 5),
+                                              autoConnect: false)
                                               .then((value) => setState(() {}));
                                         },
                                       );
@@ -129,17 +144,22 @@ class scanstate extends State<scanpage> {
                                 ),
                               );
                             }).toList(),
+
                           );
                         }),
+                    Divider(),
+                    Text('附近的裝置',textAlign: TextAlign.left,),
+                    Divider(),
                     StreamBuilder<List<ScanResult>>(
                         stream: FlutterBlue.instance.scanResults,
                         initialData: [],
                         builder: (c, snapshot) {
-                          // snapshot.data!.sort((a,b)=>b.advertisementData.connectable?1:-1);
-                          // snapshot.data!.sort((a,b)=>a.device.name.compareTo(b.device.name));
+
                           return Column(
-                            children: snapshot.data!
-                                .where((e) => e.advertisementData.connectable)
+                            children: snapshot.data
+                                .where((e) =>
+                                    e.advertisementData.connectable &&
+                                    e.device.name.isNotEmpty)
                                 .map((e) => ListTile(
                                     title: Text(e.device.name),
                                     trailing: RaisedButton(
@@ -151,7 +171,10 @@ class scanstate extends State<scanpage> {
                                                   timeout: const Duration(
                                                       seconds: 5),
                                                   autoConnect: false)
-                                              .then((value) => setState(() {}));
+                                              .then((value) => setState(() {
+
+
+                                          }));
                                         } catch (e) {
                                           print(e.toString());
                                         }
@@ -167,7 +190,7 @@ class scanstate extends State<scanpage> {
                 stream: FlutterBlue.instance.isScanning,
                 initialData: false,
                 builder: (c, snapshot) {
-                  if (snapshot.data!) {
+                  if (snapshot.data) {
                     return FloatingActionButton(
                       child: Icon(Icons.stop),
                       onPressed: () => FlutterBlue.instance.stopScan(),
@@ -189,9 +212,9 @@ class scanstate extends State<scanpage> {
 }
 
 class BluetoothOffScreen extends StatelessWidget {
-  const BluetoothOffScreen({Key? key, this.state}) : super(key: key);
+  const BluetoothOffScreen({Key key, this.state}) : super(key: key);
 
-  final BluetoothState? state;
+  final BluetoothState state;
 
   @override
   Widget build(BuildContext context) {

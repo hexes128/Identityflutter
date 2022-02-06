@@ -30,6 +30,7 @@ dependencies:
   scan: ^1.4.3
   flutter_switch: ^0.3.2
   future_progress_dialog: ^0.2.0
+  flutter_blue: ^0.8.0
 
 dev_dependencies:
   flutter_test:
