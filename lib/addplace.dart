@@ -14,7 +14,7 @@ class addplace extends StatefulWidget {
   }
 }
 
-class addplacestate extends State<addplace> with WidgetsBindingObserver  {
+class addplacestate extends State<addplace> with WidgetsBindingObserver {
   var placecontroller = TextEditingController();
   List<TextField> arealist = [];
   List<TextEditingController> controllerlist = [];
@@ -23,27 +23,29 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver  {
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     super.initState();
-
   }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if(state.index==0){
-      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
-        GV.timeout=true;
-        Navigator.of(context).popUntil((route) =>route.isFirst
-        );
+    if (state.index == 0) {
+      if (DateTime.parse(GV.info['accessTokenExpirationDateTime'])
+              .difference(DateTime.now())
+              .inSeconds <
+          GV.settimeout) {
+        GV.timeout = true;
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
-
     }
   }
 
   Future<String> sendInventory() async {
-    var access_token =GV.info['accessToken'];
+    var access_token = GV.info['accessToken'];
 
     try {
       var response = await http.post(
@@ -83,12 +85,11 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver  {
       appBar: AppBar(
         title: TextField(
           controller: placecontroller,
-
           decoration: InputDecoration(
-            fillColor: Colors.white ,filled: true,
-
-          hintText: '輸入地點',
-        ),
+            fillColor: Colors.white,
+            filled: true,
+            hintText: '輸入地點',
+          ),
         ),
         actions: [
           IconButton(
@@ -96,12 +97,17 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver  {
                 setState(() {
                   var controller = TextEditingController();
                   controllerlist.add(controller);
-                  arealist.add(TextField(controller: controller,  decoration: InputDecoration(
-                    fillColor: Colors.white ,filled: true,
-
-                    hintText: '輸入區域 ${controllerlist.indexOf(controller)+1}',
-                  ),
-                  ),);
+                  arealist.add(
+                    TextField(
+                      controller: controller,
+                      decoration: InputDecoration(
+                        fillColor: Colors.white,
+                        filled: true,
+                        hintText:
+                            '輸入區域 ${controllerlist.indexOf(controller) + 1}',
+                      ),
+                    ),
+                  );
                 });
               },
               icon: Icon(Icons.add)),
@@ -137,8 +143,7 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver  {
                   showDialog<String>(
                     context: context,
                     builder: (BuildContext context) => AlertDialog(
-                      title: Text('確認新增'+placecontroller.text+'?'),
-
+                      title: Text('確認新增' + placecontroller.text + '?'),
                       content: Container(
                           width: double.maxFinite,
                           child: ListView.builder(
@@ -168,25 +173,18 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver  {
                             );
                             showDialog(
                               context: context,
-                              builder: (context) =>
-                                  FutureProgressDialog(
-                                      sendInventory()
-                                          .then((value) {
-                                        Fluttertoast.showToast(
-                                            msg: value,
-                                            toastLength: Toast
-                                                .LENGTH_SHORT,
-                                            gravity: ToastGravity
-                                                .CENTER,
-                                            timeInSecForIosWeb: 1,
-                                            backgroundColor:
-                                            Colors.red,
-                                            textColor:
-                                            Colors.white,
-                                            fontSize: 16.0);
-
-                                      }),
-                                      message: Text('資料處理中，請稍後')),
+                              builder: (context) => FutureProgressDialog(
+                                  sendInventory().then((value) {
+                                    Fluttertoast.showToast(
+                                        msg: value,
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.CENTER,
+                                        timeInSecForIosWeb: 1,
+                                        backgroundColor: Colors.red,
+                                        textColor: Colors.white,
+                                        fontSize: 16.0);
+                                  }),
+                                  message: Text('資料處理中，請稍後')),
                             );
                           },
                           child: const Text('確定'),
@@ -218,7 +216,14 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver  {
             onTap: () {
               print(arealist[index].controller.text);
             },
-            subtitle: arealist[index],
+            subtitle: TextField(
+              controller: controllerlist[index],
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                hintText: '輸入區域 ${index + 1}',
+              ),
+            ),
             trailing: IconButton(
               icon: Icon(Icons.delete),
               onPressed: () {
