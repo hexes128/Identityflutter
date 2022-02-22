@@ -153,11 +153,10 @@ print(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTi
           scopes: [
             'profile',
             'openid',
-
             'API',
             'email',
             'phone',
-          'address',
+            'address',
             'offline_access'
           ],
           allowInsecureConnections: true,
@@ -175,7 +174,8 @@ print(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTi
             });
         if (httpResponse.statusCode == 200) {
           var userinfo = jsonDecode(httpResponse.body);
-print(result.accessToken);
+print(result.accessToken +'\n'+'accesstoken');
+print(result.idToken+'\n'+'idtoken');
           await storage.deleteAll();
           await storage.write(key: 'name', value: userinfo['name']);
           await storage.write(key: 'email', value: userinfo['email']);
@@ -221,6 +221,7 @@ if(result!=null){
       setState(() {
 
       });
+_signInWithAutoCodeExchange();
     } catch (e) {
       backfrombroswer =false;
     }
