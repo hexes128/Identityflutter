@@ -123,7 +123,7 @@ class EditinfoRecordState extends State<EditinfoRecord>  with  WidgetsBindingObs
                               ListTile(
                                 title: Text('編輯前'),
 
-                                subtitle: Text('設備名稱:'+y['oldname']+'\n'+'地點:'+y['oldplace']+'\n'+'區域:'+y['oldarea']),
+                                subtitle: Text('設備名稱:'+y['oldname']+'\n'+'地點:'+y['oldplace']+'\n'+'區域:'+y['oldarea']+'\n'+'備註:'+(y['oldpostscript']==null?'無':y['oldpostscript'])),
                               )
                                 ,
                                 flex: 1,),
@@ -131,7 +131,7 @@ class EditinfoRecordState extends State<EditinfoRecord>  with  WidgetsBindingObs
                               ListTile(
                                 title:  Text('編輯後'),
 
-                                subtitle: Text('設備名稱:'+y['newname']+'\n'+'地點:'+y['newplace']+'\n'+'區域:'+y['newarea']),
+                                subtitle: Text('設備名稱:'+y['newname']+'\n'+'地點:'+y['newplace']+'\n'+'區域:'+y['newarea']+'\n'+'備註:'+(y['newpostscript']==null?'無':y['newpostscript'])),
                               ),
                                 flex: 1,),
 
@@ -237,7 +237,7 @@ class Datasearch extends SearchDelegate<String> {
                   ListTile(
                     title: Text('編輯前'),
 
-                    subtitle: Text('設備名稱:'+record['oldname']+'\n'+'地點:'+record['oldplace']+'\n'+'區域:'+record['oldarea']),
+                    subtitle: Text('設備名稱:'+record['oldname']+'\n'+'地點:'+record['oldplace']+'\n'+'區域:'+record['oldarea']+'\n'+'備註:'+(record['oldpostscript']==null?'無':record['oldpostscript'])),
                   )
                     ,
                     flex: 1,),
@@ -245,7 +245,7 @@ class Datasearch extends SearchDelegate<String> {
                   ListTile(
                     title:  Text('編輯後'),
 
-                    subtitle: Text('設備名稱:'+record['newname']+'\n'+'地點:'+record['newplace']+'\n'+'區域:'+record['newarea']),
+                    subtitle: Text('設備名稱:'+record['newname']+'\n'+'地點:'+record['newplace']+'\n'+'區域:'+record['newarea']+'\n'+'備註:'+(record['newpostscript']==null?'無':record['newpostscript'])),
                   ),
                     flex: 1,),
 
