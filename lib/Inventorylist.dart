@@ -127,15 +127,21 @@ class InventoryListState extends State<InventoryList>
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(<String, dynamic>{
-            'UserId': GV.info['name'],
+            'UserName': GV.info['name'],
             'PlaceId': PlaceList[Placeindex]['placeId'],
             'InventoryItemList': iteminfo
           }));
-
+var a =jsonEncode(<String, dynamic>{
+  'UserName': GV.info['name'],
+  'PlaceId': PlaceList[Placeindex]['placeId'],
+  'InventoryItemList': iteminfo
+});
+var b=0;
       if (response.statusCode == 200) {
         print(response.body);
         return response.body;
       } else {
+
         print('錯誤');
       }
     } on Error catch (e) {
@@ -454,84 +460,6 @@ class InventoryListState extends State<InventoryList>
                 ),
                 body: Column(
                   children: [
-                    // showcamera
-                    //     ? Expanded(
-                    //         flex: 3,
-                    //         child: Container(
-                    //           width: double.infinity, // custom wrap size
-                    //           height: 250,
-                    //           child: ScanView(
-                    //             controller: scanController,
-                    //             scanAreaScale: 0.9,
-                    //             scanLineColor: Colors.green.shade400,
-                    //             onCapture: (data) {
-                    //               var Fireitrm;
-                    //               bool showcancel = false;
-                    //               bool isnormal = false;
-                    //               String itemId = '';
-                    //               String hintmessage = '';
-                    //
-                    //               try {
-                    //                 Fireitrm = ItemList.singleWhere(
-                    //                     (e) => e['itemId'] == data);
-                    //                 itemId = Fireitrm['itemId'];
-                    //                 if (Fireitrm['presentStatus'] == 0) {
-                    //                   if (Fireitrm['inventoryStatus'] == 0) {
-                    //                     showcancel = true;
-                    //                     isnormal = true;
-                    //                     hintmessage = Fireitrm['itemName'];
-                    //                   } else {
-                    //                     hintmessage = '此設備已勾選';
-                    //                   }
-                    //                 } else {
-                    //                   hintmessage = '借出/報修中，無法盤點';
-                    //                 }
-                    //               } on Error catch (e) {
-                    //                 hintmessage = '查無此設備，請確認地點區域是否正確';
-                    //               } finally {
-                    //                 showDialog<String>(
-                    //                   context: context,
-                    //                   builder: (BuildContext context) =>
-                    //                       AlertDialog(
-                    //                     title: Text(itemId),
-                    //                     content: Text(hintmessage),
-                    //                     actions: <Widget>[
-                    //                       Visibility(
-                    //                           visible: showcancel,
-                    //                           child: TextButton(
-                    //                             onPressed: () {
-                    //                               Navigator.pop(
-                    //                                 context,
-                    //                               );
-                    //
-                    //                               scanController.resume();
-                    //                             },
-                    //                             child: Text('取消'),
-                    //                           )),
-                    //                       TextButton(
-                    //                         onPressed: () {
-                    //                           setState(() {
-                    //                             if (isnormal) {
-                    //                               Fireitrm['inventoryStatus'] =
-                    //                                   1;
-                    //                             }
-                    //                           });
-                    //                           Navigator.pop(
-                    //                             context,
-                    //                           );
-                    //                           scanController.resume();
-                    //                         },
-                    //                         child: const Text('確定'),
-                    //                       ),
-                    //                     ],
-                    //                   ),
-                    //                 );
-                    //               }
-                    //             },
-                    //           ),
-                    //         ),
-                    //       )
-                    //     :
                     StreamBuilder<List<BluetoothDevice>>(
                             stream: Stream.periodic(const Duration(seconds: 1))
                                 .asyncMap((_) => FlutterBlue.instance.connectedDevices),
@@ -613,6 +541,85 @@ class InventoryListState extends State<InventoryList>
                                 }).toList(),
                               );
                             }),
+                    // showcamera
+                    //     ? Expanded(
+                    //         flex: 3,
+                    //         child: Container(
+                    //           width: double.infinity, // custom wrap size
+                    //           height: 250,
+                    //           child: ScanView(
+                    //             controller: scanController,
+                    //             scanAreaScale: 0.9,
+                    //             scanLineColor: Colors.green.shade400,
+                    //             onCapture: (data) {
+                    //               var Fireitrm;
+                    //               bool showcancel = false;
+                    //               bool isnormal = false;
+                    //               String itemId = '';
+                    //               String hintmessage = '';
+                    //
+                    //               try {
+                    //                 Fireitrm = ItemList.singleWhere(
+                    //                     (e) => e['itemId'] == data);
+                    //                 itemId = Fireitrm['itemId'];
+                    //                 if (Fireitrm['presentStatus'] == 0) {
+                    //                   if (Fireitrm['inventoryStatus'] == 0) {
+                    //                     showcancel = true;
+                    //                     isnormal = true;
+                    //                     hintmessage = Fireitrm['itemName'];
+                    //                   } else {
+                    //                     hintmessage = '此設備已勾選';
+                    //                   }
+                    //                 } else {
+                    //                   hintmessage = '借出/報修中，無法盤點';
+                    //                 }
+                    //               } on Error catch (e) {
+                    //                 hintmessage = '查無此設備，請確認地點區域是否正確';
+                    //               } finally {
+                    //                 showDialog<String>(
+                    //                   context: context,
+                    //                   builder: (BuildContext context) =>
+                    //                       AlertDialog(
+                    //                     title: Text(itemId),
+                    //                     content: Text(hintmessage),
+                    //                     actions: <Widget>[
+                    //                       Visibility(
+                    //                           visible: showcancel,
+                    //                           child: TextButton(
+                    //                             onPressed: () {
+                    //                               Navigator.pop(
+                    //                                 context,
+                    //                               );
+                    //
+                    //                               scanController.resume();
+                    //                             },
+                    //                             child: Text('取消'),
+                    //                           )),
+                    //                       TextButton(
+                    //                         onPressed: () {
+                    //                           setState(() {
+                    //                             if (isnormal) {
+                    //                               Fireitrm['inventoryStatus'] =
+                    //                                   1;
+                    //                             }
+                    //                           });
+                    //                           Navigator.pop(
+                    //                             context,
+                    //                           );
+                    //                           scanController.resume();
+                    //                         },
+                    //                         child: const Text('確定'),
+                    //                       ),
+                    //                     ],
+                    //                   ),
+                    //                 );
+                    //               }
+                    //             },
+                    //           ),
+                    //         ),
+                    //       )
+                    //     :
+
                     Expanded(
                         flex: 7,
                         child: Ddefaultshow

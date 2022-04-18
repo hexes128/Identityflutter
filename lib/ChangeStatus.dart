@@ -186,14 +186,14 @@ class ChangeStatusState extends State<ChangeStatus>
                         List<dynamic> infoList = groupItemList.where((e) => e['inventoryStatus'] != 5).toList();
                         if (infoList.length != 0) {
 
-
+print(GV.info['name']);
 
                           List<dynamic> sendItemList = infoList.map((e) => {
                                     'ItemId': e['itemId'],
                                     'Beforechange': e['presentStatus'],
                                     'StatusCode': e['inventoryStatus'],
                                     'PlaceId': PlaceList[Placeindex]['placeId'],
-                                    'UserId': GV.info['name']
+                                    'UserName': GV.info['name']
                                   }).toList();
 
 

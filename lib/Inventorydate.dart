@@ -120,7 +120,7 @@ class InventoryRecordState extends State<InventoryRecord>
                                     title: Text(DateFormat('MM/dd kk:mm')
                                         .format(DateTime.parse(
                                             y['inventoryDate']))),
-                                subtitle: Text(y['userId']),
+                                subtitle: Text(y['userName']),
 
                                 onTap: (){  Navigator.push(
                                   //從登入push到第二個

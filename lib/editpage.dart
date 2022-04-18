@@ -90,7 +90,7 @@ class editstate extends State<editietm> with WidgetsBindingObserver {
         '${PlaceList[widget.initialplace]['priorityList'][widget.initialarea]['storeId']}');
     print(
         '${PlaceList[placecontroller.selectedItem]['priorityList'][areacontroller.selectedItem]['storeId']}');
-print(jsonEncode(<String, dynamic>{
+print( jsonEncode(<String, dynamic>{
   'itemid': widget.Fireitem['itemId'],
   'oldname': widget.Fireitem['itemName'],
   'newname': namecontroller.text,
@@ -98,8 +98,9 @@ print(jsonEncode(<String, dynamic>{
   [widget.initialarea]['storeId'],
   'newstore': PlaceList[placecontroller.selectedItem]['priorityList']
   [areacontroller.selectedItem]['storeId'],
-  'UserId': GV.info['name'],
-  'postscript': postscriptcontroller.text.trim()
+  'UserName': GV.info['name'],
+  'oldpostscript':   widget.Fireitem['postscript']==null?'':   widget.Fireitem['postscript'],
+  'newpostscript':postscriptcontroller.text.trim()
 }));
     try {
       var response = await http.post(
@@ -120,7 +121,7 @@ print(jsonEncode(<String, dynamic>{
                 [widget.initialarea]['storeId'],
             'newstore': PlaceList[placecontroller.selectedItem]['priorityList']
                 [areacontroller.selectedItem]['storeId'],
-            'UserId': GV.info['name'],
+            'UserName': GV.info['name'],
             'oldpostscript':   widget.Fireitem['postscript']==null?'':   widget.Fireitem['postscript'],
             'newpostscript':postscriptcontroller.text.trim()
           }));

@@ -142,7 +142,7 @@ class EditinfoRecordState extends State<EditinfoRecord>  with  WidgetsBindingObs
                           ),
                           Container(
                             child: Center(child: Text(
-                                '更動人:'+y['userId']+' 日期:'+
+                                '更動人:'+y['userName']+' 日期:'+
                                     DateFormat('MM/dd kk:mm')
                                         .format(DateTime.parse(
                                         y['changeDate'])))),
@@ -256,7 +256,7 @@ class Datasearch extends SearchDelegate<String> {
               ),
               Container(
                 child: Center(child: Text(
-                    '更動人:'+record['userId']+' 日期:'+
+                    '更動人:'+record['userName']+' 日期:'+
                         DateFormat('MM/dd kk:mm')
                             .format(DateTime.parse(
                             record['changeDate'])))),

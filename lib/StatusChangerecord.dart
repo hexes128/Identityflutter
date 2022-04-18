@@ -164,7 +164,7 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
                                             ),
                                             Text(
                                                 '更改人:' +
-                                                    y['userId'])
+                                                    y['userName'])
 
 
                                           ],
@@ -276,7 +276,7 @@ class Datasearch extends SearchDelegate<String> {
                     ),
                     Text(
                         '更改人:' +
-                            record['userId'])
+                            record['userName'])
 
 
                   ],
