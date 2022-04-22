@@ -64,7 +64,7 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
 
   var namecontroller = TextEditingController();
 
-  Future<String> sendnewitem() async {
+  Future<String?> sendnewitem() async {
     var access_token = GV.info!['accessToken'];
 
     try {
@@ -199,7 +199,7 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
                                             FutureProgressDialog(
                                                 sendnewitem().then((value) {
                                                   Fluttertoast.showToast(
-                                                      msg: value,
+                                                      msg: value==null?'':value,
                                                       toastLength:
                                                           Toast.LENGTH_SHORT,
                                                       gravity:

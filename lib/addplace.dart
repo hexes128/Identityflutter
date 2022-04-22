@@ -44,7 +44,7 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver {
     }
   }
 
-  Future<String> sendInventory() async {
+  Future<String?> sendInventory() async {
     var access_token = GV.info!['accessToken'];
 
     try {
@@ -176,7 +176,7 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver {
                               builder: (context) => FutureProgressDialog(
                                   sendInventory().then((value) {
                                     Fluttertoast.showToast(
-                                        msg: value,
+                                        msg: value==null?'':value,
                                         toastLength: Toast.LENGTH_SHORT,
                                         gravity: ToastGravity.CENTER,
                                         timeInSecForIosWeb: 1,

@@ -83,7 +83,7 @@ class editstate extends State<editietm> with WidgetsBindingObserver {
   TextEditingController? namecontroller;
   TextEditingController? postscriptcontroller;
 
-  Future<String> sendnewitem() async {
+  Future<String?> sendnewitem() async {
     var access_token = GV.info!['accessToken'];
 
     print(
@@ -408,7 +408,7 @@ print( jsonEncode(<String, dynamic>{
                             builder: (context) => FutureProgressDialog(
                                 sendnewitem().then((value) {
                                   Fluttertoast.showToast(
-                                      msg: value,
+                                      msg: value==null?'':value,
                                       toastLength: Toast.LENGTH_SHORT,
                                       gravity: ToastGravity.CENTER,
                                       timeInSecForIosWeb: 1,

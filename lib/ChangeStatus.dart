@@ -97,7 +97,7 @@ class ChangeStatusState extends State<ChangeStatus>
         false;
   }
 
-  Future<String> sendInventory(List<dynamic> iteminfo) async {
+  Future<String?> sendInventory(List<dynamic> iteminfo) async {
     var access_token =GV.info!['accessToken'];
 
     try {
@@ -237,7 +237,7 @@ print(GV.info!['name']);
                                               sendInventory(sendItemList)
                                                   .then((value) {
                                                 Fluttertoast.showToast(
-                                                    msg: '成功新增' + value + '筆紀錄',
+                                                    msg: '成功新增' + (value==null?'':value) + '筆紀錄',
                                                     toastLength:
                                                         Toast.LENGTH_SHORT,
                                                     gravity:
