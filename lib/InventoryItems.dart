@@ -11,21 +11,21 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 
 class InventoryRecorditem extends StatefulWidget {
-  InventoryRecorditem({Key key, this.inventoryid, this.date}) : super(key: key);
-  int inventoryid;
-  String date;
+  InventoryRecorditem({Key? key, this.inventoryid, this.date}) : super(key: key);
+  int? inventoryid;
+  String? date;
 
   @override
   State<StatefulWidget> createState() => InventoryRecorditemState();
 }
-List<dynamic> Itemlist;
+List<dynamic>? Itemlist;
 var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
 class InventoryRecorditemState extends State<InventoryRecorditem>
     with TickerProviderStateMixin , WidgetsBindingObserver {
 
 
-  Future<List<dynamic>> _callApi() async {
-    var access_token =GV.info['accessToken'];
+  Future<List<dynamic>?> _callApi() async {
+    var access_token =GV.info!['accessToken'];
 
     try {
       var response = await http.get(
@@ -48,19 +48,19 @@ class InventoryRecorditemState extends State<InventoryRecorditem>
   void initState() {
     super.initState();
     futureList = _callApi();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state.index==0){
-      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+      if(     DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inSeconds<GV.settimeout){
         GV.timeout=true;
         Navigator.of(context).popUntil((route) =>route.isFirst
         );
@@ -69,7 +69,7 @@ class InventoryRecorditemState extends State<InventoryRecorditem>
     }
   }
 
-  Future<List<dynamic>> futureList;
+  Future<List<dynamic>?>? futureList;
 
   // List<dynamic> Itemlist;
 
@@ -78,15 +78,15 @@ class InventoryRecorditemState extends State<InventoryRecorditem>
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<dynamic>>(
+    return FutureBuilder<List<dynamic>?>(
       future: futureList,
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>?> snapshot) {
         if (snapshot.hasData) {
           Itemlist = snapshot.data;
 
           return Scaffold(
               appBar: AppBar(
-                title: Text(widget.date),
+                title: Text(widget.date!),
                 actions: [
                   IconButton(
                       onPressed: () {
@@ -96,9 +96,9 @@ class InventoryRecorditemState extends State<InventoryRecorditem>
                 ],
               ),
               body: ListView.builder(
-                  itemCount: Itemlist.length,
+                  itemCount: Itemlist!.length,
                   itemBuilder: (context, index) {
-                    var record = Itemlist[index];
+                    var record = Itemlist![index];
                     var fireitem = record['fireitemsRef'];
 
                     return
@@ -157,7 +157,7 @@ class InventoryRecorditemState extends State<InventoryRecorditem>
   }
 }
 
-class Datasearch extends SearchDelegate<String> {
+class Datasearch extends SearchDelegate<String?> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return [IconButton(onPressed: () {
@@ -186,7 +186,7 @@ class Datasearch extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    var suggestions = query.isEmpty? Itemlist:Itemlist.where((e) => e['fireitemsRef']['itemId'].toString().contains(query) ||e['fireitemsRef']['itemName'].toString().contains(query)).toList();
+    var suggestions = query.isEmpty? Itemlist!:Itemlist!.where((e) => e['fireitemsRef']['itemId'].toString().contains(query) ||e['fireitemsRef']['itemName'].toString().contains(query)).toList();
  var a=0;
 
 

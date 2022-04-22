@@ -46,7 +46,7 @@ class scanstate extends State<scanpage> {
                         builder: (c, snapshot) {
                           return Column(
                             children:
-                             snapshot.data.map((d) {
+                             snapshot.data!.map((d) {
                               return ListTile(
                                 title: Text(d.name),
                                 subtitle: Text(d.id.toString()),
@@ -64,9 +64,9 @@ class scanstate extends State<scanpage> {
                                         initialData: [],
                                         builder: (c, snapshot) {
                                           if (snapshot.hasData &&
-                                              snapshot.data.isNotEmpty) {
+                                              snapshot.data!.isNotEmpty) {
                                             BluetoothService service =
-                                            snapshot.data.singleWhere((e) =>
+                                            snapshot.data!.singleWhere((e) =>
                                             e.uuid.toString() ==
                                                 '0000ffe0-0000-1000-8000-00805f9b34fb');
 
@@ -156,7 +156,7 @@ class scanstate extends State<scanpage> {
                         builder: (c, snapshot) {
 
                           return Column(
-                            children: snapshot.data
+                            children: snapshot.data!
                                 .where((e) =>
                                     e.advertisementData.connectable &&
                                     e.device.name.isNotEmpty)
@@ -190,7 +190,7 @@ class scanstate extends State<scanpage> {
                 stream: FlutterBlue.instance.isScanning,
                 initialData: false,
                 builder: (c, snapshot) {
-                  if (snapshot.data) {
+                  if (snapshot.data!) {
                     return FloatingActionButton(
                       child: Icon(Icons.stop),
                       onPressed: () => FlutterBlue.instance.stopScan(),
@@ -212,9 +212,9 @@ class scanstate extends State<scanpage> {
 }
 
 class BluetoothOffScreen extends StatelessWidget {
-  const BluetoothOffScreen({Key key, this.state}) : super(key: key);
+  const BluetoothOffScreen({Key? key, this.state}) : super(key: key);
 
-  final BluetoothState state;
+  final BluetoothState? state;
 
   @override
   Widget build(BuildContext context) {

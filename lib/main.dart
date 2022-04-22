@@ -36,8 +36,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  MyHomePage({Key? key, this.title}) : super(key: key);
+  final String? title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -76,7 +76,7 @@ var expired = await storage.read(key: 'accessTokenExpirationDateTime');
   @override
   initState() {
 initialtimeoutcheck();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
     super.initState();
 
   }
@@ -84,7 +84,7 @@ initialtimeoutcheck();
   @override
   void dispose() {
 
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 
@@ -101,8 +101,8 @@ initialtimeoutcheck();
         return;
       }
 
-      if( GV.info!=null && DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
-print(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds);
+      if( GV.info!=null && DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inSeconds<GV.settimeout){
+print(DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inSeconds);
         showDialog<String>(
           barrierDismissible: false,
           context: context,
@@ -111,7 +111,7 @@ print(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTi
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  _logout(GV.info['idToken']);
+                  _logout(GV.info!['idToken']);
                   Navigator.pop(
                     context,
                   );
@@ -140,7 +140,7 @@ print(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTi
 
   Future<void> _signInWithAutoCodeExchange() async {
     try {
-      final AuthorizationTokenResponse result =
+      final AuthorizationTokenResponse? result =
           await _appAuth.authorizeAndExchangeCode(
         AuthorizationTokenRequest(
           'flutter',
@@ -174,8 +174,8 @@ print(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTi
             });
         if (httpResponse.statusCode == 200) {
           var userinfo = jsonDecode(httpResponse.body);
-print(result.accessToken +'\n'+'accesstoken');
-print(result.idToken+'\n'+'idtoken');
+print(result.accessToken! +'\n'+'accesstoken');
+print(result.idToken!+'\n'+'idtoken');
           await storage.deleteAll();
           await storage.write(key: 'name', value: userinfo['name']);
           await storage.write(key: 'email', value: userinfo['email']);
@@ -198,12 +198,12 @@ print(result.idToken+'\n'+'idtoken');
     }
   }
 
-  Future<void> _logout(String idtoken) async {
+  Future<void> _logout(String? idtoken) async {
     try {
       // await storage.deleteAll();
 backfrombroswer =true;
 
-EndSessionResponse result =      await _appAuth.endSession(EndSessionRequest(
+EndSessionResponse? result =      await _appAuth.endSession(EndSessionRequest(
           idTokenHint: idtoken,
           postLogoutRedirectUrl:
               'com.firedepartment.apps.flutter2:/oauth2redirect',
@@ -230,7 +230,7 @@ _signInWithAutoCodeExchange();
 
 
   Future<String> sendemail() async {
-    var access_token = GV.info['accessToken'];
+    var access_token = GV.info!['accessToken'];
 
     try {
       var response = await http.get(
@@ -239,7 +239,7 @@ _signInWithAutoCodeExchange();
               host: '140.133.78.140',
               port: 81,
               path: 'Item/generatecodewithoutsave',
-              queryParameters: <String, String>{'email': GV.info['email']}),
+              queryParameters: <String, String?>{'email': GV.info!['email']}),
           headers: {"Authorization": "Bearer $access_token"});
       if (response.statusCode == 200) {
         return '123';
@@ -270,19 +270,19 @@ _signInWithAutoCodeExchange();
         future: storage.readAll(),
         initialData:null,
         builder: (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
-          if (snapshot.hasData&& snapshot.data.isNotEmpty) {
+          if (snapshot.hasData&& snapshot.data!.isNotEmpty) {
             var selectfeature = arr[_selectedIndex];
             GV.info = snapshot.data;
             return Scaffold(
               appBar: AppBar(actions: [
                 IconButton(
                     onPressed: () {
-                      _logout(snapshot.data['idToken']);
+                      _logout(snapshot.data!['idToken']);
                     },
                     icon: Icon(Icons.logout))
               ], title:
-              ListTile(title: Text('歡迎 ${GV.info['name']}'),subtitle:
-                Text('登入剩餘時間:'+(DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inMinutes-10).toString()+'分鐘'))
+              ListTile(title: Text('歡迎 ${GV.info!['name']}'),subtitle:
+                Text('登入剩餘時間:'+(DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inMinutes-10).toString()+'分鐘'))
              ),
               body:
               GridView.builder(
@@ -296,7 +296,7 @@ _signInWithAutoCodeExchange();
                         child: Center(child: Text(selectfeature[index])),
                       ),
                       onTap: () {
-                        MaterialPageRoute route;
+                        late MaterialPageRoute route;
                         switch (selectfeature[index]) {
                           case ('個人資料'):
                             {
@@ -374,7 +374,7 @@ _signInWithAutoCodeExchange();
                           setState(() {
 
                           });
-                          if(  DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+                          if(  DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inSeconds<GV.settimeout){
                             showDialog<String>(
                               barrierDismissible: false,
                               context: context,
@@ -383,7 +383,7 @@ _signInWithAutoCodeExchange();
                                 actions: <Widget>[
                                   TextButton(
                                     onPressed: () {
-                                      _logout(GV.info['idToken']);
+                                      _logout(GV.info!['idToken']);
                                       Navigator.pop(
                                         context,
                                       );

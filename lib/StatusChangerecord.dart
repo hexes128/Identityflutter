@@ -11,20 +11,20 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 
 class StatusRecord extends StatefulWidget {
-  StatusRecord({Key key}) : super(key: key);
+  StatusRecord({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => StatusRecordState();
 }
-List<dynamic> recordlist;
+List<dynamic>? recordlist;
 
 var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
 class StatusRecordState extends State<StatusRecord>
   with WidgetsBindingObserver {
   ScanController scanController = ScanController();
 
-  Future<List<dynamic>> _callApi() async {
-    var access_token =GV.info['accessToken'];
+  Future<List<dynamic>?> _callApi() async {
+    var access_token =GV.info!['accessToken'];
 
     try {
       var response = await http.get(
@@ -46,20 +46,20 @@ class StatusRecordState extends State<StatusRecord>
   void initState() {
     super.initState();
     futureList = _callApi();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
 
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state.index==0){
-      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+      if(     DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inSeconds<GV.settimeout){
         GV.timeout=true;
         Navigator.of(context).popUntil((route) =>route.isFirst
         );
@@ -68,9 +68,9 @@ class StatusRecordState extends State<StatusRecord>
     }
   }
 
-  Future<List<dynamic>> futureList;
+  Future<List<dynamic>?>? futureList;
 
-  List<dynamic> PlaceList;
+  List<dynamic>? PlaceList;
 
 
 
@@ -84,21 +84,21 @@ class StatusRecordState extends State<StatusRecord>
 
   @override
   Widget build(BuildContext context) {
-    return  FutureBuilder<List<dynamic>>(
+    return  FutureBuilder<List<dynamic>?>(
       future: futureList,
       builder:
-          (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+          (BuildContext context, AsyncSnapshot<List<dynamic>?> snapshot) {
         if (snapshot.hasData) {
           PlaceList = snapshot.data;
-          var Place = PlaceList[Placeindex];
+          var Place = PlaceList![Placeindex];
          recordlist = Place['statusChangeList'];
-recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b['changeDate']))?1:-1);
+recordlist!.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b['changeDate']))?1:-1);
 
           return Scaffold(
               appBar: AppBar(
                 title:
                 CupertinoPicker(
-                  children: PlaceList.map((e) =>
+                  children: PlaceList!.map((e) =>
                       Center(child: Text(e['placeName']))).toList(),
                   itemExtent: 50,
                   onSelectedItemChanged: (int index) {
@@ -119,7 +119,7 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
               body:
                   ListView(
                     shrinkWrap: true,
-                    children:     recordlist
+                    children:     recordlist!
                         .map((e) {
                       DateTime etime = DateTime.parse(e['changeDate']);
                       return DateTime(etime.year, etime.month);
@@ -127,7 +127,7 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
                         .toSet()
                         .map((e) => ExpansionTile(
                       title: Text('${e.year}年 ${e.month}月'),
-                      children: recordlist
+                      children: recordlist!
                           .where((x) => (DateTime.parse(x['changeDate'])
                           .year ==
                           e.year &&
@@ -206,7 +206,7 @@ recordlist.sort((a,b)=>DateTime.parse(a['changeDate']).isBefore(DateTime.parse(b
     );
   }
 }
-class Datasearch extends SearchDelegate<String> {
+class Datasearch extends SearchDelegate<String?> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return [IconButton(onPressed: () {
@@ -235,7 +235,7 @@ class Datasearch extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    var suggestions = query.isEmpty? recordlist:recordlist.where((e) => e['fireitemRef']['itemId'].toString().contains(query) ||e['fireitemRef']['itemName'].toString().contains(query)).toList();
+    var suggestions = query.isEmpty? recordlist!:recordlist!.where((e) => e['fireitemRef']['itemId'].toString().contains(query) ||e['fireitemRef']['itemName'].toString().contains(query)).toList();
     var a=0;
 
 

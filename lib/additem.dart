@@ -20,19 +20,19 @@ class additemform extends StatefulWidget {
 class additemstate extends State<additemform> with WidgetsBindingObserver {
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
     super.initState();
     futureList = _callApi();
   }
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
    if(state.index==0){
-     if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+     if(     DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inSeconds<GV.settimeout){
       GV.timeout=true;
        Navigator.of(context).popUntil((route) =>route.isFirst
      );
@@ -41,10 +41,10 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
    }
   }
 
-  Future<List<dynamic>> futureList;
+  Future<List<dynamic>?>? futureList;
 
-  Future<List<dynamic>> _callApi() async {
-    var access_token = GV.info['accessToken'];
+  Future<List<dynamic>?> _callApi() async {
+    var access_token = GV.info!['accessToken'];
 
     try {
       var response = await http.get(
@@ -65,7 +65,7 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
   var namecontroller = TextEditingController();
 
   Future<String> sendnewitem() async {
-    var access_token = GV.info['accessToken'];
+    var access_token = GV.info!['accessToken'];
 
     try {
       var response = await http.post(
@@ -82,8 +82,8 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
             return {
               'ItemName': e.namecontroller.text,
               'postscript':
-                  e.addpostscript ? e.postscriptcontroller.text : '',
-              'StoreId': Arealist[e.areaindex]['storeId']
+                  e.addpostscript! ? e.postscriptcontroller.text : '',
+              'StoreId': Arealist![e.areaindex]['storeId']
             };
           }).toList()));
 
@@ -97,10 +97,10 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
     }
   }
 
-  List<dynamic> PlaceList;
-  List<dynamic> Arealist;
+  List<dynamic>? PlaceList;
+  List<dynamic>? Arealist;
   List<iteminput> itemlist = [];
-  String Areavalue;
+  String? Areavalue;
 
   int Placeindex = 0;
   int Areaindex = 0;
@@ -108,18 +108,18 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<dynamic>>(
+    return FutureBuilder<List<dynamic>?>(
       future: futureList,
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>?> snapshot) {
         if (snapshot.hasData) {
           PlaceList = snapshot.data;
-          Arealist = PlaceList[Placeindex]['priorityList'];
+          Arealist = PlaceList![Placeindex]['priorityList'];
 
-          Arealist.sort((a, b) => a['priorityNum'].compareTo(b['priorityNum']));
+          Arealist!.sort((a, b) => a['priorityNum'].compareTo(b['priorityNum']));
           return Scaffold(
               appBar: AppBar(
                   title: CupertinoPicker(
-                    children: PlaceList.map(
+                    children: PlaceList!.map(
                         (e) => Center(child: Text(e['placeName']))).toList(),
                     itemExtent: 50,
                     onSelectedItemChanged: (int index) {
@@ -172,10 +172,10 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
                                             child: ListTile(
                                               title: Text(itemlist[index]
                                                   .namecontroller
-                                                  .text+' '+Arealist[
+                                                  .text+' '+Arealist![
                                               itemlist[index].areaindex]
                                               ['subArea']),
-                                              subtitle: Text(itemlist[index].addpostscript?'備註:'+itemlist[index].postscriptcontroller.text:''),
+                                              subtitle: Text(itemlist[index].addpostscript!?'備註:'+itemlist[index].postscriptcontroller.text:''),
                                             ),
                                           );
                                         })),
@@ -246,7 +246,7 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
                         child: Row(children: [
                           Expanded(
                             child: Column(
-                                children: controllers.addpostscript
+                                children: controllers.addpostscript!
                                     ? [
                                         TextField(
                                             controller:
@@ -284,22 +284,22 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
                             child: Column(children: [
                               Text('存放區'),
                               DropdownButton<String>(
-                                value: Arealist[controllers.areaindex]
+                                value: Arealist![controllers.areaindex]
                                     ['subArea'],
                                 iconSize: 24,
                                 elevation: 16,
                                 style:
                                     const TextStyle(color: Colors.deepPurple),
-                                onChanged: (String newValue) {
+                                onChanged: (String? newValue) {
                                   setState(() {
                                     controllers.areaindex =
-                                        Arealist.map((e) => e['subArea'])
+                                        Arealist!.map((e) => e['subArea'])
                                             .toList()
                                             .indexOf(newValue);
                                   });
                                 },
                                 items:
-                                    Arealist.map((e) => e['subArea'].toString())
+                                    Arealist!.map((e) => e['subArea'].toString())
                                         .map<DropdownMenuItem<String>>(
                                             (String value) {
                                   return DropdownMenuItem<String>(
@@ -317,7 +317,7 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
                               Checkbox(
                                 checkColor: Colors.white,
                                 value: controllers.addpostscript,
-                                onChanged: (bool value) {
+                                onChanged: (bool? value) {
                                   setState(() {
                                     controllers.addpostscript = value;
                                   });
@@ -362,5 +362,5 @@ class iteminput {
   FixedExtentScrollController scrollController = FixedExtentScrollController();
 
   int areaindex = 0;
-  bool addpostscript = false;
+  bool? addpostscript = false;
 }

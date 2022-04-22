@@ -11,18 +11,18 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 
 class EditinfoRecord extends StatefulWidget {
-  EditinfoRecord({Key key}) : super(key: key);
+  EditinfoRecord({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => EditinfoRecordState();
 }
 
-List<dynamic> recordlist;
+List<dynamic>? recordlist;
 class EditinfoRecordState extends State<EditinfoRecord>  with  WidgetsBindingObserver  {
   ScanController scanController = ScanController();
 
-  Future<List<dynamic>> _callApi() async {
-    var access_token =GV.info['accessToken'];
+  Future<List<dynamic>?> _callApi() async {
+    var access_token =GV.info!['accessToken'];
 
     try {
       var response = await http.get(
@@ -44,19 +44,19 @@ class EditinfoRecordState extends State<EditinfoRecord>  with  WidgetsBindingObs
   void initState() {
     super.initState();
     futureList = _callApi();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state.index==0){
-      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+      if(     DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inSeconds<GV.settimeout){
         GV.timeout=true;
         Navigator.of(context).popUntil((route) =>route.isFirst
         );
@@ -65,16 +65,16 @@ class EditinfoRecordState extends State<EditinfoRecord>  with  WidgetsBindingObs
     }
   }
 
-  Future<List<dynamic>> futureList;
+  Future<List<dynamic>?>? futureList;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<dynamic>>(
+    return FutureBuilder<List<dynamic>?>(
       future: futureList,
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>?> snapshot) {
         if (snapshot.hasData) {
            recordlist = snapshot.data;
-          recordlist.sort((a, b) => DateTime.parse(a['changeDate'])
+          recordlist!.sort((a, b) => DateTime.parse(a['changeDate'])
                   .isBefore(DateTime.parse(b['changeDate']))
               ? 1
               : -1);
@@ -95,7 +95,7 @@ class EditinfoRecordState extends State<EditinfoRecord>  with  WidgetsBindingObs
               body:
               ListView(
                 shrinkWrap: true,
-                children: recordlist
+                children: recordlist!
                     .map((e) {
                   DateTime etime = DateTime.parse(e['changeDate']);
                   return DateTime(etime.year, etime.month);
@@ -103,7 +103,7 @@ class EditinfoRecordState extends State<EditinfoRecord>  with  WidgetsBindingObs
                     .toSet()
                     .map((e) => ExpansionTile(
                   title: Text('${e.year}年 ${e.month}月'),
-                  children: snapshot.data
+                  children: snapshot.data!
                       .where((x) => (DateTime.parse(x['changeDate'])
                       .year ==
                       e.year &&
@@ -183,7 +183,7 @@ class EditinfoRecordState extends State<EditinfoRecord>  with  WidgetsBindingObs
   }
 }
 
-class Datasearch extends SearchDelegate<String> {
+class Datasearch extends SearchDelegate<String?> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return [IconButton(onPressed: () {
@@ -212,7 +212,7 @@ class Datasearch extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    var suggestions = query.isEmpty? recordlist:recordlist.where((e) => e['itemid'].toString().contains(query)).toList();
+    var suggestions = query.isEmpty? recordlist!:recordlist!.where((e) => e['itemid'].toString().contains(query)).toList();
     var a=0;
 
 

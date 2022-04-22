@@ -10,7 +10,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 
 class ChangeStatus extends StatefulWidget {
-  ChangeStatus({Key key}) : super(key: key);
+  ChangeStatus({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => ChangeStatusState();
@@ -20,8 +20,8 @@ class ChangeStatusState extends State<ChangeStatus>
     with TickerProviderStateMixin , WidgetsBindingObserver  {
   ScanController scanController = ScanController();
 
-  Future<List<dynamic>> _callApi() async {
-    var access_token =GV.info['accessToken'];
+  Future<List<dynamic>?> _callApi() async {
+    var access_token =GV.info!['accessToken'];
 
     try {
       var response = await http.get(
@@ -44,17 +44,17 @@ class ChangeStatusState extends State<ChangeStatus>
     super.initState();
     futureList = _callApi();
     tabController = TabController(length: 0, vsync: this);
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state.index==0){
-      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+      if(     DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inSeconds<GV.settimeout){
         GV.timeout=true;
         Navigator.of(context).popUntil((route) =>route.isFirst
         );
@@ -65,19 +65,19 @@ class ChangeStatusState extends State<ChangeStatus>
 
 
 
-  Future<List<dynamic>> futureList;
+  Future<List<dynamic>?>? futureList;
 
-  List<dynamic> PlaceList;
-  List<dynamic> AreaList;
-  List<dynamic> ItemList;
+  List<dynamic>? PlaceList;
+  List<dynamic>? AreaList;
+  List<dynamic>? ItemList;
   int Areaindex = 0;
   int Placeindex = 0;
   var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
 
-  TabController tabController;
+  TabController? tabController;
 
   Future<bool> _onWillPop() async {
-    return (await showDialog(
+    return (await (showDialog(
           context: context,
           builder: (context) => new AlertDialog(
             title: new Text('退出'),
@@ -93,12 +93,12 @@ class ChangeStatusState extends State<ChangeStatus>
               ),
             ],
           ),
-        )) ??
+        ) as FutureOr<bool>?)) ??
         false;
   }
 
   Future<String> sendInventory(List<dynamic> iteminfo) async {
-    var access_token =GV.info['accessToken'];
+    var access_token =GV.info!['accessToken'];
 
     try {
       var response = await http.post(
@@ -127,32 +127,32 @@ class ChangeStatusState extends State<ChangeStatus>
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        child: FutureBuilder<List<dynamic>>(
+        child: FutureBuilder<List<dynamic>?>(
           future: futureList,
           builder:
-              (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+              (BuildContext context, AsyncSnapshot<List<dynamic>?> snapshot) {
             if (snapshot.hasData) {
               PlaceList = snapshot.data;
-              AreaList = PlaceList[Placeindex]['priorityList'];
-              AreaList.sort(
+              AreaList = PlaceList![Placeindex]['priorityList'];
+              AreaList!.sort(
                   (a, b) => a['priorityNum'].compareTo(b['priorityNum']));
-              ItemList = AreaList[Areaindex]['fireitemList'];
+              ItemList = AreaList![Areaindex]['fireitemList'];
 
               tabController = TabController(
-                  length: AreaList.length,
+                  length: AreaList!.length,
                   vsync: this,
                   initialIndex: Areaindex);
-              tabController.addListener(() {
-                if (tabController.indexIsChanging) {
+              tabController!.addListener(() {
+                if (tabController!.indexIsChanging) {
                   setState(() {
-                    Areaindex = tabController.index;
+                    Areaindex = tabController!.index;
                   });
                 }
               });
               return Scaffold(
                 appBar: AppBar(
                   title: CupertinoPicker(
-                    children: PlaceList.map(
+                    children: PlaceList!.map(
                         (e) => Center(child: Text(e['placeName']))).toList(),
                     itemExtent: 50,
                     onSelectedItemChanged: (int index) {
@@ -165,9 +165,9 @@ class ChangeStatusState extends State<ChangeStatus>
                     IconButton(
                       icon: Icon(Icons.cloud_upload),
                       onPressed: () {
-                        if (PlaceList[Placeindex]['todaysend']) {
+                        if (PlaceList![Placeindex]['todaysend']) {
                           Fluttertoast.showToast(
-                              msg: PlaceList[Placeindex]['placeName'] +
+                              msg: PlaceList![Placeindex]['placeName'] +
                                   '請退出後重新進入',
                               toastLength: Toast.LENGTH_SHORT,
                               gravity: ToastGravity.CENTER,
@@ -178,7 +178,7 @@ class ChangeStatusState extends State<ChangeStatus>
                           return;
                         }
                         List<dynamic> groupItemList =
-                            AreaList.map((e) => e['fireitemList'])
+                            AreaList!.map((e) => e['fireitemList'])
                                 .expand((e) => e)
                                 .toList();
 
@@ -186,21 +186,21 @@ class ChangeStatusState extends State<ChangeStatus>
                         List<dynamic> infoList = groupItemList.where((e) => e['inventoryStatus'] != 5).toList();
                         if (infoList.length != 0) {
 
-print(GV.info['name']);
+print(GV.info!['name']);
 
                           List<dynamic> sendItemList = infoList.map((e) => {
                                     'ItemId': e['itemId'],
                                     'Beforechange': e['presentStatus'],
                                     'StatusCode': e['inventoryStatus'],
-                                    'PlaceId': PlaceList[Placeindex]['placeId'],
-                                    'UserName': GV.info['name']
+                                    'PlaceId': PlaceList![Placeindex]['placeId'],
+                                    'UserName': GV.info!['name']
                                   }).toList();
 
 
                           showDialog<String>(
                             context: context,
                             builder: (BuildContext context) => AlertDialog(
-                              title: Text(PlaceList[Placeindex]['placeName']),
+                              title: Text(PlaceList![Placeindex]['placeName']),
                               content: Container(
                                   width: double.maxFinite,
                                   child: ListView.builder(
@@ -246,7 +246,7 @@ print(GV.info['name']);
                                                     backgroundColor: Colors.red,
                                                     textColor: Colors.white,
                                                     fontSize: 16.0);
-                                                PlaceList[Placeindex]
+                                                PlaceList![Placeindex]
                                                     ['todaysend'] = true;
                                               }),
                                               message: Text('資料處理中，請稍後')),
@@ -283,10 +283,10 @@ print(GV.info['name']);
                           ),
                           Expanded(
                             child: ListView.builder(
-                                itemCount: ItemList.where(
+                                itemCount: ItemList!.where(
                                     (e) => e['inventoryStatus'] == 5).length,
                                 itemBuilder: (context, index) {
-                                  var notchecklist = ItemList.where(
+                                  var notchecklist = ItemList!.where(
                                           (e) => e['inventoryStatus'] == 5)
                                       .toList();
                                   var Fireitem = notchecklist[index];
@@ -380,10 +380,10 @@ print(GV.info['name']);
                             ),
                             Expanded(
                               child: ListView.builder(
-                                  itemCount: ItemList.where(
+                                  itemCount: ItemList!.where(
                                       (e) => e['inventoryStatus'] != 5).length,
                                   itemBuilder: (context, index) {
-                                    var checklist = ItemList.where(
+                                    var checklist = ItemList!.where(
                                             (e) => e['inventoryStatus'] != 5)
                                         .toList();
                                     var Fireitem = checklist[index];
@@ -444,7 +444,7 @@ print(GV.info['name']);
                       labelColor: Colors.black,
                       unselectedLabelColor: Colors.white,
                       isScrollable: true,
-                      tabs: AreaList.map((e) => Tab(
+                      tabs: AreaList!.map((e) => Tab(
                               text: e['subArea'] +
                                   ' ' +
                                   '(${e['fireitemList'].where((x) => x['inventoryStatus'] != 5).length})'))

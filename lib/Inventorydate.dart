@@ -12,7 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 
 class InventoryRecord extends StatefulWidget {
-  InventoryRecord({Key key}) : super(key: key);
+  InventoryRecord({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => InventoryRecordState();
@@ -20,8 +20,8 @@ class InventoryRecord extends StatefulWidget {
 
 class InventoryRecordState extends State<InventoryRecord>
     with TickerProviderStateMixin , WidgetsBindingObserver{
-  Future<List<dynamic>> _callApi() async {
-    var access_token =GV.info['accessToken'];
+  Future<List<dynamic>?> _callApi() async {
+    var access_token =GV.info!['accessToken'];
 
     try {
       var response = await http.get(
@@ -43,18 +43,18 @@ class InventoryRecordState extends State<InventoryRecord>
   void initState() {
     super.initState();
     futureList = _callApi();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state.index==0){
-      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+      if(     DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inSeconds<GV.settimeout){
         GV.timeout=true;
         Navigator.of(context).popUntil((route) =>route.isFirst
         );
@@ -63,9 +63,9 @@ class InventoryRecordState extends State<InventoryRecord>
     }
   }
 
-  Future<List<dynamic>> futureList;
+  Future<List<dynamic>?>? futureList;
 
-  List<dynamic> PlaceList;
+  List<dynamic>? PlaceList;
 
   int Placeindex = 0;
 
@@ -73,12 +73,12 @@ class InventoryRecordState extends State<InventoryRecord>
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<dynamic>>(
+    return FutureBuilder<List<dynamic>?>(
       future: futureList,
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>?> snapshot) {
         if (snapshot.hasData) {
           PlaceList = snapshot.data;
-          var place = PlaceList[Placeindex];
+          var place = PlaceList![Placeindex];
           List<dynamic> eventlist = place['inventoryEventList'];
           eventlist.sort((a,b)=>DateTime.parse(a['inventoryDate']).isBefore(DateTime.parse(b['inventoryDate']))?1:-1);
           print(place['placeName']);
@@ -86,7 +86,7 @@ class InventoryRecordState extends State<InventoryRecord>
           return Scaffold(
               appBar: AppBar(
                 title:  CupertinoPicker(
-                  children: PlaceList.map((e) =>
+                  children: PlaceList!.map((e) =>
                       Center(child: Text(e['placeName']))).toList(),
                   itemExtent: 50,
                   onSelectedItemChanged: (int index) {

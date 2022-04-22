@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
@@ -14,7 +15,7 @@ import 'package:flutter_switch/flutter_switch.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 
 class InventoryList extends StatefulWidget {
-  InventoryList({Key key}) : super(key: key);
+  InventoryList({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => InventoryListState();
@@ -24,8 +25,8 @@ class InventoryListState extends State<InventoryList>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   ScanController scanController = ScanController();
 
-  Future<List<dynamic>> _callApi() async {
-    var access_token = GV.info['accessToken'];
+  Future<List<dynamic>?> _callApi() async {
+    var access_token = GV.info!['accessToken'];
 
     try {
       var response = await http.get(
@@ -51,12 +52,12 @@ class InventoryListState extends State<InventoryList>
     super.initState();
     futureList = _callApi();
     tabController = TabController(length: 0, vsync: this);
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     SubscriptionList.forEach((element) {
       element.cancel();
     });
@@ -66,7 +67,7 @@ class InventoryListState extends State<InventoryList>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state.index == 0) {
-      if (DateTime.parse(GV.info['accessTokenExpirationDateTime'])
+      if (DateTime.parse(GV.info!['accessTokenExpirationDateTime']!)
               .difference(DateTime.now())
               .inSeconds <
           GV.settimeout) {
@@ -76,23 +77,23 @@ class InventoryListState extends State<InventoryList>
     }
   }
 
-  Future<List<dynamic>> futureList;
+  Future<List<dynamic>?>? futureList;
 
-  List<dynamic> PlaceList;
-  List<dynamic> AreaList;
-  List<dynamic> ItemList;
+  List<dynamic>? PlaceList;
+  List<dynamic>? AreaList;
+  List<dynamic>? ItemList;
   int Areaindex = 0;
   int Placeindex = 0;
   var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
 
-  TabController tabController;
+  TabController? tabController;
   // bool showcamera = false;
   bool Ddefaultshow = true;
   List<BluetoothCharacteristic> CharacteristicList = [];
   List<StreamSubscription> SubscriptionList = [];
 
   Future<bool> _onWillPop() async {
-    return (await showDialog(
+    return (await (showDialog(
           context: context,
           builder: (context) => new AlertDialog(
             title: new Text('退出盤點'),
@@ -108,12 +109,12 @@ class InventoryListState extends State<InventoryList>
               ),
             ],
           ),
-        )) ??
+        ) as FutureOr<bool>?)) ??
         false;
   }
 
   Future<String> sendInventory(List<dynamic> iteminfo) async {
-    var access_token = GV.info['accessToken'];
+    var access_token = GV.info!['accessToken'];
 
     try {
       var response = await http.post(
@@ -127,13 +128,13 @@ class InventoryListState extends State<InventoryList>
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(<String, dynamic>{
-            'UserName': GV.info['name'],
-            'PlaceId': PlaceList[Placeindex]['placeId'],
+            'UserName': GV.info!['name'],
+            'PlaceId': PlaceList![Placeindex]['placeId'],
             'InventoryItemList': iteminfo
           }));
 var a =jsonEncode(<String, dynamic>{
-  'UserName': GV.info['name'],
-  'PlaceId': PlaceList[Placeindex]['placeId'],
+  'UserName': GV.info!['name'],
+  'PlaceId': PlaceList![Placeindex]['placeId'],
   'InventoryItemList': iteminfo
 });
 var b=0;
@@ -159,7 +160,7 @@ var b=0;
     if (!characteristic.isNotifying) {
       try {
         await characteristic.setNotifyValue(true);
-        String devicename;
+        late String devicename;
 
         if (!CharacteristicList.map((e) => e.deviceId)
             .contains(characteristic.deviceId)) {
@@ -167,7 +168,7 @@ var b=0;
               characteristic.value.listen((event) {
             String id='';
             print(event);
-            AreaList.forEach((element) {
+            AreaList!.forEach((element) {
               try {
                 id = latin1.decode(event).toString().trim();
 
@@ -179,9 +180,8 @@ var b=0;
                   if (Fireitem['presentStatus'] == 0) {
                     if (Fireitem['inventoryStatus'] == 5) {
                       FlutterBlue.instance.connectedDevices.then((value) {
-                        BluetoothDevice device = value.singleWhere(
-                            (x) => x.id == characteristic.deviceId,
-                            orElse: () => null);
+                        BluetoothDevice? device = value.singleWhereOrNull(
+                            (x) => x.id == characteristic.deviceId);
                         if(device!=null){
                           devicename=device.name;
                         }
@@ -218,25 +218,25 @@ var b=0;
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        child: FutureBuilder<List<dynamic>>(
+        child: FutureBuilder<List<dynamic>?>(
           future: futureList,
           builder:
-              (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+              (BuildContext context, AsyncSnapshot<List<dynamic>?> snapshot) {
             if (snapshot.hasData) {
               PlaceList = snapshot.data;
-              AreaList = PlaceList[Placeindex]['priorityList'];
-              AreaList.sort(
+              AreaList = PlaceList![Placeindex]['priorityList'];
+              AreaList!.sort(
                   (a, b) => a['priorityNum'].compareTo(b['priorityNum']));
-              ItemList = AreaList[Areaindex]['fireitemList'];
+              ItemList = AreaList![Areaindex]['fireitemList'];
 
               tabController = TabController(
-                  length: AreaList.length,
+                  length: AreaList!.length,
                   vsync: this,
                   initialIndex: Areaindex);
-              tabController.addListener(() {
-                if (tabController.indexIsChanging) {
+              tabController!.addListener(() {
+                if (tabController!.indexIsChanging) {
                   setState(() {
-                    Areaindex = tabController.index;
+                    Areaindex = tabController!.index;
                   });
                 }
               });
@@ -246,7 +246,7 @@ var b=0;
                     children: [
                       Expanded(
                         child: CupertinoPicker(
-                          children: PlaceList.map(
+                          children: PlaceList!.map(
                                   (e) => Center(child: Text(e['placeName'])))
                               .toList(),
                           itemExtent: 50,
@@ -259,7 +259,7 @@ var b=0;
                         ),
                       ),
                       Expanded(
-                        child: Text(AreaList[Areaindex]['subArea']),
+                        child: Text(AreaList![Areaindex]['subArea']),
                       )
                     ],
                   ),
@@ -310,7 +310,7 @@ var b=0;
                                 context: context,
                                 builder: (BuildContext context) => AlertDialog(
                                   title: Text(
-                                      '${PlaceList[Placeindex]['placeName']} ${AreaList[Areaindex]['subArea']}'),
+                                      '${PlaceList![Placeindex]['placeName']} ${AreaList![Areaindex]['subArea']}'),
                                   content: const Text('將會清除本區勾選'),
                                   actions: <Widget>[
                                     TextButton(
@@ -322,7 +322,7 @@ var b=0;
                                     TextButton(
                                       onPressed: () {
                                         setState(() {
-                                          ItemList.forEach((e) {
+                                          ItemList!.forEach((e) {
                                             if (e['presentStatus'] == 0) {
                                               e['inventoryStatus'] = 5;
                                             }
@@ -344,9 +344,9 @@ var b=0;
                           child: ListTile(
                             onTap: () {
                               Navigator.pop(context);
-                              if (PlaceList[Placeindex]['todaysend']) {
+                              if (PlaceList![Placeindex]['todaysend']) {
                                 Fluttertoast.showToast(
-                                    msg: PlaceList[Placeindex]['placeName'] +
+                                    msg: PlaceList![Placeindex]['placeName'] +
                                         '已完成盤點',
                                     toastLength: Toast.LENGTH_SHORT,
                                     gravity: ToastGravity.CENTER,
@@ -357,7 +357,7 @@ var b=0;
                                 return;
                               }
                               List<dynamic> groupItemList =
-                                  AreaList.map((e) => e['fireitemList'])
+                                  AreaList!.map((e) => e['fireitemList'])
                                       .expand((e) => e)
                                       .toList();
 
@@ -380,7 +380,7 @@ var b=0;
                                   builder: (BuildContext context) =>
                                       AlertDialog(
                                     title: Text(
-                                        PlaceList[Placeindex]['placeName']),
+                                        PlaceList![Placeindex]['placeName']),
                                     content: Text('確認送出盤點紀錄?'),
                                     actions: <Widget>[
                                       TextButton(
@@ -417,7 +417,7 @@ var b=0;
                                                           textColor:
                                                               Colors.white,
                                                           fontSize: 16.0);
-                                                      PlaceList[Placeindex]
+                                                      PlaceList![Placeindex]
                                                           ['todaysend'] = true;
                                                     }),
                                                     message: Text('資料處理中，請稍後')),
@@ -441,7 +441,7 @@ var b=0;
                             },
                             leading: Icon(Icons.cloud_upload),
                             title: Text(
-                                '送出${PlaceList[Placeindex]['placeName']}盤點'),
+                                '送出${PlaceList![Placeindex]['placeName']}盤點'),
                           ),
                         ),
                         PopupMenuDivider(),
@@ -466,7 +466,7 @@ var b=0;
                             initialData: [],
                             builder: (c, snapshot) {
                               return Column(
-                                children: snapshot.data.map((d) {
+                                children: snapshot.data!.map((d) {
                                   return ListTile(
                                     title: Text(d.name),
                                     subtitle: Text(d.id.toString()),
@@ -484,9 +484,9 @@ var b=0;
                                             initialData: [],
                                             builder: (c, snapshot) {
                                               if (snapshot.hasData &&
-                                                  snapshot.data.isNotEmpty) {
+                                                  snapshot.data!.isNotEmpty) {
                                                 BluetoothService service = snapshot
-                                                    .data
+                                                    .data!
                                                     .singleWhere((e) =>
                                                         e.uuid.toString() ==
                                                         '0000ffe0-0000-1000-8000-00805f9b34fb');
@@ -624,9 +624,9 @@ var b=0;
                         flex: 7,
                         child: Ddefaultshow
                             ? ListView.builder(
-                                itemCount: ItemList.length,
+                                itemCount: ItemList!.length,
                                 itemBuilder: (context, index) {
-                                  var Fireitem = ItemList[index];
+                                  var Fireitem = ItemList![index];
                                   if (Fireitem['presentStatus'] != 0) {
                                     Fireitem['inventoryStatus'] =
                                         Fireitem['presentStatus'];
@@ -635,7 +635,7 @@ var b=0;
                                   return Card(
                                       child: ListTile(
                                     leading: Checkbox(
-                                      onChanged: (bool val) {},
+                                      onChanged: (bool? val) {},
                                       checkColor: Colors.white,
                                       activeColor:
                                           Fireitem['presentStatus'] != 0
@@ -801,13 +801,13 @@ var b=0;
                                         ),
                                         Expanded(
                                           child: ListView.builder(
-                                              itemCount: ItemList.where((e) =>
+                                              itemCount: ItemList!.where((e) =>
                                                   e['inventoryStatus'] == 5 &&
                                                   e['presentStatus'] ==
                                                       0).length,
                                               itemBuilder: (context, index) {
                                                 var notchecklist =
-                                                    ItemList.where((e) =>
+                                                    ItemList!.where((e) =>
                                                         e['inventoryStatus'] ==
                                                             5 &&
                                                         e['presentStatus'] ==
@@ -971,13 +971,13 @@ var b=0;
                                           ),
                                           Expanded(
                                             child: ListView.builder(
-                                                itemCount: ItemList.where((e) =>
+                                                itemCount: ItemList!.where((e) =>
                                                     e['presentStatus'] != 0 ||
                                                     e['inventoryStatus'] !=
                                                         5).length,
                                                 itemBuilder: (context, index) {
                                                   var checklist =
-                                                      ItemList.where((e) =>
+                                                      ItemList!.where((e) =>
                                                           e['presentStatus'] !=
                                                               0 ||
                                                           e['inventoryStatus'] !=
@@ -1131,7 +1131,7 @@ var b=0;
                       labelColor: Colors.black,
                       unselectedLabelColor: Colors.white,
                       isScrollable: true,
-                      tabs: AreaList.map((e) => Tab(
+                      tabs: AreaList!.map((e) => Tab(
                               text: e['subArea'] +
                                   ' ' +
                                   '(${e['fireitemList'].where((x) => x['inventoryStatus'] != 5 || x['presentStatus'] != 0).length}/${e['fireitemList'].length})'))

@@ -21,20 +21,20 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
     super.initState();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state.index == 0) {
-      if (DateTime.parse(GV.info['accessTokenExpirationDateTime'])
+      if (DateTime.parse(GV.info!['accessTokenExpirationDateTime']!)
               .difference(DateTime.now())
               .inSeconds <
           GV.settimeout) {
@@ -45,7 +45,7 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver {
   }
 
   Future<String> sendInventory() async {
-    var access_token = GV.info['accessToken'];
+    var access_token = GV.info!['accessToken'];
 
     try {
       var response = await http.post(
@@ -62,7 +62,7 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver {
             'placeName': placecontroller.text,
             'priorityList': arealist
                 .map((e) => <String, dynamic>{
-                      'subArea': e.controller.text,
+                      'subArea': e.controller!.text,
                       'priorityNum': arealist.indexOf(e) + 1
                     })
                 .toList()
@@ -126,7 +126,7 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver {
                 }
                 if (arealist.length > 0) {
                   if (arealist
-                          .map((e) => e.controller.text)
+                          .map((e) => e.controller!.text)
                           .where((e) => e.isEmpty)
                           .length >
                       0) {
@@ -153,7 +153,7 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver {
                                 return Card(
                                   child: ListTile(
                                     title:
-                                        Text(arealist[index].controller.text),
+                                        Text(arealist[index].controller!.text),
                                   ),
                                 );
                               })),
@@ -214,7 +214,7 @@ class addplacestate extends State<addplace> with WidgetsBindingObserver {
           return Card(
               child: ListTile(
             onTap: () {
-              print(arealist[index].controller.text);
+              print(arealist[index].controller!.text);
             },
             subtitle: TextField(
               controller: controllerlist[index],

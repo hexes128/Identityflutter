@@ -12,7 +12,7 @@ import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'editpage.dart';
 
 class editinfolist extends StatefulWidget {
-  editinfolist({Key key}) : super(key: key);
+  editinfolist({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => editinfostate();
@@ -22,8 +22,8 @@ class editinfostate extends State<editinfolist>
     with TickerProviderStateMixin , WidgetsBindingObserver  {
   ScanController scanController = ScanController();
 
-  Future<List<dynamic>> _callApi() async {
-    var access_token =GV.info['accessToken'];
+  Future<List<dynamic>?> _callApi() async {
+    var access_token =GV.info!['accessToken'];
 
     try {
       var response = await http.get(
@@ -44,7 +44,7 @@ class editinfostate extends State<editinfolist>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
     futureList = _callApi();
     tabController = TabController(length: 0, vsync: this);
   }
@@ -52,13 +52,13 @@ class editinfostate extends State<editinfolist>
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state.index==0){
-      if(     DateTime.parse(GV.info['accessTokenExpirationDateTime']).difference(DateTime.now()).inSeconds<GV.settimeout){
+      if(     DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(DateTime.now()).inSeconds<GV.settimeout){
         GV.timeout=true;
         Navigator.of(context).popUntil((route) =>route.isFirst
         );
@@ -68,41 +68,41 @@ class editinfostate extends State<editinfolist>
   }
 
 
-  Future<List<dynamic>> futureList;
+  Future<List<dynamic>?>? futureList;
 
-  List<dynamic> PlaceList;
-  List<dynamic> AreaList;
-  List<dynamic> ItemList;
+  List<dynamic>? PlaceList;
+  List<dynamic>? AreaList;
+  List<dynamic>? ItemList;
   int Areaindex = 0;
   int Placeindex = 0;
   var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
 
-  TabController tabController;
+  TabController? tabController;
 
 
 
 
   @override
   Widget build(BuildContext context) {
-    return   FutureBuilder<List<dynamic>>(
+    return   FutureBuilder<List<dynamic>?>(
       future: futureList,
       builder:
-          (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+          (BuildContext context, AsyncSnapshot<List<dynamic>?> snapshot) {
         if (snapshot.hasData) {
           PlaceList = snapshot.data;
-          AreaList = PlaceList[Placeindex]['priorityList'];
-          AreaList.sort(
+          AreaList = PlaceList![Placeindex]['priorityList'];
+          AreaList!.sort(
                   (a, b) => a['priorityNum'].compareTo(b['priorityNum']));
-          ItemList = AreaList[Areaindex]['fireitemList'];
+          ItemList = AreaList![Areaindex]['fireitemList'];
 
           tabController = TabController(
-              length: AreaList.length,
+              length: AreaList!.length,
               vsync: this,
               initialIndex: Areaindex);
-          tabController.addListener(() {
-            if (tabController.indexIsChanging) {
+          tabController!.addListener(() {
+            if (tabController!.indexIsChanging) {
               setState(() {
-                Areaindex = tabController.index;
+                Areaindex = tabController!.index;
               });
             }
           });
@@ -112,7 +112,7 @@ class editinfostate extends State<editinfolist>
                 children: [
                   Expanded(
                     child: CupertinoPicker(
-                      children: PlaceList.map(
+                      children: PlaceList!.map(
                               (e) => Center(child: Text(e['placeName'])))
                           .toList(),
                       itemExtent: 50,
@@ -126,7 +126,7 @@ class editinfostate extends State<editinfolist>
                   ),
                   Expanded(
                     child: Text(
-                        AreaList[Areaindex]['subArea'] ),
+                        AreaList![Areaindex]['subArea'] ),
                   )
                 ],
               ),
@@ -135,9 +135,9 @@ class editinfostate extends State<editinfolist>
             body:
 
             ListView.builder(
-                itemCount: ItemList.length,
+                itemCount: ItemList!.length,
                 itemBuilder: (context, index) {
-                  var Fireitem = ItemList[index];
+                  var Fireitem = ItemList![index];
                   if (Fireitem['presentStatus'] != 0) {
                     Fireitem['inventoryStatus'] =
                     Fireitem['presentStatus'];
@@ -190,7 +190,7 @@ class editinfostate extends State<editinfolist>
                   labelColor: Colors.black,
                   unselectedLabelColor: Colors.white,
                   isScrollable: true,
-                  tabs: AreaList.map((e) => Tab(
+                  tabs: AreaList!.map((e) => Tab(
                       text: e['subArea'] +
                           ' ' +
                           '(${e['fireitemList'].length})'))

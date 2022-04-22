@@ -11,11 +11,11 @@ import 'GlobalVariable.dart' as GV;
 import 'package:http/http.dart' as http;
 
 class editietm extends StatefulWidget {
-  editietm({Key key, this.Fireitem, this.initialplace, this.initialarea})
+  editietm({Key? key, this.Fireitem, this.initialplace, this.initialarea})
       : super(key: key);
   dynamic Fireitem;
-  int initialplace;
-  int initialarea;
+  int? initialplace;
+  int? initialarea;
 
   @override
   State<StatefulWidget> createState() {
@@ -34,22 +34,22 @@ class editstate extends State<editietm> with WidgetsBindingObserver {
     Areaindex = widget.initialarea;
     Placeindex = widget.initialplace;
     areacontroller =
-        FixedExtentScrollController(initialItem: widget.initialarea);
+        FixedExtentScrollController(initialItem: widget.initialarea!);
     placecontroller =
-        FixedExtentScrollController(initialItem: widget.initialplace);
-    WidgetsBinding.instance.addObserver(this);
+        FixedExtentScrollController(initialItem: widget.initialplace!);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state.index == 0) {
-      if (DateTime.parse(GV.info['accessTokenExpirationDateTime'])
+      if (DateTime.parse(GV.info!['accessTokenExpirationDateTime']!)
               .difference(DateTime.now())
               .inSeconds <
           GV.settimeout) {
@@ -59,10 +59,10 @@ class editstate extends State<editietm> with WidgetsBindingObserver {
     }
   }
 
-  Future<List<dynamic>> futureList;
+  Future<List<dynamic>?>? futureList;
 
-  Future<List<dynamic>> _callApi() async {
-    var access_token = GV.info['accessToken'];
+  Future<List<dynamic>?> _callApi() async {
+    var access_token = GV.info!['accessToken'];
 
     try {
       var response = await http.get(
@@ -80,27 +80,27 @@ class editstate extends State<editietm> with WidgetsBindingObserver {
     }
   }
 
-  TextEditingController namecontroller;
-  TextEditingController postscriptcontroller;
+  TextEditingController? namecontroller;
+  TextEditingController? postscriptcontroller;
 
   Future<String> sendnewitem() async {
-    var access_token = GV.info['accessToken'];
+    var access_token = GV.info!['accessToken'];
 
     print(
-        '${PlaceList[widget.initialplace]['priorityList'][widget.initialarea]['storeId']}');
+        '${PlaceList![widget.initialplace!]['priorityList'][widget.initialarea]['storeId']}');
     print(
-        '${PlaceList[placecontroller.selectedItem]['priorityList'][areacontroller.selectedItem]['storeId']}');
+        '${PlaceList![placecontroller!.selectedItem]['priorityList'][areacontroller!.selectedItem]['storeId']}');
 print( jsonEncode(<String, dynamic>{
   'itemid': widget.Fireitem['itemId'],
   'oldname': widget.Fireitem['itemName'],
-  'newname': namecontroller.text,
-  'oldstore': PlaceList[widget.initialplace]['priorityList']
+  'newname': namecontroller!.text,
+  'oldstore': PlaceList![widget.initialplace!]['priorityList']
   [widget.initialarea]['storeId'],
-  'newstore': PlaceList[placecontroller.selectedItem]['priorityList']
-  [areacontroller.selectedItem]['storeId'],
-  'UserName': GV.info['name'],
+  'newstore': PlaceList![placecontroller!.selectedItem]['priorityList']
+  [areacontroller!.selectedItem]['storeId'],
+  'UserName': GV.info!['name'],
   'oldpostscript':   widget.Fireitem['postscript']==null?'':   widget.Fireitem['postscript'],
-  'newpostscript':postscriptcontroller.text.trim()
+  'newpostscript':postscriptcontroller!.text.trim()
 }));
     try {
       var response = await http.post(
@@ -116,14 +116,14 @@ print( jsonEncode(<String, dynamic>{
           body: jsonEncode(<String, dynamic>{
             'itemid': widget.Fireitem['itemId'],
             'oldname': widget.Fireitem['itemName'],
-            'newname': namecontroller.text,
-            'oldstore': PlaceList[widget.initialplace]['priorityList']
+            'newname': namecontroller!.text,
+            'oldstore': PlaceList![widget.initialplace!]['priorityList']
                 [widget.initialarea]['storeId'],
-            'newstore': PlaceList[placecontroller.selectedItem]['priorityList']
-                [areacontroller.selectedItem]['storeId'],
-            'UserName': GV.info['name'],
+            'newstore': PlaceList![placecontroller!.selectedItem]['priorityList']
+                [areacontroller!.selectedItem]['storeId'],
+            'UserName': GV.info!['name'],
             'oldpostscript':   widget.Fireitem['postscript']==null?'':   widget.Fireitem['postscript'],
-            'newpostscript':postscriptcontroller.text.trim()
+            'newpostscript':postscriptcontroller!.text.trim()
           }));
 
       if (response.statusCode == 200) {
@@ -134,16 +134,16 @@ print( jsonEncode(<String, dynamic>{
     }
   }
 
-  List<dynamic> PlaceList;
-  List<dynamic> Arealist;
+  List<dynamic>? PlaceList;
+  List<dynamic>? Arealist;
 
-  int Placeindex;
+  int? Placeindex;
 
-  int Areaindex;
+  int? Areaindex;
 
-  FixedExtentScrollController areacontroller;
+  FixedExtentScrollController? areacontroller;
 
-  FixedExtentScrollController placecontroller;
+  FixedExtentScrollController? placecontroller;
 
   @override
   Widget build(BuildContext context) {
@@ -176,15 +176,15 @@ print( jsonEncode(<String, dynamic>{
                     Padding(
                       padding: EdgeInsets.all(16.0),
                     ),
-                    FutureBuilder<List<dynamic>>(
+                    FutureBuilder<List<dynamic>?>(
                       future: futureList,
                       builder: (BuildContext context,
-                          AsyncSnapshot<List<dynamic>> snapshot) {
+                          AsyncSnapshot<List<dynamic>?> snapshot) {
                         if (snapshot.hasData) {
                           PlaceList = snapshot.data;
-                          Arealist = PlaceList[Placeindex]['priorityList'];
+                          Arealist = PlaceList![Placeindex!]['priorityList'];
                           var a = 0;
-                          Arealist.sort((a, b) =>
+                          Arealist!.sort((a, b) =>
                               a['priorityNum'].compareTo(b['priorityNum']));
                           return Row(children: [
                             Expanded(
@@ -195,16 +195,16 @@ print( jsonEncode(<String, dynamic>{
                               child: Center(
                                 child: CupertinoPicker(
                                   scrollController: placecontroller,
-                                  children: PlaceList.map((e) =>
+                                  children: PlaceList!.map((e) =>
                                           Center(child: Text(e['placeName'])))
                                       .toList(),
                                   itemExtent: 50,
                                   onSelectedItemChanged: (int index) {
                                     setState(() {
-                                      print('${areacontroller.selectedItem}');
+                                      print('${areacontroller!.selectedItem}');
                                       Placeindex = index;
 
-                                      areacontroller.jumpTo(0);
+                                      areacontroller!.jumpTo(0);
                                     });
                                   },
                                 ),
@@ -215,7 +215,7 @@ print( jsonEncode(<String, dynamic>{
                               child: Center(
                                 child: CupertinoPicker(
                                   scrollController: areacontroller,
-                                  children: Arealist.map((e) {
+                                  children: Arealist!.map((e) {
                                     print(e['subArea']);
                                     return Center(child: Text(e['subArea']));
                                   }).toList(),
@@ -250,11 +250,11 @@ print( jsonEncode(<String, dynamic>{
                           borderRadius: BorderRadius.circular(20)),
                       child: FlatButton(
                         onPressed: () async {
-                          await placecontroller.animateToItem(
-                              widget.initialplace,
+                          await placecontroller!.animateToItem(
+                              widget.initialplace!,
                               duration: Duration(milliseconds: 200),
                               curve: Curves.ease);
-                          await areacontroller.animateToItem(widget.initialarea,
+                          await areacontroller!.animateToItem(widget.initialarea!,
                               duration: Duration(milliseconds: 200),
                               curve: Curves.ease);
                           setState(() {
@@ -282,7 +282,7 @@ print( jsonEncode(<String, dynamic>{
                           borderRadius: BorderRadius.circular(20)),
                       child: FlatButton(
                         onPressed: () async {
-                          if (namecontroller.text.trim().isEmpty) {
+                          if (namecontroller!.text.trim().isEmpty) {
                             Fluttertoast.showToast(
                                 msg: '名稱不可空白',
                                 toastLength: Toast.LENGTH_SHORT,
@@ -293,14 +293,14 @@ print( jsonEncode(<String, dynamic>{
                                 fontSize: 16.0);
                             return;
                           }
-                          print(postscriptcontroller.text.trim());
+                          print(postscriptcontroller!.text.trim());
                           print(widget.Fireitem['postscript']);
                           if (Areaindex == widget.initialarea &&
                               Placeindex == widget.initialplace &&
-                              namecontroller.text.trim() ==
+                              namecontroller!.text.trim() ==
                                   widget.Fireitem['itemName'] &&
                               widget.Fireitem['postscript'].toString().trim() ==
-                                  postscriptcontroller.text.trim()) {
+                                  postscriptcontroller!.text.trim()) {
                             Fluttertoast.showToast(
                                 msg: '無任何更動',
                                 toastLength: Toast.LENGTH_SHORT,
@@ -312,9 +312,9 @@ print( jsonEncode(<String, dynamic>{
                             return;
                           }
 
-                          if (placecontroller.selectedItem !=
+                          if (placecontroller!.selectedItem !=
                               widget.initialplace) {
-                            bool keepgo = false;
+                            bool? keepgo = false;
                             await showDialog<bool>(
                               barrierDismissible: false,
                               context: context,
@@ -337,11 +337,11 @@ print( jsonEncode(<String, dynamic>{
                             ).then((value) {
                               keepgo = value;
                             });
-                            if (!keepgo) {
+                            if (!keepgo!) {
                               return;
                             }
                           }
-                          bool keepgo = false;
+                          bool? keepgo = false;
                           await showDialog<bool>(
                             barrierDismissible: false,
                             context: context,
@@ -356,10 +356,10 @@ print( jsonEncode(<String, dynamic>{
                                       subtitle: Text('設備名稱:' +
                                           widget.Fireitem['itemName'] +
                                           '\n地點:' +
-                                          PlaceList[widget.initialplace]
+                                          PlaceList![widget.initialplace!]
                                               ['placeName'] +
                                           '\n區域:' +
-                                          PlaceList[widget.initialplace]
+                                          PlaceList![widget.initialplace!]
                                                   ['priorityList']
                                               [widget.initialarea]['subArea'] +
                                           '\n備註:' +
@@ -369,18 +369,18 @@ print( jsonEncode(<String, dynamic>{
                                         child: ListTile(
                                       title: Text('更動後'),
                                       subtitle: Text('設備名稱:' +
-                                          namecontroller.text +
+                                          namecontroller!.text +
                                           '\n地點:' +
-                                          PlaceList[placecontroller
+                                          PlaceList![placecontroller!
                                               .selectedItem]['placeName'] +
                                           '\n區域:' +
-                                          PlaceList[placecontroller
+                                          PlaceList![placecontroller!
                                                           .selectedItem]
                                                       ['priorityList']
-                                                  [areacontroller.selectedItem]
+                                                  [areacontroller!.selectedItem]
                                               ['subArea'] +
                                           '\n備註:' +
-                                          postscriptcontroller.text.trim()),
+                                          postscriptcontroller!.text.trim()),
                                     ))
                                   ]),
                               actions: <Widget>[
@@ -399,7 +399,7 @@ print( jsonEncode(<String, dynamic>{
                           ).then((value) {
                             keepgo = value;
                           });
-                          if (!keepgo) {
+                          if (!keepgo!) {
                             return;
                           }
 
@@ -415,7 +415,7 @@ print( jsonEncode(<String, dynamic>{
                                       backgroundColor: Colors.red,
                                       textColor: Colors.white,
                                       fontSize: 16.0);
-                                  PlaceList[Placeindex]['todaysend'] = true;
+                                  PlaceList![Placeindex!]['todaysend'] = true;
                                 }),
                                 message: Text('資料處理中，請稍後')),
                           );
