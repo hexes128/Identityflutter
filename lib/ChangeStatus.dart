@@ -77,7 +77,7 @@ class ChangeStatusState extends State<ChangeStatus>
   TabController? tabController;
 
   Future<bool> _onWillPop() async {
-    return (await (showDialog(
+    return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
             title: new Text('退出'),
@@ -93,7 +93,7 @@ class ChangeStatusState extends State<ChangeStatus>
               ),
             ],
           ),
-        ) as FutureOr<bool>?)) ??
+        ) ) ??
         false;
   }
 

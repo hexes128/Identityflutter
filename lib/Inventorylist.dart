@@ -93,7 +93,7 @@ class InventoryListState extends State<InventoryList>
   List<StreamSubscription> SubscriptionList = [];
 
   Future<bool> _onWillPop() async {
-    return (await (showDialog(
+    return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
             title: new Text('退出盤點'),
@@ -109,7 +109,7 @@ class InventoryListState extends State<InventoryList>
               ),
             ],
           ),
-        ) as FutureOr<bool>?)) ??
+        )) ??
         false;
   }
 
