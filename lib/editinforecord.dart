@@ -5,7 +5,7 @@ import 'package:identityflutter/GlobalVariable.dart' as GV;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:scan/scan.dart';
+
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
@@ -19,7 +19,7 @@ class EditinfoRecord extends StatefulWidget {
 
 List<dynamic>? recordlist;
 class EditinfoRecordState extends State<EditinfoRecord>  with  WidgetsBindingObserver  {
-  ScanController scanController = ScanController();
+
 
   Future<List<dynamic>?> _callApi() async {
     var access_token =GV.info!['accessToken'];

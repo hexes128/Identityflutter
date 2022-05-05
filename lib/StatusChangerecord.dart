@@ -5,10 +5,7 @@ import 'package:identityflutter/GlobalVariable.dart' as GV;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:scan/scan.dart';
-import 'package:flutter_switch/flutter_switch.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:future_progress_dialog/future_progress_dialog.dart';
+
 
 class StatusRecord extends StatefulWidget {
   StatusRecord({Key? key}) : super(key: key);
@@ -21,7 +18,7 @@ List<dynamic>? recordlist;
 var ItemStatus = ['正常', '借出', '報修', '遺失', '停用', '尚未盤點'];
 class StatusRecordState extends State<StatusRecord>
   with WidgetsBindingObserver {
-  ScanController scanController = ScanController();
+
 
   Future<List<dynamic>?> _callApi() async {
     var access_token =GV.info!['accessToken'];
