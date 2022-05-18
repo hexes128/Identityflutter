@@ -567,13 +567,13 @@ var b=0;
                     //                     isnormal = true;
                     //                     hintmessage = Fireitrm['itemName'];
                     //                   } else {
-                    //                     hintmessage = '此設備已勾選';
+                    //                     hintmessage = '此器材已勾選';
                     //                   }
                     //                 } else {
                     //                   hintmessage = '借出/報修中，無法盤點';
                     //                 }
                     //               } on Error catch (e) {
-                    //                 hintmessage = '查無此設備，請確認地點區域是否正確';
+                    //                 hintmessage = '查無此器材，請確認地點區域是否正確';
                     //               } finally {
                     //                 showDialog<String>(
                     //                   context: context,
@@ -680,7 +680,7 @@ var b=0;
                                     onTap: () {
                                       if (Fireitem['presentStatus'] != 0) {
                                         Fluttertoast.showToast(
-                                            msg: '設備異常 無法勾選',
+                                            msg: '器材異常 無法勾選',
                                             toastLength: Toast.LENGTH_SHORT,
                                             gravity: ToastGravity.CENTER,
                                             timeInSecForIosWeb: 1,

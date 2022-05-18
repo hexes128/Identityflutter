@@ -146,7 +146,7 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
                                     .length >
                                 0) {
                               Fluttertoast.showToast(
-                                  msg: '尚有設備名稱未填寫',
+                                  msg: '尚有器材名稱未填寫',
                                   toastLength: Toast.LENGTH_SHORT,
                                   gravity: ToastGravity.CENTER,
                                   timeInSecForIosWeb: 1,
@@ -158,7 +158,7 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
                             showDialog<String>(
                               context: context,
                               builder: (BuildContext context) => AlertDialog(
-                                title: Text('確認以下設備?'),
+                                title: Text('確認以下器材?'),
                                 content: Container(
                                     width: double.maxFinite,
                                     child: ListView.builder(
@@ -218,7 +218,7 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
                             );
                           } else {
                             Fluttertoast.showToast(
-                                msg: '尚未新增設備',
+                                msg: '尚未新增器材',
                                 toastLength: Toast.LENGTH_SHORT,
                                 gravity: ToastGravity.CENTER,
                                 timeInSecForIosWeb: 1,
@@ -252,7 +252,7 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
                                             decoration: InputDecoration(
                                               fillColor: Colors.white,
                                               filled: true,
-                                              hintText: '輸入設備名稱',
+                                              hintText: '輸入器材名稱',
                                             )),
                                         TextField(
                                             keyboardType:
@@ -273,7 +273,7 @@ class additemstate extends State<additemform> with WidgetsBindingObserver {
                                             decoration: InputDecoration(
                                               fillColor: Colors.white,
                                               filled: true,
-                                              hintText: '輸入設備名稱',
+                                              hintText: '輸入器材名稱',
                                             ))
                                       ]),
                             flex: 5,

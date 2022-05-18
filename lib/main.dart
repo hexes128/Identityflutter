@@ -135,7 +135,7 @@ print(DateTime.parse(GV.info!['accessTokenExpirationDateTime']!).difference(Date
 
   var arr = [
     ['個人資料'],
-    ['設備盤點', '設備狀態異動', '新增設備', '編輯設備資訊', '新增地點'],
+    ['器材盤點', '器材狀態異動', '新增器材', '編輯器材資訊', '新增地點'],
     ['盤點紀錄', '狀態異動紀錄', '資訊編輯紀錄', '寄出盤點碼(長按)']
   ];
 
@@ -306,7 +306,7 @@ _signInWithAutoCodeExchange();
 
                               break;
                             }
-                          case ('設備盤點'):
+                          case ('器材盤點'):
                             {
                               route = MaterialPageRoute(
                                   builder: (context) => InventoryList());
@@ -318,7 +318,7 @@ _signInWithAutoCodeExchange();
                                   builder: (context) => InventoryRecord());
                               break;
                             }
-                          case ('設備狀態異動'):
+                          case ('器材狀態異動'):
                             {
                               route = MaterialPageRoute(
                                   builder: (context) => ChangeStatus());
@@ -332,14 +332,14 @@ _signInWithAutoCodeExchange();
 
                               break;
                             }
-                          case ('新增設備'):
+                          case ('新增器材'):
                             {
                               route = MaterialPageRoute(
                                   builder: (context) => additemform());
 
                               break;
                             }
-                          case ('新增設備'):
+                          case ('新增器材'):
                             {
                               route = MaterialPageRoute(
                                   builder: (context) => additemform());
@@ -347,7 +347,7 @@ _signInWithAutoCodeExchange();
                               break;
                             }
 
-                          case ('編輯設備資訊'):
+                          case ('編輯器材資訊'):
                             {
                               route = MaterialPageRoute(
                                   builder: (context) => editinfolist());
@@ -427,7 +427,7 @@ _signInWithAutoCodeExchange();
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(Icons.inventory_outlined),
-                    label: '設備管理',
+                    label: '器材管理',
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(Icons.history_outlined),
@@ -450,7 +450,7 @@ _signInWithAutoCodeExchange();
             return Scaffold(
               backgroundColor: Colors.white,
               appBar: AppBar(
-                title: Text("消防設備管理應用-登入"),
+                title: Text("消防器材管理-登入"),
               ),
               body: SingleChildScrollView(
                 child: Column(

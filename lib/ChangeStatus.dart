@@ -259,7 +259,7 @@ print(GV.info!['name']);
                           );
                         } else {
                           Fluttertoast.showToast(
-                              msg: '未更動任何設備',
+                              msg: '未更動任何器材',
                               toastLength: Toast.LENGTH_SHORT,
                               gravity: ToastGravity.CENTER,
                               timeInSecForIosWeb: 1,

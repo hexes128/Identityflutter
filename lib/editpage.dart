@@ -150,7 +150,7 @@ print( jsonEncode(<String, dynamic>{
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text('編輯設備資訊'),
+          title: Text('編輯器材資訊'),
         ),
         body: SingleChildScrollView(
             child: Column(
@@ -164,7 +164,7 @@ print( jsonEncode(<String, dynamic>{
                     TextField(
                       controller: namecontroller,
                       decoration: const InputDecoration(
-                          border: OutlineInputBorder(), hintText: '設備名稱'),
+                          border: OutlineInputBorder(), hintText: '器材名稱'),
                     ),
                     TextField(
                       keyboardType: TextInputType.multiline,
@@ -320,7 +320,7 @@ print( jsonEncode(<String, dynamic>{
                               context: context,
                               builder: (BuildContext context) => AlertDialog(
                                 title: Text('警告'),
-                                content: Text('更改設備地點將會刪除本設備先前相關紀錄\n確定更改?'),
+                                content: Text('更改器材地點將會刪除本器材先前相關紀錄\n確定更改?'),
                                 actions: <Widget>[
                                   FlatButton(
                                       child: Text('Cancel'),
@@ -353,7 +353,7 @@ print( jsonEncode(<String, dynamic>{
                                     Card(
                                         child: ListTile(
                                       title: Text('更動前'),
-                                      subtitle: Text('設備名稱:' +
+                                      subtitle: Text('器材名稱:' +
                                           widget.Fireitem['itemName'] +
                                           '\n地點:' +
                                           PlaceList![widget.initialplace!]
@@ -368,7 +368,7 @@ print( jsonEncode(<String, dynamic>{
                                     Card(
                                         child: ListTile(
                                       title: Text('更動後'),
-                                      subtitle: Text('設備名稱:' +
+                                      subtitle: Text('器材名稱:' +
                                           namecontroller!.text +
                                           '\n地點:' +
                                           PlaceList![placecontroller!
