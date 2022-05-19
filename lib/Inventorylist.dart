@@ -87,7 +87,7 @@ class InventoryListState extends State<InventoryList>
 
   TabController? tabController;
   // bool showcamera = false;
-  bool Ddefaultshow = true;
+  bool Ddefaultshow = false;
   List<BluetoothCharacteristic> CharacteristicList = [];
   List<StreamSubscription> SubscriptionList = [];
 
